@@ -1,0 +1,25 @@
+name: Notify Telegram on Push
+on:
+  push:
+    branches:
+      - "**"
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Send Telegram notification
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: html
+          message: |
+            ✅ <b>milktea_mobile</b> – Push mới thành công
+            🧑‍💻 Người push: <b>${{ github.actor }}</b>
+            🌿 Branch: <b>${{ github.ref_name }}</b>
+            🔗 Commit: <code>${{ github.sha }}</code>
+            Repo: <a href="https://github.com/${{ github.repository }}/commit/${{ github.sha }}">Open commit</a>
