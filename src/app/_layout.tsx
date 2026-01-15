@@ -1,4 +1,5 @@
-import { useColorScheme } from "@/shared/hooks/use-color-scheme.web";
+import { ProtectedRoute } from "@/components/layouts/ProtectedRoute";
+import { useTheme } from "@/shared/hooks/useTheme";
 import {
   DarkTheme,
   DefaultTheme,
@@ -7,6 +8,7 @@ import {
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../../global.css";
 
 export const unstable_settings = {
@@ -14,18 +16,24 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const { effectiveTheme } = useTheme();
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: "modal", title: "Modal" }}
-        />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider
+        value={effectiveTheme === "dark" ? DarkTheme : DefaultTheme}
+      >
+        <ProtectedRoute>
+          <Stack>
+            <Stack.Screen
+              name="login"
+              options={{ headerShown: false, gestureEnabled: false }}
+            />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+          <StatusBar style={effectiveTheme === "dark" ? "light" : "dark"} />
+        </ProtectedRoute>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
