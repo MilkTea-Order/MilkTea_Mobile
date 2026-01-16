@@ -100,8 +100,6 @@ export default function ProfileScreen() {
         style={{ backgroundColor: colors.background }}
         contentContainerStyle={{ paddingBottom: 20 }}
         scrollEventThrottle={16}
-        bounces={true}
-        showsVerticalScrollIndicator={true}
       >
         {/* Profile Card - Separated from header */}
         <View className="px-6 mt-8">

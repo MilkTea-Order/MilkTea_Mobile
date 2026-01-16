@@ -101,28 +101,28 @@ export const Colors = {
     background: "#FFFFFF", // Pure white
     surface: "#FFFFFF", // Pure white
     card: "#FFFFFF", // Pure white
-    
+
     // Text colors - maximum contrast for better readability
     text: "#000000", // Pure black - maximum contrast
     textSecondary: "#1E293B", // Slate-800 - very high contrast
     textTertiary: "#475569", // Slate-600 - high contrast
-    
+
     // Border colors - more visible
     border: "#CBD5E1", // Slate-300 - more visible borders
     borderLight: "#E2E8F0", // Slate-200
-    
+
     // Primary colors - softer
     primary: primaryColors.primary,
     primaryLight: primaryColors.primaryLight,
     primaryDark: primaryColors.primaryDark,
     secondary: primaryColors.secondary,
-    
+
     // Semantic colors
     success: "#10B981", // Emerald-500
     warning: "#F59E0B", // Amber-500
     error: "#EF4444", // Red-500
     info: "#3B82F6", // Blue-500
-    
+
     // Navigation
     tint: primaryColors.primary,
     icon: "#1E293B", // Slate-800 - very high contrast
@@ -134,28 +134,28 @@ export const Colors = {
     background: "#0F172A", // Slate-950
     surface: "#1E293B", // Slate-800
     card: "#1E293B", // Slate-800
-    
+
     // Text colors - improved contrast for dark mode
     text: "#F8FAFC", // Slate-50 - brighter for better contrast
     textSecondary: "#CBD5E1", // Slate-300 - brighter secondary text
     textTertiary: "#94A3B8", // Slate-400
-    
+
     // Border colors - more visible in dark mode
     border: "#475569", // Slate-600 - brighter border
     borderLight: "#334155", // Slate-700
-    
+
     // Primary colors - softer for dark mode
     primary: "#FDBA74", // Orange-300 - softer for dark mode
     primaryLight: "#FED7AA", // Orange-200 - even softer
     primaryDark: "#FB923C", // Orange-400
     secondary: "#FCD34D", // Amber-300
-    
+
     // Semantic colors
     success: "#34D399", // Emerald-400 - brighter for dark mode
     warning: "#FBBF24", // Amber-400 - brighter
     error: "#F87171", // Red-400 - brighter
     info: "#60A5FA", // Blue-400 - brighter
-    
+
     // Navigation
     tint: "#FDBA74", // Orange-300
     icon: "#CBD5E1", // Slate-300 - brighter icons
@@ -180,7 +180,8 @@ export const Fonts = Platform.select({
   web: {
     sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
     serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
+    rounded:
+      "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });

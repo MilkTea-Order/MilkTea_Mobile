@@ -66,7 +66,6 @@ export default function LoginScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         className="flex-1"
         enabled={Platform.OS === "ios"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
         <ScrollView
           contentContainerStyle={{
@@ -153,7 +152,6 @@ export default function LoginScreen() {
                     value={username}
                     onChangeText={setUsername}
                     autoCapitalize="none"
-                    autoComplete="username"
                   />
                 </View>
               </View>
@@ -193,7 +191,6 @@ export default function LoginScreen() {
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
                     autoCapitalize="none"
-                    autoComplete="password"
                     onSubmitEditing={handleLogin}
                   />
                   <TouchableOpacity
@@ -256,10 +253,7 @@ export default function LoginScreen() {
                         <Text className="text-white text-lg font-bold mr-2">
                           Đăng nhập
                         </Text>
-                        <View
-                          className="rounded-full bg-white/20 p-1"
-                          style={{ marginLeft: 4 }}
-                        >
+                        <View className="rounded-full bg-white/20 p-1 ml-1">
                           <Ionicons
                             name="arrow-forward"
                             size={18}

@@ -76,9 +76,8 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
-  const { colors, gradients, status } = useTheme();
+  const { colors, gradients, status, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const isDarkMode = colors.background === "#0F172A";
   const scrollViewRef = useRef<ScrollView>(null);
 
   // Scroll to top when tab is focused
@@ -151,7 +150,6 @@ export default function HomeScreen() {
                 className="flex-1 rounded-2xl p-4"
                 style={{
                   backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  backdropFilter: "blur(10px)",
                   borderWidth: 1,
                   borderColor: "rgba(255, 255, 255, 0.3)",
                 }}
@@ -190,8 +188,6 @@ export default function HomeScreen() {
           />
         }
         scrollEventThrottle={16}
-        bounces={true}
-        showsVerticalScrollIndicator={true}
       >
         <View className="flex-row items-center justify-between mb-5">
           <View>
@@ -209,9 +205,7 @@ export default function HomeScreen() {
 
         {orders.map((order) => {
           const statusConfig = status[order.status];
-          const statusTheme = isDarkMode
-            ? statusConfig.dark
-            : statusConfig.light;
+          const statusTheme = isDark ? statusConfig.dark : statusConfig.light;
 
           return (
             <TouchableOpacity

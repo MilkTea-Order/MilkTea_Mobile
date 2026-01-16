@@ -2,11 +2,9 @@ import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/shared/hooks/useTheme";
-import { useThemeStore } from "@/shared/store/themeStore";
 
 export function ThemeSelector() {
   const { colors, themeMode, setThemeMode } = useTheme();
-  const { themeMode: currentMode } = useThemeStore();
 
   const options = [
     {
@@ -37,7 +35,7 @@ export function ThemeSelector() {
     >
       <View className="flex-row">
         {options.map((option, index) => {
-          const isSelected = currentMode === option.mode;
+          const isSelected = themeMode === option.mode;
           return (
             <TouchableOpacity
               key={option.mode}
