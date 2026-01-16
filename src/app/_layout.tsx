@@ -1,5 +1,6 @@
 import { ProtectedRoute } from "@/components/layouts/ProtectedRoute";
 import { useTheme } from "@/shared/hooks/useTheme";
+import { THEME_MODE } from "@/shared/constants/theme";
 import {
   DarkTheme,
   DefaultTheme,
@@ -20,7 +21,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ThemeProvider
-        value={effectiveTheme === "dark" ? DarkTheme : DefaultTheme}
+        value={effectiveTheme === THEME_MODE.DARK ? DarkTheme : DefaultTheme}
       >
         <ProtectedRoute>
           <Stack>
@@ -30,7 +31,7 @@ export default function RootLayout() {
             />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           </Stack>
-          <StatusBar style={effectiveTheme === "dark" ? "light" : "dark"} />
+          <StatusBar style={effectiveTheme === THEME_MODE.DARK ? "light" : "dark"} />
         </ProtectedRoute>
       </ThemeProvider>
     </SafeAreaProvider>
