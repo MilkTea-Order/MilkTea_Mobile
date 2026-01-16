@@ -1,5 +1,6 @@
 import { ThemeSelector } from "@/components/molecules/ThemeSelector";
-import { useAuthStore } from "@/features/auth/store/authStore";
+import { useLogout } from "@/features/auth/hooks/useAuth";
+import { useAuthStore } from "@/features/auth/store/auth.store";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -10,7 +11,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
+  const logoutMutation = useLogout();
   const { colors, gradients } = useTheme();
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null);
@@ -31,9 +33,13 @@ export default function ProfileScreen() {
       {
         text: "Đăng xuất",
         style: "destructive",
-        onPress: () => {
-          logout();
-          router.replace("/login");
+        onPress: async () => {
+          try {
+            await logoutMutation.mutateAsync();
+            // Navigation is handled by useLogout hook onSuccess
+          } catch (error) {
+            console.error("Logout error:", error);
+          }
         },
       },
     ]);

@@ -1,9 +1,14 @@
 import { AppLogo } from "@/components/atoms/AppLogo";
-import { useAuthStore } from "@/features/auth/store/authStore";
+import { useLogin } from "@/features/auth/hooks/useAuth";
 import { useTheme } from "@/shared/hooks/useTheme";
+import { getErrorMessageFromResponse } from "@/shared/resources/errorMessages";
+import {
+  ApiErrorResponse,
+  ApiResponse,
+  isErrorResponse,
+} from "@/shared/types/api.type";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -22,29 +27,26 @@ export default function LoginScreen() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const login = useAuthStore((state) => state.login);
-  const router = useRouter();
+  const loginMutation = useLogin();
   const { colors, gradients } = useTheme();
 
   const handleLogin = async () => {
-    if (!username.trim() || !password.trim()) {
-      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin");
-      return;
-    }
-
-    setIsLoading(true);
     try {
-      const success = await login(username, password);
-      if (success) {
-        router.replace("/(tabs)");
-      } else {
-        Alert.alert("Lỗi", "Đăng nhập thất bại. Vui lòng thử lại.");
+      await loginMutation.mutateAsync({ username, password });
+      // Navigation is handled by useLogin hook onSuccess
+    } catch (err) {
+      console.log("error: ", err);
+
+      let errorMessage = "Đăng nhập thất bại. Vui lòng thử lại.";
+
+      if (isErrorResponse(err as ApiResponse<unknown>)) {
+        // Get error message from error response data
+        errorMessage = getErrorMessageFromResponse(err as ApiErrorResponse);
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
       }
-    } catch {
-      Alert.alert("Lỗi", "Có lỗi xảy ra. Vui lòng thử lại.");
-    } finally {
-      setIsLoading(false);
+
+      Alert.alert("Lỗi", errorMessage);
     }
   };
 
@@ -224,9 +226,9 @@ export default function LoginScreen() {
               {/* Login Button */}
               <TouchableOpacity
                 onPress={handleLogin}
-                disabled={isLoading}
+                disabled={loginMutation.isPending}
                 activeOpacity={0.9}
-                style={{ opacity: isLoading ? 0.7 : 1 }}
+                style={{ opacity: loginMutation.isPending ? 0.7 : 1 }}
               >
                 <View
                   className="rounded-2xl overflow-hidden"
@@ -246,7 +248,7 @@ export default function LoginScreen() {
                       paddingVertical: 16,
                     }}
                   >
-                    {isLoading ? (
+                    {loginMutation.isPending ? (
                       <ActivityIndicator color="white" size="small" />
                     ) : (
                       <View className="flex-row items-center justify-center">
