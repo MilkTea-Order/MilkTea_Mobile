@@ -1,129 +1,96 @@
 import {
-  getItem,
   getObject,
   removeItem,
-  setItem,
   setObject,
 } from "@/shared/storage/secure-storage";
+import { STORAGE_KEYS } from "@/shared/storage/storage.keys";
 import { create } from "zustand";
-import { AUTH_KEYS } from "../constants/auth.keys";
-import { Permission } from "../types/permission.type";
+import { LoginResponse } from "../types/auth.type";
 import { User } from "../types/user.type";
 
 interface AuthState {
-  user: User | null;
-  accessToken: string | null;
-  refreshToken: string | null;
-  permissions: Permission[] | null;
-  expiresAt: string | null;
+  session: LoginResponse | null;
   isHydrating: boolean;
-  isAuthenticated: boolean;
-  error: string | null;
 
   hydrate: () => Promise<void>;
-  setAuthData: (data: {
-    user: User;
-    accessToken: string;
-    refreshToken?: string;
-    expiresAt?: string;
-    permissions?: Permission[];
-  }) => Promise<void>;
+  login: (session: LoginResponse) => Promise<void>;
+  logout: () => Promise<void>;
   setUser: (user: User) => Promise<void>;
-  clearAuthData: () => Promise<void>;
+  updateAccessToken: (accessToken: string) => Promise<void>;
+
+  // getter
+  isAuthenticated: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  user: null,
-  accessToken: null,
-  refreshToken: null,
-  permissions: null,
-  expiresAt: null,
+  session: null,
   isHydrating: true,
-  isAuthenticated: false,
-  error: null,
 
   hydrate: async () => {
     try {
-      set({ isHydrating: true, error: null });
+      set({ isHydrating: true });
 
-      const [accessToken, refreshToken, user] = await Promise.all([
-        getItem(AUTH_KEYS.ACCESS_TOKEN),
-        getItem(AUTH_KEYS.REFRESH_TOKEN),
-        getObject<User>(AUTH_KEYS.USER),
-      ]);
-      if (accessToken && user) {
-        set({
-          user,
-          accessToken,
-          refreshToken,
-          isAuthenticated: true,
-        });
-      } else {
-        set({ isAuthenticated: false });
+      const session = await getObject<LoginResponse>(STORAGE_KEYS.AUTH.SESSION);
+
+      if (session && session.accessToken && session.user) {
+        set({ session });
       }
 
       set({ isHydrating: false });
     } catch {
       set({
-        error: "Failed to load session",
         isHydrating: false,
       });
     }
   },
 
-  setAuthData: async (data: {
-    user: User;
-    accessToken: string;
-    refreshToken?: string;
-    expiresAt?: string;
-    permissions?: Permission[];
-  }) => {
-    const { user, accessToken, refreshToken, expiresAt, permissions } = data;
+  login: async (sessionData: LoginResponse) => {
+    set({ session: sessionData });
 
-    set({
-      user,
-      accessToken,
-      refreshToken: refreshToken || null,
-      expiresAt: expiresAt || null,
-      permissions: permissions || null,
-      isAuthenticated: true,
-      error: null,
-    });
+    // Save entire session object
+    await setObject(STORAGE_KEYS.AUTH.SESSION, sessionData);
+  },
 
-    const promises = [
-      setItem(AUTH_KEYS.ACCESS_TOKEN, accessToken),
-      setObject(AUTH_KEYS.USER, user),
-    ];
+  logout: async () => {
+    set({ session: null });
 
-    if (refreshToken) {
-      promises.push(setItem(AUTH_KEYS.REFRESH_TOKEN, refreshToken));
-    }
-
-    await Promise.all(promises);
+    // Remove session object
+    await removeItem(STORAGE_KEYS.AUTH.SESSION);
   },
 
   setUser: async (user: User) => {
-    set({ user });
-
-    await setObject(AUTH_KEYS.USER, user);
+    const currentSession = get().session;
+    if (currentSession) {
+      const updatedSession: LoginResponse = {
+        ...currentSession,
+        user,
+      };
+      set({ session: updatedSession });
+      // Save updated session object
+      await setObject(STORAGE_KEYS.AUTH.SESSION, updatedSession);
+    }
   },
 
-  clearAuthData: async () => {
-    // Clear Zustand state
-    set({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      permissions: null,
-      expiresAt: null,
-      isAuthenticated: false,
-      error: null,
-    });
+  updateAccessToken: async (accessToken: string) => {
+    const currentSession = get().session;
+    if (currentSession) {
+      const updatedSession: LoginResponse = {
+        ...currentSession,
+        accessToken,
+      };
+      set({ session: updatedSession });
+      // Save updated session object
+      await setObject(STORAGE_KEYS.AUTH.SESSION, updatedSession);
+    }
+  },
 
-    await Promise.all([
-      removeItem(AUTH_KEYS.ACCESS_TOKEN),
-      removeItem(AUTH_KEYS.REFRESH_TOKEN),
-      removeItem(AUTH_KEYS.USER),
-    ]);
+  // getter: check if session exists and has accessToken and refreshToken
+  isAuthenticated: () => {
+    const session = get().session;
+    return !!(
+      session &&
+      session.accessToken &&
+      session.refreshToken
+    );
   },
 }));

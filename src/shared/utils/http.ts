@@ -1,10 +1,10 @@
 import { useAuthStore } from "@/features/auth/store/auth.store";
-import { RefreshTokenResponse } from "@/features/auth/types/auth.type";
 import { BASE_URL, URL } from "@/shared/constants/urls";
-import { ApiResponse, isErrorResponse } from "@/shared/types/api.type";
+import { getErrorMessageFromResponse } from "@/shared/resources/errorMessages";
+import { ApiErrorResponse, ApiResponse, isErrorResponse } from "@/shared/types/api.type";
 import { isExpiredTokenError, isUnauthorizedError } from "@/shared/utils/utils";
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
-import { Alert } from "react-native";
+import { Toast } from "react-native-toast-notifications";
 
 class Http {
   instance: AxiosInstance;
@@ -19,18 +19,18 @@ class Http {
 
     this.instance.interceptors.request.use(
       (config) => {
-        const { accessToken, refreshToken } = useAuthStore.getState();
+        const { session } = useAuthStore.getState();
 
-        if (accessToken) {
+        if (session?.accessToken) {
           config.headers = config.headers ?? {};
-          config.headers.Authorization = `Bearer ${accessToken}`;
+          config.headers.Authorization = `Bearer ${session.accessToken}`;
         }
 
         if (
           (config.url === URL.LOGOUT || config.url?.endsWith(URL.LOGOUT)) &&
-          refreshToken
+          session?.refreshToken
         ) {
-          config.data = { ...(config.data ?? {}), refreshToken };
+          config.data = { ...(config.data ?? {}), refreshToken: session.refreshToken };
         }
 
         return config;
@@ -41,26 +41,29 @@ class Http {
     this.instance.interceptors.response.use(
       async (response) => {
         const responseData = response.data as ApiResponse<unknown>;
-        const config = response.config as AxiosRequestConfig;
-        const { clearAuthData } = useAuthStore.getState();
+        const config = response.config as AxiosRequestConfig & { _retry?: boolean };
+        const { logout } = useAuthStore.getState();
         if (isErrorResponse(responseData)) {
           if (isUnauthorizedError(responseData)) {
             // Xử lí liên quan tới token hết hạn
             if (
               isExpiredTokenError(responseData) &&
               config.url !== URL.REFRESH_TOKEN &&
-              !config.url?.endsWith(URL.REFRESH_TOKEN)
+              !config.url?.endsWith(URL.REFRESH_TOKEN) &&
+              !config._retry
             ) {
-              this.refreshTokenRequest = this.handleRefreshToken();
+              config._retry = true;
+              this.refreshTokenRequest = this.refreshTokenRequest ?? this.handleRefreshToken();
+
               return this.refreshTokenRequest.then((access_token) => {
                 return this.instance({
                   ...config,
-                  headers: { ...config.headers, Authorization: access_token },
+                  headers: { ...config.headers, Authorization: `Bearer ${access_token}` },
                 });
               });
             }
-            // Token không đúng, không truyền,  refresh token cũng hết hạn
-            await clearAuthData();
+            // Token không đúng, không truyền,  refresh token cũng hết hạn hay đã bị thu hồi
+            await logout();
           }
           throw responseData;
         }
@@ -73,12 +76,15 @@ class Http {
         let errorMessage = "Có lỗi xảy ra. Vui lòng thử lại.";
         if (error.response) {
           const data: any = error.response.data;
-          errorMessage =
-            (typeof data === "string"
-              ? data
-              : data?.description || data?.message) ||
-            error.message ||
-            errorMessage;
+          if (isErrorResponse(data as ApiResponse<unknown>)) {
+            errorMessage = getErrorMessageFromResponse(data as ApiErrorResponse);
+          } else if (typeof data === "string") {
+            errorMessage = data;
+          } else if (data?.description || data?.message) {
+            errorMessage = data.description || data.message;
+          } else {
+            errorMessage = error.message || errorMessage;
+          }
         } else if (error.code === "ECONNABORTED") {
           errorMessage = "Request timeout. Vui lòng thử lại.";
         } else if (error.message?.toLowerCase().includes("network")) {
@@ -86,40 +92,42 @@ class Http {
         } else if (error.message) {
           errorMessage = error.message;
         }
-        Alert.alert("Lỗi", errorMessage, [{ text: "Đóng" }]);
+        // Hiển thị toast error
+        Toast.show(errorMessage, {
+          type: "danger",
+        });
         return Promise.reject(error);
       }
     );
   }
 
   private async handleRefreshToken(): Promise<string> {
-    if (this.refreshTokenRequest) return this.refreshTokenRequest;
-
     const store = useAuthStore.getState();
-    if (!store.refreshToken) {
-      await store.clearAuthData();
+    if (!store.session?.refreshToken) {
+      await store.logout();
       throw new Error("No refresh token available");
     }
 
     this.refreshTokenRequest = this.instance
-      .post<RefreshTokenResponse>(URL.REFRESH_TOKEN, {
-        refreshToken: store.refreshToken,
+      .post< ApiResponse<{ accessToken: string }>>(URL.REFRESH_TOKEN, {
+        refreshToken: store.session.refreshToken,
       })
-      .then((res) => {
+      .then(async (res) => {
         const newAccessToken = (
           res.data as ApiResponse<{ accessToken: string }>
         ).data.accessToken;
-        useAuthStore.setState({ accessToken: newAccessToken });
-        return `Bearer ${newAccessToken}` as string;
+        await store.updateAccessToken(newAccessToken);
+        return newAccessToken as string;
       })
       .catch(async (error) => {
-        await store.clearAuthData();
+        await store.logout();
         throw error;
       })
       .finally(() => {
-        setTimeout(() => {
-          this.refreshTokenRequest = null;
-        }, 10000);
+        this.refreshTokenRequest = null;
+        // setTimeout(() => {
+        //   this.refreshTokenRequest = null;
+        // }, 10000);
       });
 
     return this.refreshTokenRequest;

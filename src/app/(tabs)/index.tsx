@@ -75,7 +75,8 @@ export default function HomeScreen() {
   const [orders] = useState<Order[]>(mockOrders);
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
+  const session = useAuthStore((state) => state.session);
+  const user = session?.user;
   const { colors, gradients, status, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null);

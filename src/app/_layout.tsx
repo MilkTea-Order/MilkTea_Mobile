@@ -1,15 +1,18 @@
+import { CustomToast } from "@/components/molecules/CustomToast";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import { THEME_VARIANT } from "@/shared/constants/theme";
 import { useTheme } from "@/shared/hooks/useTheme";
+import TanstackQueryProvider from "@/shared/providers/Providers";
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
+import { ToastProvider } from "react-native-toast-notifications";
+
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../../global.css";
@@ -18,24 +21,12 @@ export const unstable_settings = {
   anchor: "(tabs)",
 };
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 5 * 60 * 1000,
-    },
-    mutations: {
-      retry: 1,
-    },
-  },
-});
-
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { effectiveTheme } = useTheme();
   const isHydrating = useAuthStore((state) => state.isHydrating);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
   const hydrate = useAuthStore((state) => state.hydrate);
 
   useEffect(() => {
@@ -50,31 +41,47 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider
-          value={
-            effectiveTheme === THEME_VARIANT.DARK ? DarkTheme : DefaultTheme
-          }
-        >
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Protected guard={isAuthenticated}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            </Stack.Protected>
-
-            <Stack.Protected guard={!isAuthenticated}>
-              <Stack.Screen
-                name="login"
-                // gestureEnabled: false : để tắt vuốt back khi vào trang login
-                options={{ headerShown: false, gestureEnabled: false }}
-              />
-            </Stack.Protected>
-          </Stack>
-          {/* Dark -> light, light -> dark */}
-          <StatusBar
-            style={effectiveTheme === THEME_VARIANT.DARK ? "light" : "dark"}
+      <ToastProvider
+        placement="top"
+        offsetTop={50}
+        offsetBottom={0}
+        animationType="slide-in"
+        animationDuration={250}
+        duration={3000}
+        swipeEnabled={true}
+        renderToast={(toastOptions) => (
+          <CustomToast
+            message={toastOptions.message}
+            type={toastOptions.type as any}
           />
-        </ThemeProvider>
-      </QueryClientProvider>
+        )}
+      >
+        <TanstackQueryProvider>
+          <ThemeProvider
+            value={
+              effectiveTheme === THEME_VARIANT.DARK ? DarkTheme : DefaultTheme
+            }
+          >
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Protected guard={isAuthenticated}>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              </Stack.Protected>
+
+              <Stack.Protected guard={!isAuthenticated}>
+                <Stack.Screen
+                  name="login"
+                  // gestureEnabled: false : để tắt vuốt back khi vào trang login
+                  options={{ headerShown: false, gestureEnabled: false }}
+                />
+              </Stack.Protected>
+            </Stack>
+            {/* Dark -> light, light -> dark */}
+            <StatusBar
+              style={effectiveTheme === THEME_VARIANT.DARK ? "light" : "dark"}
+            />
+          </ThemeProvider>
+        </TanstackQueryProvider>
+      </ToastProvider>
     </SafeAreaProvider>
   );
 }

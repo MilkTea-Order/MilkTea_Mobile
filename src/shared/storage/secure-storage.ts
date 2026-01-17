@@ -1,9 +1,3 @@
-/**
- * Generic SecureStore utilities
- * Wraps expo-secure-store with type-safe methods
- * NO domain logic here - pure storage operations
- */
-
 import * as SecureStore from "expo-secure-store";
 import { STORAGE_KEYS } from "./storage.keys";
 
@@ -80,14 +74,10 @@ export async function clearAll(): Promise<void> {
   try {
     const allKeys = [
       // Auth keys
-      STORAGE_KEYS.AUTH.ACCESS_TOKEN,
-      STORAGE_KEYS.AUTH.REFRESH_TOKEN,
-      STORAGE_KEYS.AUTH.USER,
+      STORAGE_KEYS.AUTH.SESSION,
       // Settings keys
       STORAGE_KEYS.SETTINGS.THEME_MODE,
       STORAGE_KEYS.SETTINGS.LANGUAGE,
-      // Onboarding keys
-      STORAGE_KEYS.ONBOARDING.COMPLETED,
     ];
 
     await Promise.all(allKeys.map((key) => removeItem(key)));

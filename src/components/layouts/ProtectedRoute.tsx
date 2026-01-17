@@ -7,6 +7,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
+  const session = useAuthStore((state) => state.session);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
   const isHydrating = useAuthStore((state) => state.isHydrating);
   const segments = useSegments();
@@ -21,7 +22,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     } else if (isAuthenticated && isLoginPage) {
       router.replace("/(tabs)");
     }
-  }, [isAuthenticated, isHydrating, segments, router]);
+  }, [session, isAuthenticated, isHydrating, segments, router]);
 
   if (isHydrating) {
     return null;

@@ -1,8 +1,5 @@
 import { ERROR_CODE } from "../constants/errorCode";
 
-// Error messages mapping
-// Format: ERROR_CODE -> default message
-// Note: Some errors may have dynamic messages based on field name
 export const ERROR_MESSAGES: Record<string, string> = {
   [ERROR_CODE.E0001]: "Không tồn tại hoặc không khớp với dữ liệu",
   [ERROR_CODE.E0002]: "Đã tồn tại",
@@ -23,14 +20,12 @@ export const ERROR_MESSAGES: Record<string, string> = {
   [ERROR_CODE.E9999]: "Lỗi hệ thống. Vui lòng thử lại sau.",
 };
 
-// Field-specific error messages
-// Format: ERROR_CODE -> field name -> message
 export const FIELD_ERROR_MESSAGES: Record<string, Record<string, string>> = {
   [ERROR_CODE.E0001]: {
-    username: "Tên đăng nhập không tồn tại",
+    username:"Tài khoản hoặc mật khẩu không đúng",
     email: "Email không tồn tại",
     phone: "Số điện thoại không tồn tại",
-    password: "Mật khẩu không đúng",
+    password: "Tài khoản hoặc mật khẩu không đúng",
     // Add more field-specific messages as needed
   },
   [ERROR_CODE.E0002]: {

@@ -22,7 +22,6 @@ export interface MeResponseData {
   permissions?: Permission[];
 }
 
-export type RefreshTokenResponse = ApiResponse<{ accessToken: string }>;
 export type MeApiResponse = ApiResponse<MeResponseData>;
 
 // export interface RegisterPayload {

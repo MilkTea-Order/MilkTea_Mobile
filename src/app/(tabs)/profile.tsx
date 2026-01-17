@@ -11,7 +11,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { session } = useAuthStore();
+  const user = session?.user;
   const logoutMutation = useLogout();
   const { colors, gradients } = useTheme();
   const insets = useSafeAreaInsets();

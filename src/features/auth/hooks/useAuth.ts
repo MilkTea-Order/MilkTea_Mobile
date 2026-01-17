@@ -1,8 +1,9 @@
+import { extractFieldErrors } from "@/shared/utils/formErrors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { authApi } from "../apis/auth.api";
 import { useAuthStore } from "../store/auth.store";
-import { LoginPayload } from "../types/auth.type";
+import { LoginPayload, LoginResponse } from "../types/auth.type";
 import { User } from "../types/user.type";
 
 export const authKeys = {
@@ -14,7 +15,7 @@ export const authKeys = {
 export function useLogin() {
   const queryClient = useQueryClient();
 
-  const { setAuthData } = useAuthStore();
+  const { login } = useAuthStore();
 
   return useMutation({
     mutationFn: async (payload: LoginPayload) => {
@@ -34,33 +35,42 @@ export function useLogin() {
         dateLogin: userData.dateLogin,
       };
 
-      await setAuthData({
-        user,
+      const session: LoginResponse = {
         accessToken,
         refreshToken,
         expiresAt,
+        user,
         permissions,
-      });
+      };
+
+      await login(session);
       await queryClient.invalidateQueries({ queryKey: authKeys.me() });
     },
+    onError: (error: any) => {
+      const fieldErrors = extractFieldErrors(error, () => "password");
+      if (fieldErrors.length > 0) {
+        error.fieldErrors = fieldErrors;
+      }
+    },
+
   });
 }
 
 export function useLogout() {
   const queryClient = useQueryClient();
-  const { clearAuthData } = useAuthStore();
+  const { logout } = useAuthStore();
 
   return useMutation({
     mutationFn: authApi.logout,
     onSuccess: async () => {
-      await clearAuthData();
+      await logout();
       queryClient.clear();
     },
   });
 }
 
 export function useMe() {
-  const accessToken = useAuthStore((state) => state.accessToken);
+  const session = useAuthStore((state) => state.session);
   const { setUser } = useAuthStore();
 
   const query = useQuery({
@@ -70,7 +80,7 @@ export function useMe() {
       const response = await authApi.getMe();
       return response.data; // ApiResponse<MeResponseData>
     },
-    enabled: !!accessToken, // Only fetch if authenticated
+    enabled: !!session?.accessToken, // Only fetch if authenticated
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -84,11 +94,15 @@ export function useMe() {
       setUser(user);
 
       // Update permissions if provided
-      if (permissions) {
-        useAuthStore.setState({ permissions });
+      if (permissions && session) {
+        const updatedSession: LoginResponse = {
+          ...session,
+          permissions,
+        };
+        useAuthStore.setState({ session: updatedSession });
       }
     }
-  }, [query.isSuccess, query.data, setUser]);
+  }, [query.isSuccess, query.data, setUser, session]);
 
   return query;
 }
