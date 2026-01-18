@@ -11,23 +11,10 @@ export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
   expiresAt: string;
-  user: User;
+  user: User
   permissions: Permission[];
 }
 
 export type LoginApiResponse = ApiResponse<LoginResponse>;
 
-export interface MeResponseData {
-  user: User;
-  permissions?: Permission[];
-}
 
-export type MeApiResponse = ApiResponse<MeResponseData>;
-
-// export interface RegisterPayload {
-//   username: string;
-//   password: string;
-//   name?: string;
-//   email?: string;
-//   phone?: string;
-// }

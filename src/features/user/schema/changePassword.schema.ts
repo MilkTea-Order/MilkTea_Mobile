@@ -1,7 +1,7 @@
 import * as yup from 'yup'
 
 const changePasswordSchema = yup.object({
-  currentPassword: yup
+  password: yup
     .string()
     .trim()
     .required('Vui lòng nhập mật khẩu hiện tại.')

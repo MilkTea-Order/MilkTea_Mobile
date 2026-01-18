@@ -1,6 +1,6 @@
 import { ThemeSelector } from "@/components/molecules/ThemeSelector";
 import { useLogout } from "@/features/auth/hooks/useAuth";
-import { useAuthStore } from "@/features/auth/store/auth.store";
+import { useMe } from "@/features/user/hooks/useUser";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -11,14 +11,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { session } = useAuthStore();
-  const user = session?.user;
+  const { data: meData, isPending: isLoadingUser } = useMe();
+  const user = meData?.data;
   const logoutMutation = useLogout();
   const { colors, gradients } = useTheme();
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Scroll to top when tab is focused
   useFocusEffect(
     useCallback(() => {
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });
@@ -53,6 +52,11 @@ export default function ProfileScreen() {
       onPress: () => Alert.alert("Thông tin", "Tính năng đang phát triển"),
     },
     {
+      icon: "lock-closed-outline",
+      label: "Đổi mật khẩu",
+      onPress: () => router.push("/(protected)/profile/change-password"),
+    },
+    {
       icon: "notifications-outline",
       label: "Thông báo",
       onPress: () => Alert.alert("Thông báo", "Tính năng đang phát triển"),
@@ -84,18 +88,6 @@ export default function ProfileScreen() {
           paddingHorizontal: 20,
         }}
       >
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="absolute bg-white/20 rounded-full p-2"
-          style={{
-            top: insets.top + 16,
-            left: 20,
-            zIndex: 10,
-          }}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back" size={24} color="white" />
-        </TouchableOpacity>
         <Text className="text-white text-2xl font-bold text-center mt-2">
           Hồ sơ
         </Text>
@@ -141,11 +133,19 @@ export default function ProfileScreen() {
                 className="text-2xl font-bold mb-1"
                 style={{ color: colors.text }}
               >
-                {user?.name || "Nhân viên"}
+                {isLoadingUser ? "Đang tải..." : user?.fullName || "Nhân viên"}
               </Text>
               <Text style={{ color: colors.textSecondary }}>
-                {user?.email || ""}
+                {isLoadingUser ? "" : user?.email || ""}
               </Text>
+              {user?.positionName && (
+                <Text
+                  className="text-sm mt-1"
+                  style={{ color: colors.textSecondary }}
+                >
+                  {user.positionName}
+                </Text>
+              )}
             </View>
 
             {/* Stats */}

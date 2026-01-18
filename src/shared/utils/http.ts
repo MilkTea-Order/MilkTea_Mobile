@@ -62,7 +62,7 @@ class Http {
                 });
               });
             }
-            // Token không đúng, không truyền,  refresh token cũng hết hạn hay đã bị thu hồi
+            // Token không đúng, không truyền, refresh token cũng hết hạn hay đã bị thu hồi
             await logout();
           }
           throw responseData;

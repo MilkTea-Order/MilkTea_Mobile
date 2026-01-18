@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/features/auth/store/auth.store";
+import { useMe } from "@/features/user/hooks/useUser";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -75,11 +75,13 @@ export default function HomeScreen() {
   const [orders] = useState<Order[]>(mockOrders);
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
-  const session = useAuthStore((state) => state.session);
-  const user = session?.user;
+  const { data: meData, isPending: isLoadingUser } = useMe();
+  const user = meData?.data;
   const { colors, gradients, status, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView>(null);
+
+
 
   // Scroll to top when tab is focused
   useFocusEffect(
@@ -87,6 +89,8 @@ export default function HomeScreen() {
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });
     }, [])
   );
+ 
+  
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -123,11 +127,11 @@ export default function HomeScreen() {
               Xin chào,
             </Text>
             <Text className="text-white text-3xl font-bold">
-              {user?.name || "Nhân viên"}
+              {isLoadingUser ? "Đang tải..." : user?.fullName || "Nhân viên"}
             </Text>
           </View>
           <TouchableOpacity
-            onPress={() => router.push("/(tabs)/profile")}
+            onPress={() => router.push("/(protected)/profile")}
             className="bg-white/20 rounded-full p-3"
             style={{
               shadowColor: "#000",

@@ -1,6 +1,7 @@
+import { userApi } from "@/features/user/apis/user.api";
+import { userKeys } from "@/features/user/hooks/useUser";
 import { extractFieldErrors } from "@/shared/utils/formErrors";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authApi } from "../apis/auth.api";
 import { useAuthStore } from "../store/auth.store";
 import { LoginPayload, LoginResponse } from "../types/auth.type";
@@ -14,7 +15,6 @@ export const authKeys = {
 
 export function useLogin() {
   const queryClient = useQueryClient();
-
   const { login } = useAuthStore();
 
   return useMutation({
@@ -42,12 +42,18 @@ export function useLogin() {
         user,
         permissions,
       };
-
       await login(session);
-      await queryClient.invalidateQueries({ queryKey: authKeys.me() });
+      // Prefetch user data sau khi login thành công
+      await queryClient.prefetchQuery({
+        queryKey: userKeys.me(),
+        queryFn: async () => {
+          const response = await userApi.getMe();
+          return response.data;
+        },
+      });
     },
     onError: (error: any) => {
-      const fieldErrors = extractFieldErrors(error, () => "password");
+      const fieldErrors = extractFieldErrors(error, "auth", "password");
       if (fieldErrors.length > 0) {
         error.fieldErrors = fieldErrors;
       }
@@ -67,42 +73,4 @@ export function useLogout() {
       queryClient.clear();
     },
   });
-}
-
-export function useMe() {
-  const session = useAuthStore((state) => state.session);
-  const { setUser } = useAuthStore();
-
-  const query = useQuery({
-    queryKey: authKeys.me(),
-    queryFn: async () => {
-      // API returns axios response, unwrap .data ONCE here
-      const response = await authApi.getMe();
-      return response.data; // ApiResponse<MeResponseData>
-    },
-    enabled: !!session?.accessToken, // Only fetch if authenticated
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  // Update store user when fetched from server (React Query v5 pattern)
-  useEffect(() => {
-    if (query.isSuccess && query.data) {
-      // data is ApiResponse<MeResponseData>, extract .data
-      const { user, permissions } = query.data.data;
-
-      // Update user in store
-      setUser(user);
-
-      // Update permissions if provided
-      if (permissions && session) {
-        const updatedSession: LoginResponse = {
-          ...session,
-          permissions,
-        };
-        useAuthStore.setState({ session: updatedSession });
-      }
-    }
-  }, [query.isSuccess, query.data, setUser, session]);
-
-  return query;
 }

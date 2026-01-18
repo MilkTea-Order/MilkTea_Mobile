@@ -18,7 +18,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../../global.css";
 
 export const unstable_settings = {
-  anchor: "(tabs)",
+  anchor: "(protected)",
 };
 
 SplashScreen.preventAutoHideAsync();
@@ -64,7 +64,7 @@ export default function RootLayout() {
           >
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Protected guard={isAuthenticated}>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="(protected)" options={{ headerShown: false }} />
               </Stack.Protected>
 
               <Stack.Protected guard={!isAuthenticated}>

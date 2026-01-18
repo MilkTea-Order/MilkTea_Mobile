@@ -1,3 +1,5 @@
+export type ErrorDomain = "auth" | "user" | "common";
+
 export const ERROR_CODE = {
   // General Errors (E0001-E0009)
   E0001: "E0001", // Not exists or not matching with data
@@ -6,7 +8,7 @@ export const ERROR_CODE = {
   E0005: "E0005", // Your account is not active. Please contact the administrator.
 
   // Validation Errors (E0010-E0019)
-  E0012: "E0012", // Password matches the last "X" times. Frontend should get "X" to show to customer as password policy
+  E0012: "E0012", // New Password equal current password
 
   // Business Logic Errors (E0020-E0029)
   E0027: "E0027", // Processing error - General processing failure
@@ -22,6 +24,7 @@ export const ERROR_CODE = {
 
   // Authentication Errors (E0043-E0049)
   E0043: "E0043", // Unauthorized - Token has been expired
+  E0044: "E0044", // Unauthorized - Token has been revoked or invalid
 
   // System Errors
   E9999: "E9999", // Internal server error - Unexpected system error
