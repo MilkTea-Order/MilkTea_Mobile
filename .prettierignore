@@ -1,0 +1,11 @@
+/.expo
+node_modules
+build
+bin
+expo-env.d.ts
+nativewind-env.d.ts
+package-lock.json
+ios
+android
+babel.config.js
+metro.config.js

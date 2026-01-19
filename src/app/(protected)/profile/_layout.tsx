@@ -1,27 +1,27 @@
-import { useTheme } from "@/shared/hooks/useTheme";
-import { Stack } from "expo-router";
-import React from "react";
+import { useTheme } from '@/shared/hooks/useTheme'
+import { Stack } from 'expo-router'
+import React from 'react'
 
 export default function ProfileStackLayout() {
-  const { colors } = useTheme();
+  const { colors } = useTheme()
 
   return (
     <Stack
       screenOptions={{
         headerShown: false,
         contentStyle: {
-          backgroundColor: colors.background,
-        },
+          backgroundColor: colors.background
+        }
       }}
     >
-      <Stack.Screen name="index" />
+      <Stack.Screen name='index' />
       <Stack.Screen
-        name="change-password"
+        name='change-password'
         options={{
-          presentation: "card",
-          animation: "slide_from_right",
+          presentation: 'card',
+          animation: 'slide_from_right'
         }}
       />
     </Stack>
-  );
+  )
 }

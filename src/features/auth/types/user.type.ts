@@ -1,4 +1,4 @@
 export interface User {
-  id: string | number;
-  dateLogin?: string;
+  id: string | number
+  dateLogin?: string
 }

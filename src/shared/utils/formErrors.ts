@@ -1,10 +1,10 @@
-import { getErrorMessage } from "@/shared/resources/errorMessages";
-import { isErrorResponse } from "@/shared/types/api.type";
-import { ErrorDomain } from "../constants/errorCode";
+import { getErrorMessage } from '@/shared/resources/errorMessages'
+import { isErrorResponse } from '@/shared/types/api.type'
+import { ErrorDomain } from '../constants/errorCode'
 
 export interface FieldError {
-  field: string;
-  message: string;
+  field: string
+  message: string
 }
 
 /**
@@ -19,71 +19,63 @@ export interface FieldError {
  */
 export function extractFieldErrors(
   error: any,
-  domain: ErrorDomain = "common",
+  domain: ErrorDomain = 'common',
   fieldMapping?: ((apiFieldName: string) => string) | Record<string, string> | string
 ): FieldError[] {
-  const errorResponse = error?.response?.data || error;
-  const fieldErrors: FieldError[] = [];
+  const errorResponse = error?.response?.data || error
+  const fieldErrors: FieldError[] = []
 
   if (isErrorResponse(errorResponse)) {
-    const errorData = errorResponse.data;
+    const errorData = errorResponse.data
 
     Object.keys(errorData).forEach((errorCode) => {
-      const fieldValue = errorData[errorCode];
+      const fieldValue = errorData[errorCode]
 
       // Helper function để map field name
       const mapFieldName = (apiFieldName: string): string => {
         if (!fieldMapping) {
-          return apiFieldName.toLowerCase();
+          return apiFieldName.toLowerCase()
         }
-        
-        if (typeof fieldMapping === "string") {
+
+        if (typeof fieldMapping === 'string') {
           // String: Map tất cả về 1 field
-          return fieldMapping;
+          return fieldMapping
         }
-        
-        if (typeof fieldMapping === "function") {
+
+        if (typeof fieldMapping === 'function') {
           // Function: Dynamic mapping
-          return fieldMapping(apiFieldName);
+          return fieldMapping(apiFieldName)
         }
-        
+
         // Object: Static mapping
-        return fieldMapping[apiFieldName] || apiFieldName.toLowerCase();
-      };
+        return fieldMapping[apiFieldName] || apiFieldName.toLowerCase()
+      }
 
       // Nếu là array, xử lý từng field
       if (Array.isArray(fieldValue)) {
         fieldValue.forEach((fieldName) => {
-          const errorMessage = getErrorMessage(
-            errorCode,
-            domain,
-            fieldName.toLowerCase()
-          );
-          const targetField = mapFieldName(fieldName);
+          const errorMessage = getErrorMessage(errorCode, domain, fieldName.toLowerCase())
+          const targetField = mapFieldName(fieldName)
 
           fieldErrors.push({
             field: targetField,
-            message: errorMessage,
-          });
-        });
+            message: errorMessage
+          })
+        })
       } else {
         // Nếu là string, xử lý một field
-        const errorMessage = getErrorMessage(
-          errorCode,
-          domain,
-          fieldValue.toLowerCase()
-        );
-        const targetField = mapFieldName(fieldValue);
+        const errorMessage = getErrorMessage(errorCode, domain, fieldValue.toLowerCase())
+        const targetField = mapFieldName(fieldValue)
 
         fieldErrors.push({
           field: targetField,
-          message: errorMessage,
-        });
+          message: errorMessage
+        })
       }
-    });
+    })
   }
 
-  return fieldErrors;
+  return fieldErrors
 }
 
 /**
@@ -96,6 +88,6 @@ export function setFormikFieldErrors(
   fieldErrors: FieldError[]
 ): void {
   fieldErrors.forEach(({ field, message }) => {
-    setFieldError(field, message);
-  });
+    setFieldError(field, message)
+  })
 }

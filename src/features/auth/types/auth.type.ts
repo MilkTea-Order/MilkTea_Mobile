@@ -1,20 +1,18 @@
-import { ApiResponse } from "@/shared/types/api.type";
-import { Permission } from "./permission.type";
-import { User } from "./user.type";
+import { ApiResponse } from '@/shared/types/api.type'
+import { Permission } from './permission.type'
+import { User } from './user.type'
 
 export interface LoginPayload {
-  username: string;
-  password: string;
+  username: string
+  password: string
 }
 
 export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: string;
+  accessToken: string
+  refreshToken: string
+  expiresAt: string
   user: User
-  permissions: Permission[];
+  permissions: Permission[]
 }
 
-export type LoginApiResponse = ApiResponse<LoginResponse>;
-
-
+export type LoginApiResponse = ApiResponse<LoginResponse>

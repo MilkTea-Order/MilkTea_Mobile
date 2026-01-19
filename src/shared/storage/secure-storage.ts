@@ -1,15 +1,15 @@
-import * as SecureStore from "expo-secure-store";
-import { STORAGE_KEYS } from "./storage.keys";
+import * as SecureStore from 'expo-secure-store'
+import { STORAGE_KEYS } from './storage.keys'
 
 /**
  * Set a string value in secure storage
  */
 export async function setItem(key: string, value: string): Promise<void> {
   try {
-    await SecureStore.setItemAsync(key, value);
+    await SecureStore.setItemAsync(key, value)
   } catch (error) {
-    console.error(`Failed to set secure storage item: ${key}`, error);
-    throw error;
+    console.error(`Failed to set secure storage item: ${key}`, error)
+    throw error
   }
 }
 
@@ -18,10 +18,10 @@ export async function setItem(key: string, value: string): Promise<void> {
  */
 export async function getItem(key: string): Promise<string | null> {
   try {
-    return await SecureStore.getItemAsync(key);
+    return await SecureStore.getItemAsync(key)
   } catch (error) {
-    console.error(`Failed to get secure storage item: ${key}`, error);
-    return null;
+    console.error(`Failed to get secure storage item: ${key}`, error)
+    return null
   }
 }
 
@@ -30,10 +30,10 @@ export async function getItem(key: string): Promise<string | null> {
  */
 export async function removeItem(key: string): Promise<void> {
   try {
-    await SecureStore.deleteItemAsync(key);
+    await SecureStore.deleteItemAsync(key)
   } catch (error) {
-    console.error(`Failed to remove secure storage item: ${key}`, error);
-    throw error;
+    console.error(`Failed to remove secure storage item: ${key}`, error)
+    throw error
   }
 }
 
@@ -42,11 +42,11 @@ export async function removeItem(key: string): Promise<void> {
  */
 export async function setObject<T>(key: string, value: T): Promise<void> {
   try {
-    const jsonValue = JSON.stringify(value);
-    await setItem(key, jsonValue);
+    const jsonValue = JSON.stringify(value)
+    await setItem(key, jsonValue)
   } catch (error) {
-    console.error(`Failed to set secure storage object: ${key}`, error);
-    throw error;
+    console.error(`Failed to set secure storage object: ${key}`, error)
+    throw error
   }
 }
 
@@ -55,14 +55,14 @@ export async function setObject<T>(key: string, value: T): Promise<void> {
  */
 export async function getObject<T>(key: string): Promise<T | null> {
   try {
-    const jsonValue = await getItem(key);
+    const jsonValue = await getItem(key)
     if (jsonValue === null) {
-      return null;
+      return null
     }
-    return JSON.parse(jsonValue) as T;
+    return JSON.parse(jsonValue) as T
   } catch (error) {
-    console.error(`Failed to get secure storage object: ${key}`, error);
-    return null;
+    console.error(`Failed to get secure storage object: ${key}`, error)
+    return null
   }
 }
 
@@ -77,12 +77,12 @@ export async function clearAll(): Promise<void> {
       STORAGE_KEYS.AUTH.SESSION,
       // Settings keys
       STORAGE_KEYS.SETTINGS.THEME_MODE,
-      STORAGE_KEYS.SETTINGS.LANGUAGE,
-    ];
+      STORAGE_KEYS.SETTINGS.LANGUAGE
+    ]
 
-    await Promise.all(allKeys.map((key) => removeItem(key)));
+    await Promise.all(allKeys.map((key) => removeItem(key)))
   } catch (error) {
-    console.error("Failed to clear all secure storage", error);
-    throw error;
+    console.error('Failed to clear all secure storage', error)
+    throw error
   }
 }
