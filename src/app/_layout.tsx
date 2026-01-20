@@ -1,4 +1,5 @@
 import { CustomToast } from '@/components/molecules/CustomToast'
+import { SplashScreen as AppSplashScreen } from '@/components/organisms/SplashScreen'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 import { THEME_VARIANT } from '@/shared/constants/theme'
 import { useTheme } from '@/shared/hooks/useTheme'
@@ -7,6 +8,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { SplashScreen, Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect } from 'react'
+import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { ToastProvider } from 'react-native-toast-notifications'
 
 import 'react-native-reanimated'
@@ -30,43 +32,50 @@ export default function RootLayout() {
   }, [hydrate])
 
   useEffect(() => {
-    if (!isHydrating) {
+    const timer = setTimeout(() => {
       SplashScreen.hideAsync()
-    }
-  }, [isHydrating])
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [])
 
   return (
     <SafeAreaProvider>
-      <ToastProvider
-        placement='top'
-        offsetTop={50}
-        offsetBottom={0}
-        animationType='slide-in'
-        animationDuration={250}
-        duration={3000}
-        swipeEnabled={true}
-        renderToast={(toastOptions) => <CustomToast message={toastOptions.message} type={toastOptions.type as any} />}
-      >
-        <TanstackQueryProvider>
-          <ThemeProvider value={effectiveTheme === THEME_VARIANT.DARK ? DarkTheme : DefaultTheme}>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Protected guard={isAuthenticated}>
-                <Stack.Screen name='(protected)' options={{ headerShown: false }} />
-              </Stack.Protected>
+      {/* Overlay splash screen on top when hydrating */}
+      {isHydrating && <AppSplashScreen isVisible={isHydrating} />}
+      {!isHydrating && (
+        <ToastProvider
+          placement='top'
+          offsetTop={50}
+          offsetBottom={0}
+          animationType='slide-in'
+          animationDuration={250}
+          duration={3000}
+          swipeEnabled={true}
+          renderToast={(toastOptions) => <CustomToast message={toastOptions.message} type={toastOptions.type as any} />}
+        >
+          <TanstackQueryProvider>
+            <ThemeProvider value={effectiveTheme === THEME_VARIANT.DARK ? DarkTheme : DefaultTheme}>
+              <KeyboardProvider>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Protected guard={isAuthenticated}>
+                    <Stack.Screen name='(protected)' options={{ headerShown: false }} />
+                  </Stack.Protected>
 
-              <Stack.Protected guard={!isAuthenticated}>
-                <Stack.Screen
-                  name='login'
-                  // gestureEnabled: false : để tắt vuốt back khi vào trang login
-                  options={{ headerShown: false, gestureEnabled: false }}
-                />
-              </Stack.Protected>
-            </Stack>
-            {/* Dark -> light, light -> dark */}
-            <StatusBar style={effectiveTheme === THEME_VARIANT.DARK ? 'light' : 'dark'} />
-          </ThemeProvider>
-        </TanstackQueryProvider>
-      </ToastProvider>
+                  <Stack.Protected guard={!isAuthenticated}>
+                    <Stack.Screen
+                      name='login'
+                      // gestureEnabled: false : để tắt vuốt back khi vào trang login
+                      options={{ headerShown: false, gestureEnabled: false }}
+                    />
+                  </Stack.Protected>
+                </Stack>
+                {/* Dark -> light, light -> dark */}
+                <StatusBar style={effectiveTheme === THEME_VARIANT.DARK ? 'light' : 'dark'} />
+              </KeyboardProvider>
+            </ThemeProvider>
+          </TanstackQueryProvider>
+        </ToastProvider>
+      )}
     </SafeAreaProvider>
   )
 }

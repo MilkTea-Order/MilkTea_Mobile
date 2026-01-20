@@ -2,6 +2,7 @@ import { useTheme } from '@/shared/hooks/useTheme'
 import React from 'react'
 import { Text, View } from 'react-native'
 import Logo from '~/assets/images/logo.svg'
+
 interface AppLogoProps {
   size?: 'small' | 'medium' | 'large'
   showText?: boolean

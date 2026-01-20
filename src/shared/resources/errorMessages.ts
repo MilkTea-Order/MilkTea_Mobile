@@ -19,8 +19,8 @@ export const COMMON_ERROR_MESSAGES: Record<string, string> = {
 export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode, Record<string, string>>>> = {
   auth: {
     [ERROR_CODE.E0001]: {
-      username: 'Tài khoản hoặc mật khẩu không đúng',
-      password: 'Tài khoản hoặc mật khẩu không đúng'
+      username: 'Thông tin đăng nhập không đúng',
+      password: 'Thông tin đăng nhập không đúng'
     },
     [ERROR_CODE.E0002]: {
       username: 'Tên đăng nhập đã tồn tại',

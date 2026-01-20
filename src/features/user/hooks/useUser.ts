@@ -8,7 +8,7 @@ export const userKeys = {
 }
 
 export function useMe() {
-  const session = useAuthStore((state) => state.session)
+  const tokens = useAuthStore((state) => state.tokens)
 
   const query = useQuery({
     queryKey: userKeys.me(),
@@ -16,7 +16,7 @@ export function useMe() {
       const response = await userApi.getMe()
       return response.data
     },
-    enabled: !!session?.accessToken,
+    enabled: !!tokens?.accessToken,
     staleTime: 5 * 60 * 1000
   })
 

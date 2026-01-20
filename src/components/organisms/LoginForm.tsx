@@ -1,12 +1,13 @@
 import { InputField } from '@/components/molecules/InputField'
 import { useLogin } from '@/features/auth/hooks/useAuth'
 import { loginValidationSchema } from '@/features/auth/schemas/login.schema'
+import { useAuthStore } from '@/features/auth/store/auth.store'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { setFormikFieldErrors } from '@/shared/utils/formErrors'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Formik } from 'formik'
-import React from 'react'
+import React, { useMemo, useState } from 'react'
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
 
 interface LoginFormValues {
@@ -21,11 +22,21 @@ interface LoginFormProps {
 export function LoginForm({ onForgotPassword }: LoginFormProps) {
   const loginMutation = useLogin()
   const { colors, gradients } = useTheme()
+  const {
+    username: rememberedUsername,
+    rememberUsername: isRemembering,
+    setRememberUsername,
+    clearRememberedUsername
+  } = useAuthStore()
+  const [rememberUsername, setRememberUsernameState] = useState<boolean>(isRemembering)
 
-  const initialValues: LoginFormValues = {
-    username: '',
-    password: ''
-  }
+  const initialValues: LoginFormValues = useMemo(
+    () => ({
+      username: rememberedUsername || '',
+      password: ''
+    }),
+    [rememberedUsername]
+  )
 
   const handleLogin = async (values: LoginFormValues, setFieldError: (field: string, message: string) => void) => {
     try {
@@ -33,6 +44,11 @@ export function LoginForm({ onForgotPassword }: LoginFormProps) {
         username: values.username,
         password: values.password
       })
+      if (rememberUsername) {
+        await setRememberUsername(values.username)
+      } else {
+        await clearRememberedUsername()
+      }
     } catch (error: any) {
       if (error.fieldErrors) {
         setFormikFieldErrors(setFieldError, error.fieldErrors)
@@ -77,6 +93,26 @@ export function LoginForm({ onForgotPassword }: LoginFormProps) {
             touched={touched.password}
             onSubmitEditing={() => handleSubmit()}
           />
+
+          {/* Remember Username Checkbox */}
+          <TouchableOpacity
+            onPress={() => setRememberUsernameState(!rememberUsername)}
+            className='flex-row items-center mb-6'
+            activeOpacity={0.7}
+          >
+            <View
+              className='w-5 h-5 rounded border-2 items-center justify-center mr-3'
+              style={{
+                borderColor: rememberUsername ? colors.primary : colors.border,
+                backgroundColor: rememberUsername ? colors.primary : 'transparent'
+              }}
+            >
+              {rememberUsername && <Ionicons name='checkmark' size={14} color='white' />}
+            </View>
+            <Text className='text-sm' style={{ color: colors.text }}>
+              Nhớ tên đăng nhập
+            </Text>
+          </TouchableOpacity>
 
           {/* Forgot Password */}
           {onForgotPassword && (

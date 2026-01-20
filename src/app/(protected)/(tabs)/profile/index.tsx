@@ -49,12 +49,12 @@ export default function ProfileScreen() {
     {
       icon: 'person-outline',
       label: 'Thông tin cá nhân',
-      onPress: () => Alert.alert('Thông tin', 'Tính năng đang phát triển')
+      onPress: () => router.push('/(protected)/(tabs)/profile/edit-profile')
     },
     {
       icon: 'lock-closed-outline',
       label: 'Đổi mật khẩu',
-      onPress: () => router.push('/(protected)/profile/change-password')
+      onPress: () => router.push('/(protected)/(tabs)/profile/change-password')
     },
     {
       icon: 'notifications-outline',

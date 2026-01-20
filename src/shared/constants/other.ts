@@ -1,0 +1,4 @@
+export const ITEM_HEIGHT = 48
+export const VISIBLE_ITEMS = 5
+export const LIST_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS
+export const CENTER_PADDING = (LIST_HEIGHT - ITEM_HEIGHT) / 2

@@ -8,5 +8,6 @@ export const URL = {
   UPDATE_PHONE: 'auth/update-phone',
   ME: 'auth/me',
   USER_ME: 'user/me',
-  CHANGE_PASSWORD: 'user/update-password'
+  CHANGE_PASSWORD: 'user/update-password',
+  UPDATE_PROFILE: 'user/update-profile'
 } as const

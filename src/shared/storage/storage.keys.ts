@@ -1,7 +1,10 @@
 export const STORAGE_KEYS = {
   // Auth keys
   AUTH: {
-    SESSION: 'auth_session'
+    TOKENS: 'auth_tokens',
+    PROFILE: 'auth_profile',
+    USERNAME: 'auth_username',
+    REMEMBER_USERNAME: 'auth_remember_username'
   },
   // Settings keys
   SETTINGS: {

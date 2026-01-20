@@ -74,7 +74,7 @@ export async function clearAll(): Promise<void> {
   try {
     const allKeys = [
       // Auth keys
-      STORAGE_KEYS.AUTH.SESSION,
+      STORAGE_KEYS.AUTH.TOKENS,
       // Settings keys
       STORAGE_KEYS.SETTINGS.THEME_MODE,
       STORAGE_KEYS.SETTINGS.LANGUAGE

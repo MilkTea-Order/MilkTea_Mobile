@@ -2,7 +2,7 @@ import { useTheme } from '@/shared/hooks/useTheme'
 import { Stack } from 'expo-router'
 import React from 'react'
 
-export default function ProfileStackLayout() {
+export default function OrderStackLayout() {
   const { colors } = useTheme()
 
   return (
@@ -14,9 +14,15 @@ export default function ProfileStackLayout() {
         }
       }}
     >
-      <Stack.Screen name='index' />
       <Stack.Screen
-        name='change-password'
+        name='create-order'
+        options={{
+          presentation: 'card',
+          animation: 'slide_from_right'
+        }}
+      />
+      <Stack.Screen
+        name='detail'
         options={{
           presentation: 'card',
           animation: 'slide_from_right'

@@ -42,3 +42,25 @@ export interface ChangePasswordResponse {
 }
 
 export type ChangePasswordApiResponse = ApiResponse<ChangePasswordResponse>
+
+export interface UpdateProfileBody {
+  fullName: string
+  genderID: number
+  birthDay: string
+  identityCode: string
+  email: string
+  cellPhone: string
+  address?: string
+  bankName?: string
+  bankAccountName?: string
+  bankAccountNumber?: string
+  bankQRCode?: string
+}
+
+export type UpdateProfilePayload = UpdateProfileBody | FormData
+
+export interface UpdateProfileResponse {
+  status: boolean
+}
+
+export type UpdateProfileApiResponse = ApiResponse<UpdateProfileResponse>

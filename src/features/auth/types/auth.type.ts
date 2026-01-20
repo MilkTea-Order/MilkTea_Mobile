@@ -7,12 +7,17 @@ export interface LoginPayload {
   password: string
 }
 
-export interface LoginResponse {
+export interface Token {
   accessToken: string
   refreshToken: string
   expiresAt: string
+}
+
+export interface Profile {
   user: User
   permissions: Permission[]
 }
+
+export interface LoginResponse extends Token, Profile {}
 
 export type LoginApiResponse = ApiResponse<LoginResponse>

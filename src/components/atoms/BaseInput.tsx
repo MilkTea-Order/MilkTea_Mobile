@@ -1,6 +1,6 @@
 import { useTheme } from '@/shared/hooks/useTheme'
 import { Ionicons } from '@expo/vector-icons'
-import React, { useState } from 'react'
+import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { TextInput, TextInputProps, TouchableOpacity, View } from 'react-native'
 
 export interface BaseInputProps extends Omit<TextInputProps, 'secureTextEntry'> {
@@ -12,17 +12,23 @@ export interface BaseInputProps extends Omit<TextInputProps, 'secureTextEntry'> 
   showPasswordToggle?: boolean
 }
 
-export function BaseInput({
-  icon,
-  containerStyle,
-  rightIcon,
-  onRightIconPress,
-  isPassword = false,
-  showPasswordToggle = false,
-  ...textInputProps
-}: BaseInputProps) {
+export const BaseInput = forwardRef<TextInput, BaseInputProps>(function BaseInput(
+  {
+    icon,
+    containerStyle,
+    rightIcon,
+    onRightIconPress,
+    isPassword = false,
+    showPasswordToggle = false,
+    ...textInputProps
+  },
+  ref
+) {
   const [showPassword, setShowPassword] = useState(false)
   const { colors } = useTheme()
+
+  const inputRef = useRef<TextInput>(null)
+  useImperativeHandle(ref, () => inputRef.current as TextInput)
 
   const shouldShowPasswordToggle = isPassword && showPasswordToggle
   const secureTextEntry = isPassword && !showPassword
@@ -49,7 +55,9 @@ export function BaseInput({
           <Ionicons name={icon} size={22} color={colors.primary} />
         </View>
       )}
+
       <TextInput
+        ref={inputRef}
         className='flex-1'
         style={{
           color: colors.text,
@@ -59,13 +67,16 @@ export function BaseInput({
         placeholderTextColor={colors.textTertiary}
         secureTextEntry={secureTextEntry}
         autoCapitalize={isPassword ? 'none' : textInputProps.autoCapitalize}
+        selectTextOnFocus={false}
         {...textInputProps}
       />
+
       {shouldShowPasswordToggle && (
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)} className='ml-3 p-2' activeOpacity={0.7}>
           <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={22} color={colors.textSecondary} />
         </TouchableOpacity>
       )}
+
       {rightIcon && !shouldShowPasswordToggle && (
         <TouchableOpacity onPress={onRightIconPress} className='ml-3 p-2' activeOpacity={0.7}>
           <Ionicons name={rightIcon} size={22} color={colors.textSecondary} />
@@ -73,4 +84,4 @@ export function BaseInput({
       )}
     </View>
   )
-}
+})
