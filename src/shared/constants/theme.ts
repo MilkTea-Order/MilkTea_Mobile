@@ -16,6 +16,24 @@ export const THEME_MODE = {
 
 export type ThemeMode = (typeof THEME_MODE)[keyof typeof THEME_MODE]
 
+export const OPTIONS_THEME = [
+  {
+    mode: THEME_MODE.LIGHT,
+    label: 'Sáng',
+    icon: 'sunny'
+  },
+  {
+    mode: THEME_MODE.DARK,
+    label: 'Tối',
+    icon: 'moon'
+  },
+  {
+    mode: THEME_MODE.SYSTEM,
+    label: 'Hệ thống',
+    icon: 'phone-portrait'
+  }
+]
+
 // Theme variant - actual theme values (light/dark only, no system)
 export const THEME_VARIANT = {
   LIGHT: THEME_MODE.LIGHT,
@@ -70,7 +88,22 @@ type StatusColor = {
 }
 
 export const statusColors: Record<OrderStatus, StatusColor> = {
-  [STATUS.ORDER.PENDING]: {
+  [STATUS.ORDER.CANCELED]: {
+    [THEME_VARIANT.LIGHT]: {
+      bg: '#FEE2E2', // Red-100
+      border: '#FCA5A5', // Red-300
+      text: '#991B1B', // Red-800
+      badge: '#FECACA' // Red-200
+    },
+    [THEME_VARIANT.DARK]: {
+      bg: '#7F1D1D', // Red-900/20
+      border: '#EF4444', // Red-500
+      text: '#FCA5A5', // Red-300
+      badge: '#991B1B' // Red-800
+    },
+    icon: '#EF4444' // Red-500
+  },
+  [STATUS.ORDER.UNPAID]: {
     [THEME_VARIANT.LIGHT]: {
       bg: '#FEF3C7', // Amber-100
       border: '#FCD34D', // Amber-300
@@ -85,22 +118,7 @@ export const statusColors: Record<OrderStatus, StatusColor> = {
     },
     icon: '#F59E0B' // Amber-500
   },
-  [STATUS.ORDER.PREPARING]: {
-    [THEME_VARIANT.LIGHT]: {
-      bg: '#FED7AA', // Orange-200
-      border: '#FDBA74', // Orange-300
-      text: '#9A3412', // Orange-800
-      badge: '#FFEDD5' // Orange-100
-    },
-    [THEME_VARIANT.DARK]: {
-      bg: '#7C2D12', // Orange-900/20
-      border: '#FB923C', // Orange-400
-      text: '#FDBA74', // Orange-300
-      badge: '#9A3412' // Orange-800
-    },
-    icon: '#FB923C' // Orange-400
-  },
-  [STATUS.ORDER.READY]: {
+  [STATUS.ORDER.PAID]: {
     [THEME_VARIANT.LIGHT]: {
       bg: '#D1FAE5', // Emerald-100
       border: '#6EE7B7', // Emerald-300
@@ -114,21 +132,6 @@ export const statusColors: Record<OrderStatus, StatusColor> = {
       badge: '#065F46' // Emerald-800
     },
     icon: '#10B981' // Emerald-500
-  },
-  [STATUS.ORDER.COMPLETED]: {
-    [THEME_VARIANT.LIGHT]: {
-      bg: '#F3F4F6', // Gray-100
-      border: '#D1D5DB', // Gray-300
-      text: '#374151', // Gray-700
-      badge: '#E5E7EB' // Gray-200
-    },
-    [THEME_VARIANT.DARK]: {
-      bg: '#374151', // Gray-700/30
-      border: '#6B7280', // Gray-500
-      text: '#D1D5DB', // Gray-300
-      badge: '#4B5563' // Gray-600
-    },
-    icon: '#6B7280' // Gray-500
   }
 }
 

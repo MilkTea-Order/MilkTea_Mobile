@@ -55,25 +55,24 @@ export default function ProfileScreen() {
       icon: 'lock-closed-outline',
       label: 'Đổi mật khẩu',
       onPress: () => router.push('/(protected)/(tabs)/profile/change-password')
-    },
-    {
-      icon: 'notifications-outline',
-      label: 'Thông báo',
-      onPress: () => Alert.alert('Thông báo', 'Tính năng đang phát triển')
-    },
-    {
-      icon: 'help-circle-outline',
-      label: 'Trợ giúp',
-      onPress: () => Alert.alert('Trợ giúp', 'Tính năng đang phát triển')
-    },
-    {
-      icon: 'information-circle-outline',
-      label: 'Về ứng dụng',
-      onPress: () =>
-        Alert.alert('Về ứng dụng', 'Milk Tea Shop\nVersion 1.0.0\n\nỨng dụng quản lý đơn hàng quán trà sữa')
     }
+    // {
+    //   icon: 'notifications-outline',
+    //   label: 'Thông báo',
+    //   onPress: () => Alert.alert('Thông báo', 'Tính năng đang phát triển')
+    // },
+    // {
+    //   icon: 'help-circle-outline',
+    //   label: 'Trợ giúp',
+    //   onPress: () => Alert.alert('Trợ giúp', 'Tính năng đang phát triển')
+    // },
+    // {
+    //   icon: 'information-circle-outline',
+    //   label: 'Về ứng dụng',
+    //   onPress: () =>
+    //     Alert.alert('Về ứng dụng', 'Milk Tea Shop\nVersion 1.0.0\n\nỨng dụng quản lý đơn hàng quán trà sữa')
+    // }
   ]
-
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
       {/* Header */}

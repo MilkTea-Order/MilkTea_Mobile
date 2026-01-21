@@ -1,6 +1,6 @@
+import { useAuthStore } from '@/features/auth/store/auth.store'
 import { extractFieldErrors, setFormikFieldErrors } from '@/shared/utils/formErrors'
 import { useMutation } from '@tanstack/react-query'
-import { useRouter } from 'expo-router'
 import { Toast } from 'react-native-toast-notifications'
 import { userApi } from '../apis/user.api'
 import { ChangePasswordPayload } from '../types/user.type'
@@ -11,7 +11,7 @@ export const userKeys = {
 }
 
 export function useChangePassword() {
-  const router = useRouter()
+  const { logout } = useAuthStore()
 
   return useMutation({
     mutationKey: userKeys.changePassword(),
@@ -19,10 +19,10 @@ export function useChangePassword() {
       const response = await userApi.changePassword(payload)
       return response.data
     },
-    onSuccess: (apiResponse) => {
+    onSuccess: async (apiResponse) => {
       const message = 'Đổi mật khẩu thành công!'
       Toast.show(message, { type: 'success' })
-      router.back()
+      await logout()
     },
     onError: (error: any) => {
       const fieldErrors = extractFieldErrors(error, 'user', {

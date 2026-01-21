@@ -1,18 +1,19 @@
 import { CollapsibleSection } from '@/components/molecules/CollapsibleSection'
 import { FormDatePicker } from '@/components/molecules/FormDatePicker'
 import { FormFilePicker } from '@/components/molecules/FormFilePicker'
-import { FormSelectField, SelectOption } from '@/components/molecules/FormSelectField'
+import { FormSelectField } from '@/components/molecules/FormSelectField'
 import { FormTextField } from '@/components/molecules/FormTextField'
 import { handleUpdateProfileFormErrors, useUpdateProfile } from '@/features/user/hooks/useUpdateProfile'
 import editProfileSchema, { EditProfileSchema } from '@/features/user/schema/editProfile.schema'
 import { User } from '@/features/user/types/user.type'
+import { GENDER_OPTIONS } from '@/shared/constants/other'
 import { useTheme } from '@/shared/hooks/useTheme'
-import { UploadFile } from '@/shared/types/file.type'
 import { setFormikFieldErrors } from '@/shared/utils/formErrors'
+import { isChangedNumber, isChangedText, isRNFile } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Formik } from 'formik'
-import React, { useMemo } from 'react'
+import React, { useRef } from 'react'
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -28,63 +29,105 @@ interface EditProfileFormProps {
   onSuccess?: () => void
 }
 
-const GENDER_OPTIONS: SelectOption[] = [
-  { label: 'Nam', value: 1 },
-  { label: 'Nữ', value: 2 },
-  { label: 'Khác', value: 3 }
-]
-
-type EditProfileFormValues = EditProfileSchema & {
-  bankQRCodeFile?: UploadFile | null
-}
-
 export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps) {
   const updateProfileMutation = useUpdateProfile()
   const { colors, gradients } = useTheme()
 
-  const initialValues: EditProfileFormValues = useMemo(
-    () => ({
-      fullName: userProfile.fullName || '',
-      genderID: userProfile.genderID || 1,
-      birthDay: userProfile.birthDay || '',
-      identityCode: userProfile.identityCode || '',
-      email: userProfile.email || '',
-      cellPhone: userProfile.cellPhone || '',
-      address: userProfile.address || '',
-      bankName: userProfile.bankName || '',
-      bankAccountName: userProfile.bankAccountName || '',
-      bankAccountNumber: userProfile.bankAccountNumber || '',
-      bankQRCode: userProfile.bankQRCode || '',
-      bankQRCodeFile: null
-    }),
-    [userProfile]
-  )
+  const initialValuesRef = useRef<EditProfileSchema>({
+    fullName: userProfile.fullName || '',
+    genderID: userProfile.genderID || GENDER_OPTIONS[0].value,
+    birthDay: userProfile.birthDay || '',
+    identityCode: userProfile.identityCode || '',
+    email: userProfile.email || '',
+    cellPhone: userProfile.cellPhone || '',
+    address: userProfile.address || '',
+    bankName: userProfile.bankName || '',
+    bankAccountName: userProfile.bankAccountName || '',
+    bankAccountNumber: userProfile.bankAccountNumber || '',
+    bankQRCode: userProfile.bankQRCode || null
+  })
+  const initialValues = initialValuesRef.current
 
-  const handleSubmit = async (
-    values: EditProfileFormValues,
-    setFieldError: (field: string, message: string) => void
-  ) => {
+  const validateWithChangedContext = async (values: EditProfileSchema) => {
+    const birthDayChanged = isChangedText(values.birthDay, initialValues.birthDay)
+    const emailChanged = isChangedText(values.email, initialValues.email)
+    const addressChanged = isChangedText(values.address, initialValues.address)
+    const bankNameChanged = isChangedText(values.bankName, initialValues.bankName)
+    const bankAccountNameChanged = isChangedText(values.bankAccountName, initialValues.bankAccountName)
+    const bankAccountNumberChanged = isChangedText(values.bankAccountNumber, initialValues.bankAccountNumber)
+    const bankQRCodeChanged = isRNFile(values.bankQRCode)
+
+    try {
+      await editProfileSchema.validate(values, {
+        abortEarly: false,
+        context: {
+          birthDayChanged,
+          emailChanged,
+          addressChanged,
+          bankNameChanged,
+          bankAccountNameChanged,
+          bankAccountNumberChanged,
+          bankQRCodeChanged
+        }
+      })
+      return {}
+    } catch (err: any) {
+      const formErrors: Record<string, string> = {}
+      const inner = err?.inner
+      if (Array.isArray(inner)) {
+        for (const e of inner) {
+          const path = e?.path
+          const message = e?.message
+          if (typeof path === 'string' && typeof message === 'string' && !formErrors[path]) {
+            formErrors[path] = message
+          }
+        }
+      } else if (typeof err?.path === 'string' && typeof err?.message === 'string') {
+        formErrors[err.path] = err.message
+      }
+      return formErrors
+    }
+  }
+
+  const handleSubmit = async (values: EditProfileSchema, setFieldError: (field: string, message: string) => void) => {
     try {
       const formData = new FormData()
-      formData.append('fullName', values.fullName)
-      formData.append('genderID', String(values.genderID))
-      formData.append('birthDay', values.birthDay)
-      formData.append('identityCode', values.identityCode)
-      formData.append('email', values.email)
-      formData.append('cellPhone', values.cellPhone)
-      if (values.address) formData.append('address', values.address)
-      if (values.bankName) formData.append('bankName', values.bankName)
-      if (values.bankAccountName) formData.append('bankAccountName', values.bankAccountName)
-      if (values.bankAccountNumber) formData.append('bankAccountNumber', values.bankAccountNumber)
-
-      if (values.bankQRCodeFile) {
+      if (isChangedText(values.fullName, initialValues.fullName)) {
+        formData.append('fullName', values.fullName ?? '')
+      }
+      if (isChangedNumber(values.genderID, initialValues.genderID)) {
+        formData.append('genderID', String(values.genderID ?? ''))
+      }
+      if (isChangedText(values.birthDay, initialValues.birthDay)) {
+        formData.append('birthDay', values.birthDay ?? '')
+      }
+      if (isChangedText(values.identityCode, initialValues.identityCode)) {
+        formData.append('identityCode', values.identityCode ?? '')
+      }
+      if (isChangedText(values.email, initialValues.email)) {
+        formData.append('email', values.email ?? '')
+      }
+      if (isChangedText(values.cellPhone, initialValues.cellPhone)) {
+        formData.append('cellPhone', values.cellPhone ?? '')
+      }
+      if (isChangedText(values.address ?? '', initialValues.address ?? '')) {
+        formData.append('address', values.address ?? '')
+      }
+      if (isChangedText(values.bankName ?? '', initialValues.bankName ?? '')) {
+        formData.append('bankName', values.bankName ?? '')
+      }
+      if (isChangedText(values.bankAccountName ?? '', initialValues.bankAccountName ?? '')) {
+        formData.append('bankAccountName', values.bankAccountName ?? '')
+      }
+      if (isChangedText(values.bankAccountNumber ?? '', initialValues.bankAccountNumber ?? '')) {
+        formData.append('bankAccountNumber', values.bankAccountNumber ?? '')
+      }
+      if (values.bankQRCode && isRNFile(values.bankQRCode)) {
         formData.append('bankQRCode', {
-          uri: values.bankQRCodeFile.uri,
-          name: values.bankQRCodeFile.name,
-          type: values.bankQRCodeFile.type
+          uri: values.bankQRCode.uri,
+          name: values.bankQRCode.name,
+          type: values.bankQRCode.type
         } as any)
-      } else if (values.bankQRCode) {
-        formData.append('bankQRCode', values.bankQRCode)
       }
 
       await updateProfileMutation.mutateAsync(formData)
@@ -102,13 +145,25 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
     <KeyboardAvoidingView className='flex-1' behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <Formik
         initialValues={initialValues}
-        validationSchema={editProfileSchema}
-        validateOnBlur={false}
-        validateOnChange={false}
-        enableReinitialize
+        validate={validateWithChangedContext}
+        validateOnMount
+        validateOnBlur
+        validateOnChange
         onSubmit={(values, { setFieldError }) => handleSubmit(values, setFieldError)}
       >
-        {({ handleChange, handleBlur, handleSubmit, setTouched, setFieldValue, values, errors, touched, dirty }) => (
+        {({
+          handleChange,
+          handleBlur,
+          handleSubmit: handleSubmitFormik,
+          setTouched,
+          setFieldTouched,
+          setFieldValue,
+          values,
+          errors,
+          touched,
+          dirty,
+          isValid
+        }) => (
           <ScrollView
             contentContainerStyle={{
               flexGrow: 1,
@@ -136,8 +191,10 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
               <FormTextField
                 label='Họ và tên'
                 icon='person-outline'
-                value={values.fullName}
-                onChangeText={handleChange('fullName')}
+                value={values.fullName ?? ''}
+                onChangeText={(text) => {
+                  handleChange('fullName')(text)
+                }}
                 onBlur={handleBlur('fullName')}
                 error={errors.fullName}
                 touched={touched.fullName}
@@ -148,11 +205,11 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
               {/* Gender */}
               <FormSelectField
                 label='Giới tính'
-                value={values.genderID}
+                value={values.genderID!}
                 options={GENDER_OPTIONS}
                 onChange={(value) => {
                   setFieldValue('genderID', Number(value))
-                  setTouched({ ...touched, genderID: true })
+                  setFieldTouched('genderID', true, false)
                 }}
                 error={errors.genderID}
                 touched={touched.genderID}
@@ -162,8 +219,11 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
 
               <FormDatePicker
                 label='Ngày sinh'
-                value={values.birthDay}
-                onChange={(date) => handleChange('birthDay')(date)}
+                value={values.birthDay ?? ''}
+                onChange={(date) => {
+                  handleChange('birthDay')(date)
+                  setFieldTouched('birthDay', true, false)
+                }}
                 error={errors.birthDay}
                 touched={touched.birthDay}
                 required
@@ -172,8 +232,10 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
               <FormTextField
                 label='Số CMND/CCCD'
                 icon='card-outline'
-                value={values.identityCode}
-                onChangeText={handleChange('identityCode')}
+                value={values.identityCode ?? ''}
+                onChangeText={(text) => {
+                  handleChange('identityCode')(text)
+                }}
                 onBlur={handleBlur('identityCode')}
                 error={errors.identityCode}
                 touched={touched.identityCode}
@@ -185,25 +247,29 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
 
             {/* Contact Information Section */}
             <CollapsibleSection title='Thông tin liên hệ' icon='call-outline' defaultExpanded={false}>
+              {/* Email */}
               <FormTextField
                 label='Email'
                 icon='mail-outline'
-                value={values.email}
-                onChangeText={handleChange('email')}
+                value={values.email ?? ''}
+                onChangeText={(text) => {
+                  handleChange('email')(text)
+                }}
                 onBlur={handleBlur('email')}
                 error={errors.email}
                 touched={touched.email}
-                required
                 placeholder='Nhập email'
                 keyboardType='email-address'
                 autoCapitalize='none'
               />
-
+              {/* Cell phone */}
               <FormTextField
                 label='Số điện thoại'
                 icon='call-outline'
-                value={values.cellPhone}
-                onChangeText={handleChange('cellPhone')}
+                value={values.cellPhone ?? ''}
+                onChangeText={(text) => {
+                  handleChange('cellPhone')(text)
+                }}
                 onBlur={handleBlur('cellPhone')}
                 error={errors.cellPhone}
                 touched={touched.cellPhone}
@@ -216,7 +282,9 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
                 label='Địa chỉ'
                 icon='location-outline'
                 value={values.address}
-                onChangeText={handleChange('address')}
+                onChangeText={(text) => {
+                  handleChange('address')(text)
+                }}
                 onBlur={handleBlur('address')}
                 error={errors.address}
                 touched={touched.address}
@@ -232,8 +300,10 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
               <FormTextField
                 label='Tên ngân hàng'
                 icon='business-outline'
-                value={values.bankName}
-                onChangeText={handleChange('bankName')}
+                value={values.bankName ?? ''}
+                onChangeText={(text) => {
+                  handleChange('bankName')(text)
+                }}
                 onBlur={handleBlur('bankName')}
                 error={errors.bankName}
                 touched={touched.bankName}
@@ -243,8 +313,10 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
               <FormTextField
                 label='Tên chủ tài khoản'
                 icon='person-outline'
-                value={values.bankAccountName}
-                onChangeText={handleChange('bankAccountName')}
+                value={values.bankAccountName ?? ''}
+                onChangeText={(text) => {
+                  handleChange('bankAccountName')(text)
+                }}
                 onBlur={handleBlur('bankAccountName')}
                 error={errors.bankAccountName}
                 touched={touched.bankAccountName}
@@ -254,8 +326,10 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
               <FormTextField
                 label='Số tài khoản'
                 icon='card-outline'
-                value={values.bankAccountNumber}
-                onChangeText={handleChange('bankAccountNumber')}
+                value={values.bankAccountNumber ?? ''}
+                onChangeText={(text) => {
+                  handleChange('bankAccountNumber')(text)
+                }}
                 onBlur={handleBlur('bankAccountNumber')}
                 error={errors.bankAccountNumber}
                 touched={touched.bankAccountNumber}
@@ -265,41 +339,24 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
 
               <FormFilePicker
                 label='Mã QR Code ngân hàng'
-                value={values.bankQRCodeFile}
+                value={values.bankQRCode ?? null}
                 onChange={(file) => {
-                  setFieldValue('bankQRCodeFile', file)
-                  if (file) {
-                    setFieldValue('bankQRCode', '')
-                  }
+                  setFieldValue('bankQRCode', file)
+                  setFieldTouched('bankQRCode', true, false)
                 }}
-                error={errors.bankQRCode}
-                touched={touched.bankQRCode}
-                placeholder='Tải lên QR code'
+                error={typeof errors.bankQRCode === 'string' ? errors.bankQRCode : undefined}
+                touched={typeof touched.bankQRCode === 'boolean' ? touched.bankQRCode : false}
+                placeholder='Mã QR code ngân hàng'
               />
             </CollapsibleSection>
 
             {/* Save Button */}
             <TouchableOpacity
-              onPress={() => {
-                setTouched({
-                  fullName: true,
-                  genderID: true,
-                  birthDay: true,
-                  identityCode: true,
-                  email: true,
-                  cellPhone: true,
-                  address: true,
-                  bankName: true,
-                  bankAccountName: true,
-                  bankAccountNumber: true,
-                  bankQRCode: true
-                })
-                handleSubmit()
-              }}
-              disabled={updateProfileMutation.isPending || !dirty}
+              onPress={() => handleSubmitFormik()}
+              disabled={updateProfileMutation.isPending || !dirty || !isValid}
               activeOpacity={0.9}
               style={{
-                opacity: updateProfileMutation.isPending || !dirty ? 0.6 : 1,
+                opacity: updateProfileMutation.isPending || !dirty || !isValid ? 0.6 : 1,
                 marginTop: 12
               }}
             >

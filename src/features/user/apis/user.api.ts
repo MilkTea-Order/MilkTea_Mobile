@@ -21,6 +21,6 @@ export const userApi = {
   updateProfile(body: UpdateProfilePayload): Promise<AxiosResponse<UpdateProfileApiResponse>> {
     const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
     const config = isFormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : undefined
-    return http.put<UpdateProfileApiResponse>(URL.UPDATE_PROFILE, body, config)
+    return http.patch<UpdateProfileApiResponse>(URL.UPDATE_PROFILE, body, config)
   }
 }

@@ -1,6 +1,6 @@
 import { InputField } from '@/components/molecules/InputField'
 import { useLogin } from '@/features/auth/hooks/useAuth'
-import { loginValidationSchema } from '@/features/auth/schemas/login.schema'
+import { LoginSchema, loginValidationSchema } from '@/features/auth/schemas/login.schema'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { setFormikFieldErrors } from '@/shared/utils/formErrors'
@@ -9,11 +9,6 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Formik } from 'formik'
 import React, { useMemo, useState } from 'react'
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
-
-interface LoginFormValues {
-  username: string
-  password: string
-}
 
 interface LoginFormProps {
   onForgotPassword?: () => void
@@ -30,7 +25,7 @@ export function LoginForm({ onForgotPassword }: LoginFormProps) {
   } = useAuthStore()
   const [rememberUsername, setRememberUsernameState] = useState<boolean>(isRemembering)
 
-  const initialValues: LoginFormValues = useMemo(
+  const initialValues: LoginSchema = useMemo(
     () => ({
       username: rememberedUsername || '',
       password: ''
@@ -38,7 +33,7 @@ export function LoginForm({ onForgotPassword }: LoginFormProps) {
     [rememberedUsername]
   )
 
-  const handleLogin = async (values: LoginFormValues, setFieldError: (field: string, message: string) => void) => {
+  const handleLogin = async (values: LoginSchema, setFieldError: (field: string, message: string) => void) => {
     try {
       await loginMutation.mutateAsync({
         username: values.username,
@@ -60,11 +55,12 @@ export function LoginForm({ onForgotPassword }: LoginFormProps) {
     <Formik
       initialValues={initialValues}
       validationSchema={loginValidationSchema}
-      validateOnBlur={false}
-      validateOnChange={false}
+      validateOnMount
+      validateOnBlur
+      validateOnChange
       onSubmit={(values, { setFieldError }) => handleLogin(values, setFieldError)}
     >
-      {({ handleChange, handleBlur, handleSubmit, setTouched, values, errors, touched }) => (
+      {({ handleChange, handleBlur, handleSubmit, setTouched, values, errors, touched, isValid, dirty }) => (
         <View>
           {/* Username Field */}
           <InputField
@@ -133,9 +129,9 @@ export function LoginForm({ onForgotPassword }: LoginFormProps) {
               })
               handleSubmit()
             }}
-            disabled={loginMutation.isPending}
+            disabled={loginMutation.isPending || !dirty || !isValid}
             activeOpacity={0.9}
-            style={{ opacity: loginMutation.isPending ? 0.7 : 1 }}
+            style={{ opacity: loginMutation.isPending || !dirty || !isValid ? 0.7 : 1 }}
           >
             <View
               className='rounded-2xl overflow-hidden'

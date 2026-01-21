@@ -60,7 +60,7 @@ export function Header({ title, subtitle, onBack, rightContent, children, showBa
               {title}
             </Text>
             {subtitle && (
-              <Text className='text-white/85 text-sm mt-1' numberOfLines={1}>
+              <Text className='text-white/85 text-base font-semibold mt-1' numberOfLines={1}>
                 {subtitle}
               </Text>
             )}

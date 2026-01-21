@@ -15,10 +15,6 @@ export default function EditProfileScreen() {
   const { data: meData, isPending: isLoadingUser } = useMe()
   const userProfile = meData?.data
 
-  const handleSuccess = () => {
-    router.back()
-  }
-
   if (isLoadingUser || !userProfile) {
     return (
       <View className='flex-1 items-center justify-center' style={{ backgroundColor: colors.background }}>
@@ -57,7 +53,8 @@ export default function EditProfileScreen() {
       </LinearGradient>
 
       {/* Form */}
-      <EditProfileForm userProfile={userProfile} onSuccess={handleSuccess} />
+      {/* <EditProfileForm userProfile={userProfile} onSuccess={handleSuccess} /> */}
+      <EditProfileForm userProfile={userProfile} />
     </View>
   )
 }

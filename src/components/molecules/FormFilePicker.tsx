@@ -1,14 +1,15 @@
 import { useTheme } from '@/shared/hooks/useTheme'
-import { UploadFile } from '@/shared/types/file.type'
+import { RNFile } from '@/shared/types/file.type'
 import { Ionicons } from '@expo/vector-icons'
 import * as DocumentPicker from 'expo-document-picker'
 import React, { useState } from 'react'
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native'
 
 interface FormFilePickerProps {
   label?: string
-  value?: UploadFile | null
-  onChange: (file: UploadFile | null) => void
+  // value có thể là URL từ BE (string) hoặc file user chọn (UploadFile) hoặc null
+  value?: RNFile | string | null
+  onChange: (file: RNFile | null) => void
   error?: string
   touched?: boolean
   required?: boolean
@@ -29,6 +30,8 @@ export function FormFilePicker({
   const { colors } = useTheme()
   const hasError = touched && error
   const [isPicking, setIsPicking] = useState(false)
+  const isUrl = typeof value === 'string'
+  const previewUri = isUrl ? value : value?.uri
 
   const pickFile = async () => {
     if (disabled || isPicking) return
@@ -56,10 +59,10 @@ export function FormFilePicker({
     }
   }
 
-  const clear = () => {
-    if (disabled) return
-    onChange(null)
-  }
+  // const clear = () => {
+  //   if (disabled) return
+  //   onChange(null)
+  // }
 
   return (
     <View className='mb-4'>
@@ -87,31 +90,62 @@ export function FormFilePicker({
           opacity: disabled ? 0.6 : 1
         }}
       >
-        <View className='flex-row items-center justify-between'>
-          <View className='flex-1 pr-3'>
+        {/* Preview block */}
+        <View className='flex-row items-center'>
+          <View
+            style={{
+              width: 90,
+              height: 90,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: colors.border,
+              overflow: 'hidden',
+              backgroundColor: colors.surface
+            }}
+          >
+            {previewUri ? (
+              <Image source={{ uri: previewUri }} style={{ width: '100%', height: '100%' }} resizeMode='cover' />
+            ) : (
+              <View className='flex-1 items-center justify-center'>
+                <Ionicons name='image-outline' size={28} color={colors.textTertiary} />
+              </View>
+            )}
+          </View>
+
+          <View className='flex-1 pl-3'>
             <Text
-              numberOfLines={1}
+              numberOfLines={2}
               style={{
                 color: value ? colors.text : colors.textTertiary,
                 fontSize: 15,
                 fontWeight: '500'
               }}
             >
-              {value ? value.name : placeholder}
+              {placeholder}
             </Text>
-          </View>
 
-          {isPicking ? (
-            <ActivityIndicator size='small' color={colors.primary} />
-          ) : value ? (
-            <TouchableOpacity onPress={clear} disabled={disabled} activeOpacity={0.7}>
-              <Ionicons name='trash-outline' size={20} color={colors.error || '#ef4444'} />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={pickFile} disabled={disabled} activeOpacity={0.7}>
-              <Ionicons name='cloud-upload' size={20} color={colors.primary} />
-            </TouchableOpacity>
-          )}
+            <View className='flex-row mt-2'>
+              {isPicking ? (
+                <ActivityIndicator size='small' color={colors.primary} />
+              ) : (
+                <>
+                  <TouchableOpacity
+                    onPress={pickFile}
+                    disabled={disabled}
+                    activeOpacity={0.7}
+                    style={{ paddingRight: 12 }}
+                  >
+                    <View className='flex-row items-center'>
+                      <Ionicons name='cloud-upload' size={18} color={colors.primary} />
+                      <Text className='ml-1.5' style={{ color: colors.primary, fontWeight: '600' }}>
+                        Tải lên
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+          </View>
         </View>
       </View>
 

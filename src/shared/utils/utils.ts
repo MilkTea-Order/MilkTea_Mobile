@@ -1,6 +1,7 @@
 import { ITEM_HEIGHT } from '@/shared/constants/other'
 import { AxiosError, HttpStatusCode, isAxiosError } from 'axios'
 import { ApiErrorResponse } from '../types/api.type'
+import { RNFile } from '../types/file.type'
 
 export function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n))
@@ -17,16 +18,6 @@ export const isApiError = (error: unknown): error is ApiErrorResponse =>
   typeof (error as any).code === 'number' &&
   (error as any).code !== 200
 
-// export const isUnauthorizedError = (error: unknown): error is ApiErrorResponse =>
-//   isApiError(error) && //
-//   (error as ApiErrorResponse).code === 401
-
-// export const isExpiredTokenError = (response: AxiosResponse<unknown>): response is AxiosResponse<ApiErrorResponse> => {
-//   return isUnauthorizedError(response.data) && response.headers?.['token-expired'] === 'true'
-// }
-
-// export const isAxiosError = <T = unknown>(error: unknown): error is AxiosError<T> => axios.isAxiosError(error)
-
 export function isAxiosUnauthorizedError<UnauthorizedError>(error: unknown): error is AxiosError<UnauthorizedError> {
   return isAxiosError(error) && error.response?.status === HttpStatusCode.Unauthorized
 }
@@ -41,3 +32,21 @@ export function isAxiosExpiredTokenError<UnauthorizedError>(error: unknown): err
     }>(error) && error.response?.headers['token-expired'] === 'true'
   )
 }
+
+export const isRNFile = (value: unknown): value is RNFile => {
+  return typeof value === 'object' && value !== null && 'uri' in value
+}
+
+export const isChangedText = (current?: string | null, initial?: string | null) => (current ?? '') !== (initial ?? '')
+
+export const isChangedNumber = (current?: number | null, initial?: number | null) => (current ?? 0) !== (initial ?? 0)
+
+// export const isUnauthorizedError = (error: unknown): error is ApiErrorResponse =>
+//   isApiError(error) && //
+//   (error as ApiErrorResponse).code === 401
+
+// export const isExpiredTokenError = (response: AxiosResponse<unknown>): response is AxiosResponse<ApiErrorResponse> => {
+//   return isUnauthorizedError(response.data) && response.headers?.['token-expired'] === 'true'
+// }
+
+// export const isAxiosError = <T = unknown>(error: unknown): error is AxiosError<T> => axios.isAxiosError(error)

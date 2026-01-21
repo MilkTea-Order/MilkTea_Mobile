@@ -9,5 +9,10 @@ export const URL = {
   ME: 'auth/me',
   USER_ME: 'user/me',
   CHANGE_PASSWORD: 'user/update-password',
-  UPDATE_PROFILE: 'user/update-profile'
+  UPDATE_PROFILE: 'user/me/update-profile',
+  ORDERS: 'orders',
+  TABLES: 'tables',
+  MENU_GROUP_TYPES: 'menus/groups/avaliable',
+  MENUS_GROUP_BASE: 'menus/groups',
+  MENU_SIZES_BASE: 'menus'
 } as const

@@ -1,29 +1,11 @@
-import React from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { OPTIONS_THEME } from '@/shared/constants/theme'
 import { useTheme } from '@/shared/hooks/useTheme'
+import { Ionicons } from '@expo/vector-icons'
+import React from 'react'
+import { Text, TouchableOpacity, View } from 'react-native'
 
 export function ThemeSelector() {
   const { colors, themeMode, setThemeMode } = useTheme()
-
-  const options = [
-    {
-      mode: 'light' as const,
-      label: 'Sáng',
-      icon: 'sunny'
-    },
-    {
-      mode: 'dark' as const,
-      label: 'Tối',
-      icon: 'moon'
-    },
-    {
-      mode: 'system' as const,
-      label: 'Hệ thống',
-      icon: 'phone-portrait'
-    }
-  ]
-
   return (
     <View
       className='rounded-2xl p-1'
@@ -34,7 +16,7 @@ export function ThemeSelector() {
       }}
     >
       <View className='flex-row'>
-        {options.map((option, index) => {
+        {OPTIONS_THEME.map((option, index) => {
           const isSelected = themeMode === option.mode
           return (
             <TouchableOpacity

@@ -15,6 +15,13 @@ export default function OrderStackLayout() {
       }}
     >
       <Stack.Screen
+        name='select-table'
+        options={{
+          presentation: 'card',
+          animation: 'slide_from_right'
+        }}
+      />
+      <Stack.Screen
         name='create-order'
         options={{
           presentation: 'card',

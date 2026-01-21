@@ -1,40 +1,159 @@
+import { ALLOWED_EXT_IMG, ALLOWED_MIMES_IMG, GENDER_OPTIONS, MAX_SIZE_IMG } from '@/shared/constants/other'
+import { RNFile } from '@/shared/types/file.type'
 import * as yup from 'yup'
 
 const editProfileSchema = yup.object({
-  fullName: yup.string().trim().required('Vui lòng nhập họ và tên.').min(2, 'Họ và tên phải có ít nhất 2 ký tự.'),
-
-  genderID: yup.number().required('Vui lòng chọn giới tính.').oneOf([1, 2, 3], 'Giới tính không hợp lệ.'),
-
-  birthDay: yup
+  fullName: yup
     .string()
-    .required('Vui lòng chọn ngày sinh.')
-    .matches(/^\d{4}-\d{2}-\d{2}$/, 'Định dạng ngày sinh không đúng (yyyy-mm-dd).'),
+    .trim()
+    .required('Vui lòng nhập họ và tên.')
+    .test('at-least-two-words', 'Họ và tên phải có ít nhất 2 từ.', (value) => {
+      if (!value) return false
+      const words = value.trim().split(/\s+/).filter(Boolean)
+      return words.length >= 2
+    }),
 
-  identityCode: yup.string().trim().required('Vui lòng nhập số CMND/CCCD.'),
+  genderID: yup
+    .number()
+    .required('Vui lòng chọn giới tính.')
+    .oneOf(
+      GENDER_OPTIONS.map((option) => option.value),
+      'Giới tính không hợp lệ.'
+    ),
 
-  email: yup.string().trim().required('Vui lòng nhập email.').email('Email không hợp lệ.'),
+  birthDay: yup.string().when('$birthDayChanged', {
+    is: true,
+    then: (schema) =>
+      schema
+        .required('Vui lòng chọn ngày sinh.')
+        .matches(/^\d{4}-\d{2}-\d{2}$/, 'Định dạng ngày sinh không đúng (yyyy-mm-dd).')
+        .test('valid-date', 'Ngày sinh không hợp lệ.', (value) => {
+          if (!value) return false
+          const [year, month, day] = value.split('-').map(Number)
+          return !isNaN(year) && !isNaN(month) && !isNaN(day) && month >= 1 && month <= 12 && day >= 1 && day <= 31
+        }),
+    otherwise: (schema) => schema.notRequired()
+  }),
+
+  identityCode: yup
+    .string()
+    .trim()
+    .required('Vui lòng nhập số CMND/CCCD.')
+    .matches(/^[0-9]+$/, 'Số CMND/CCCD chỉ được chứa số.')
+    .test('valid-length', 'Số CMND/CCCD phải có 9 hoặc 12 chữ số.', (value) => {
+      if (!value) return false
+      return value.length === 9 || value.length === 12
+    }),
+
+  email: yup
+    .string()
+    .trim()
+    .when('$emailChanged', {
+      is: true,
+      then: (schema) => schema.required('Vui lòng nhập email.').email('Email không hợp lệ.'),
+      otherwise: (schema) => schema.notRequired()
+    }),
 
   cellPhone: yup
     .string()
     .trim()
     .required('Vui lòng nhập số điện thoại.')
-    .matches(/^[0-9]+$/, 'Số điện thoại chỉ được chứa số.'),
+    .matches(/^((03|05|07|08|09)[0-9]{8}|02[0-9]{8,9})$/, 'Số điện thoại không hợp lệ.'),
 
-  address: yup.string().trim(),
+  address: yup
+    .string()
+    .trim()
+    .when('$addressChanged', {
+      is: true,
+      then: (schema) => schema.trim().required('Vui lòng nhập địa chỉ.'),
+      otherwise: (schema) => schema.notRequired()
+    }),
 
-  bankName: yup.string().trim(),
+  bankName: yup
+    .string()
+    .trim()
+    .when('$bankNameChanged', {
+      is: true,
+      then: (schema) =>
+        schema
+          .required('Vui lòng nhập tên ngân hàng.')
+          .test('bank-name-required-when-has-number', 'Vui lòng nhập tên ngân hàng.', function (value) {
+            const bankAccountNumber = (this.parent?.bankAccountNumber || '').toString().trim()
+            if (!bankAccountNumber) return true
+            return Boolean(value && value.toString().trim().length > 0)
+          }),
+      otherwise: (schema) => schema.notRequired()
+    }),
 
-  bankAccountName: yup.string().trim(),
+  bankAccountName: yup
+    .string()
+    .trim()
+    .when('$bankAccountNameChanged', {
+      is: true,
+      then: (schema) =>
+        schema
+          .required('Vui lòng nhập tên chủ tài khoản.')
+          .test('bank-account-name-required-when-has-number', 'Vui lòng nhập tên chủ tài khoản.', function (value) {
+            const bankAccountNumber = (this.parent?.bankAccountNumber || '').toString().trim()
+            if (!bankAccountNumber) return true
+            return Boolean(value && value.toString().trim().length > 0)
+          }),
+      otherwise: (schema) => schema.notRequired()
+    }),
 
   bankAccountNumber: yup
     .string()
     .trim()
-    .when('bankName', {
-      is: (val: string) => val && val.length > 0,
-      then: (schema) => schema.matches(/^[0-9]+$/, 'Số tài khoản chỉ được chứa số.')
+    .when('$bankAccountNumberChanged', {
+      is: true,
+      then: (schema) =>
+        schema
+          .required('Vui lòng nhập số tài khoản.')
+          .test('bank-account-name-exists', 'Vui lòng nhập tên chủ tài khoản.', function (value) {
+            const v = (value || '').toString().trim()
+            if (!v) return true
+            const bankAccountName = (this.parent?.bankAccountName || '').toString().trim()
+            return bankAccountName.length > 0
+          })
+          .test('bank-name-exists', 'Vui lòng nhập tên ngân hàng.', function (value) {
+            const v = (value || '').toString().trim()
+            if (!v) return true
+            const bankName = (this.parent?.bankName || '').toString().trim()
+            return bankName.length > 0
+          })
+          .matches(/^[0-9]+$/, 'Số tài khoản chỉ được chứa số.'),
+      otherwise: (schema) => schema.notRequired()
     }),
+  bankQRCode: yup
+    .mixed<RNFile | string>()
+    .nullable()
+    .when('$bankQRCodeChanged', {
+      is: true,
+      then: (schema) =>
+        schema.test('bank-qr', function (value) {
+          if (value == null) return true
+          if (typeof value === 'string') return true // giữ URL BE trả về
+          if (typeof value !== 'object') return this.createError({ message: 'Vui lòng chọn file ảnh QR code.' })
 
-  bankQRCode: yup.string().trim()
+          const file = value as RNFile
+          if (!file.uri) return this.createError({ message: 'Ảnh không hợp lệ. Hãy tải ảnh khác lên lên.' })
+
+          const mime = (file.type || '').toLowerCase()
+          const nameOrUri = (file.name || file.uri).toLowerCase()
+
+          const isValidType = mime
+            ? ALLOWED_MIMES_IMG.includes(mime)
+            : ALLOWED_EXT_IMG.some((ext) => nameOrUri.endsWith(ext))
+
+          if (!isValidType) return this.createError({ message: 'File phải là ảnh (jpg, jpeg, png, gif).' })
+
+          if (file.size != null && file.size > MAX_SIZE_IMG)
+            return this.createError({ message: 'Dung lượng ảnh phải ≤ 5MB.' })
+
+          return true
+        }),
+      otherwise: (schema) => schema.notRequired()
+    })
 })
 
 export default editProfileSchema

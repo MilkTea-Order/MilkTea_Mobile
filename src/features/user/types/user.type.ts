@@ -27,9 +27,7 @@ export interface User {
   lastUpdatedDate: string
 }
 
-export type MeResponseData = User
-
-export type MeApiResponse = ApiResponse<MeResponseData>
+export type MeApiResponse = ApiResponse<User>
 
 export interface ChangePasswordPayload {
   password: string
@@ -37,11 +35,7 @@ export interface ChangePasswordPayload {
   confirmPassword: string
 }
 
-export interface ChangePasswordResponse {
-  status: boolean
-}
-
-export type ChangePasswordApiResponse = ApiResponse<ChangePasswordResponse>
+export type ChangePasswordApiResponse = ApiResponse<{ status: boolean }>
 
 export interface UpdateProfileBody {
   fullName: string
@@ -59,8 +53,4 @@ export interface UpdateProfileBody {
 
 export type UpdateProfilePayload = UpdateProfileBody | FormData
 
-export interface UpdateProfileResponse {
-  status: boolean
-}
-
-export type UpdateProfileApiResponse = ApiResponse<UpdateProfileResponse>
+export type UpdateProfileApiResponse = ApiResponse<{ status: boolean }>

@@ -10,3 +10,5 @@ export const loginValidationSchema = Yup.object({
 
   password: Yup.string().min(3, 'Mật khẩu phải có ít nhất 3 ký tự').required('Vui lòng nhập mật khẩu')
 })
+
+export type LoginSchema = Yup.InferType<typeof loginValidationSchema>

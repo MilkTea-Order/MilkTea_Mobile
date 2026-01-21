@@ -1,162 +1,66 @@
+import { Header } from '@/components/layouts/Header'
+import { OrderCard } from '@/components/organisms/OrderCard'
+import { OrderFilterChips } from '@/components/organisms/OrderFilterChips'
+import type { OrderFilter } from '@/features/order/api/order.api'
+import { useOrders } from '@/features/order/hooks/useOrder'
 import { useMe } from '@/features/user/hooks/useUser'
+import { ORDER_STATUS_LABEL, STATUS, type OrderStatus } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { Ionicons } from '@expo/vector-icons'
-import { LinearGradient } from 'expo-linear-gradient'
-import { useFocusEffect, useRouter } from 'expo-router'
-import React, { useCallback, useRef, useState } from 'react'
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
-interface Table {
-  id: string
-  tableNumber: string
-  customerName?: string
-  items: string[]
-  total: number
-  status: 'unpaid' | 'paid' | 'cancelled'
-  time: string
-  orderCount: number
-}
-
-const mockTables: Table[] = [
-  {
-    id: '1',
-    tableNumber: 'Bàn 01',
-    customerName: 'Nguyễn Văn A',
-    items: ['Trà sữa truyền thống', 'Trà sữa matcha', 'Bánh flan'],
-    total: 125000,
-    status: 'unpaid',
-    time: '10:30',
-    orderCount: 3
-  },
-  {
-    id: '2',
-    tableNumber: 'Bàn 02',
-    customerName: 'Trần Thị B',
-    items: ['Trà sữa thái xanh', 'Trân châu đen'],
-    total: 65000,
-    status: 'unpaid',
-    time: '10:25',
-    orderCount: 2
-  },
-  {
-    id: '3',
-    tableNumber: 'Bàn 03',
-    customerName: 'Lê Văn C',
-    items: ['Trà sữa oolong', 'Kem cheese'],
-    total: 95000,
-    status: 'paid',
-    time: '10:15',
-    orderCount: 2
-  },
-  {
-    id: '4',
-    tableNumber: 'Bàn 04',
-    customerName: 'Phạm Thị D',
-    items: ['Trà sữa đào', 'Thạch dừa'],
-    total: 75000,
-    status: 'cancelled',
-    time: '10:00',
-    orderCount: 2
-  },
-  {
-    id: '5',
-    tableNumber: 'Bàn 05',
-    items: ['Trà sữa matcha', 'Bánh mì chả cá'],
-    total: 85000,
-    status: 'unpaid',
-    time: '11:00',
-    orderCount: 2
-  }
-]
-
-const statusLabels = {
-  unpaid: 'Chưa thanh toán',
-  paid: 'Đã thanh toán',
-  cancelled: 'Đã hủy'
-}
-
-const statusIcons = {
-  unpaid: 'receipt-outline',
-  paid: 'checkmark-circle-outline',
-  cancelled: 'close-circle-outline'
-}
-
-type TableStatus = 'unpaid' | 'paid' | 'cancelled' | 'all'
 
 export default function HomeScreen() {
-  const [tables] = useState<Table[]>(mockTables)
-  const [selectedFilter, setSelectedFilter] = useState<TableStatus>('all')
+  const { colors, status, effectiveTheme } = useTheme()
+  const [selectedFilter, setSelectedFilter] = useState<OrderFilter>('all')
   const [refreshing, setRefreshing] = useState(false)
   const router = useRouter()
+  const params = useLocalSearchParams<{ filter?: string }>()
   const { data: meData, isPending: isLoadingUser } = useMe()
   const user = meData?.data
-  const { colors, gradients } = useTheme()
-  const insets = useSafeAreaInsets()
   const scrollViewRef = useRef<ScrollView>(null)
 
-  // Scroll to top when tab is focused
+  const { orders, isLoading: isLoadingOrders, isRefetching, refetch } = useOrders(selectedFilter)
+
+  // Read filter from query params
+  useEffect(() => {
+    if (params.filter) {
+      const filterValue = params.filter
+      // Validate filter value
+      if (
+        filterValue === 'all' ||
+        filterValue === STATUS.ORDER.UNPAID ||
+        filterValue === STATUS.ORDER.PAID ||
+        filterValue === STATUS.ORDER.CANCELED
+      ) {
+        setSelectedFilter(filterValue as OrderFilter)
+      } else {
+        setSelectedFilter('all')
+      }
+    } else {
+      setSelectedFilter('all')
+    }
+  }, [params.filter])
+
   useFocusEffect(
     useCallback(() => {
       scrollViewRef.current?.scrollTo({ y: 0, animated: false })
     }, [])
   )
 
-  const onRefresh = React.useCallback(() => {
+  const onRefresh = useCallback(() => {
     setRefreshing(true)
-    setTimeout(() => {
-      setRefreshing(false)
-    }, 1000)
-  }, [])
-
-  const filteredTables = tables.filter((table) => {
-    if (selectedFilter === 'all') return true
-    return table.status === selectedFilter
-  })
-
-  const getStatusCount = (statusType: TableStatus) => {
-    if (statusType === 'all') return tables.length
-    return tables.filter((table) => table.status === statusType).length
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(amount)
-  }
-
-  const getStatusColor = (tableStatus: Table['status']) => {
-    switch (tableStatus) {
-      case 'unpaid':
-        return { bg: '#FFF4E6', text: '#FF8C00', border: '#FFB84D', icon: '#FF8C00' }
-      case 'paid':
-        return { bg: '#E6F7E6', text: '#00AA00', border: '#4DD14D', icon: '#00AA00' }
-      case 'cancelled':
-        return { bg: '#FFE6E6', text: '#CC0000', border: '#FF4D4D', icon: '#CC0000' }
-      default:
-        return { bg: colors.card, text: colors.text, border: colors.border, icon: colors.primary }
-    }
-  }
+    refetch().finally(() => setRefreshing(false))
+  }, [refetch])
 
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
-      {/* Header */}
-      <LinearGradient
-        colors={gradients.header as any}
-        style={{
-          paddingTop: insets.top + 16,
-          paddingBottom: 24,
-          paddingHorizontal: 20
-        }}
-      >
-        <View className='flex-row items-center justify-between mb-6'>
-          <View className='flex-1'>
-            <Text className='text-white text-sm opacity-90 mb-1'>Xin chào,</Text>
-            <Text className='text-white text-3xl font-bold'>
-              {isLoadingUser ? 'Đang tải...' : user?.fullName || 'Nhân viên'}
-            </Text>
-          </View>
+      <Header
+        title='Xin chào'
+        subtitle={isLoadingUser ? 'Đang tải...' : user?.fullName || 'Nhân viên'}
+        showBackButton={false}
+        rightContent={
           <TouchableOpacity
             onPress={() => router.push('/(protected)/(tabs)/profile')}
             className='bg-white/20 rounded-full p-3'
@@ -170,83 +74,12 @@ export default function HomeScreen() {
           >
             <Ionicons name='person-circle-outline' size={28} color='white' />
           </TouchableOpacity>
-        </View>
+        }
+      >
+        <OrderFilterChips selected={selectedFilter} onChange={setSelectedFilter} colors={colors} />
+      </Header>
 
-        {/* Filter Chips */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 10, paddingRight: 8 }}
-          className='mb-4'
-        >
-          {(['all', 'unpaid', 'paid', 'cancelled'] as TableStatus[]).map((filterType) => {
-            const isSelected = selectedFilter === filterType
-            const count = getStatusCount(filterType)
-            const label = filterType === 'all' ? 'Tất cả' : statusLabels[filterType as Table['status']]
-
-            return (
-              <TouchableOpacity
-                key={filterType}
-                onPress={() => setSelectedFilter(filterType)}
-                className='rounded-full px-5 py-2.5 flex-row items-center'
-                style={{
-                  backgroundColor: isSelected ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.2)',
-                  borderWidth: isSelected ? 0 : 1.5,
-                  borderColor: 'rgba(255, 255, 255, 0.4)',
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: isSelected ? 0.15 : 0.08,
-                  shadowRadius: 4,
-                  elevation: isSelected ? 4 : 2
-                }}
-                activeOpacity={0.7}
-              >
-                {filterType !== 'all' && (
-                  <Ionicons
-                    name={statusIcons[filterType as Table['status']] as any}
-                    size={18}
-                    color={isSelected ? colors.primary : 'white'}
-                    style={{ marginRight: 6 }}
-                  />
-                )}
-                {filterType === 'all' && (
-                  <Ionicons
-                    name='grid-outline'
-                    size={18}
-                    color={isSelected ? colors.primary : 'white'}
-                    style={{ marginRight: 6 }}
-                  />
-                )}
-                <Text
-                  className='text-sm font-bold'
-                  style={{
-                    color: isSelected ? colors.primary : 'white'
-                  }}
-                >
-                  {label}
-                </Text>
-                <View
-                  className='rounded-full px-2 py-0.5 ml-2'
-                  style={{
-                    backgroundColor: isSelected ? `${colors.primary}20` : 'rgba(255, 255, 255, 0.3)'
-                  }}
-                >
-                  <Text
-                    className='text-xs font-bold'
-                    style={{
-                      color: isSelected ? colors.primary : 'white'
-                    }}
-                  >
-                    {count}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            )
-          })}
-        </ScrollView>
-      </LinearGradient>
-
-      {/* Tables List */}
+      {/* Orders List */}
       <ScrollView
         ref={scrollViewRef}
         className='flex-1'
@@ -255,163 +88,109 @@ export default function HomeScreen() {
           padding: 16,
           paddingBottom: 100
         }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing || isRefetching} onRefresh={onRefresh} tintColor={colors.primary} />
+        }
         scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
       >
-        <View className='flex-row items-center justify-between mb-5'>
-          <View>
-            <Text className='text-2xl font-bold' style={{ color: colors.text }}>
-              Danh sách bàn
-            </Text>
-            <Text className='text-sm mt-1' style={{ color: colors.textSecondary }}>
-              {filteredTables.length} bàn{' '}
-              {selectedFilter !== 'all' ? statusLabels[selectedFilter as Table['status']].toLowerCase() : ''}
-            </Text>
+        {/* Header Section */}
+        <View className='mb-6'>
+          <View className='flex-row items-center justify-between mb-2'>
+            <View className='flex-row items-center'>
+              <View className='rounded-2xl p-3 mr-3' style={{ backgroundColor: `${colors.primary}15` }}>
+                <Ionicons name='receipt-outline' size={24} color={colors.primary} />
+              </View>
+              <View>
+                <Text className='text-2xl font-bold' style={{ color: colors.text }}>
+                  Danh sách đơn
+                </Text>
+                <Text className='text-sm mt-0.5' style={{ color: colors.textSecondary }}>
+                  {orders.length} đơn hàng
+                  {selectedFilter !== 'all' && <Text> • {ORDER_STATUS_LABEL[selectedFilter as OrderStatus]}</Text>}
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
 
-        {filteredTables.length === 0 ? (
-          <View className='items-center justify-center py-20'>
-            <Ionicons name='restaurant-outline' size={64} color={colors.textSecondary} />
-            <Text className='text-lg font-semibold mt-4' style={{ color: colors.textSecondary }}>
-              Không có bàn nào
+        {/* Content */}
+        {isLoadingOrders && orders.length === 0 ? (
+          <View className='items-center justify-center py-32'>
+            <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
+              <Ionicons name='time-outline' size={48} color={colors.primary} />
+            </View>
+            <Text className='text-lg font-semibold mt-2' style={{ color: colors.text }}>
+              Đang tải đơn hàng...
+            </Text>
+            <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
+              Vui lòng đợi trong giây lát
             </Text>
           </View>
-        ) : (
-          filteredTables.map((table) => {
-            const statusColor = getStatusColor(table.status)
-
-            return (
+        ) : orders.length === 0 ? (
+          <View className='items-center justify-center py-32'>
+            <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
+              <Ionicons name='restaurant-outline' size={48} color={colors.primary} />
+            </View>
+            <Text className='text-xl font-bold mt-2' style={{ color: colors.text }}>
+              Chưa có đơn hàng
+            </Text>
+            <Text className='text-sm mt-2 text-center px-8' style={{ color: colors.textSecondary }}>
+              {selectedFilter !== 'all'
+                ? `Không có đơn hàng ${ORDER_STATUS_LABEL[selectedFilter as OrderStatus].toLowerCase()} nào`
+                : 'Bắt đầu tạo đơn hàng mới để quản lý'}
+            </Text>
+            {selectedFilter === 'all' && (
               <TouchableOpacity
-                key={table.id}
-                className='rounded-3xl p-5 mb-4 border-2'
-                style={{
-                  backgroundColor: colors.card,
-                  borderColor: statusColor.border,
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.08,
-                  shadowRadius: 12,
-                  elevation: 4
-                }}
-                activeOpacity={0.9}
+                onPress={() => router.push('/(protected)/order/select-table' as any)}
+                className='mt-6 px-6 py-3 rounded-2xl'
+                style={{ backgroundColor: colors.primary }}
+                activeOpacity={0.8}
               >
-                {/* Table Header */}
-                <View className='flex-row items-start justify-between mb-4'>
-                  <View className='flex-1'>
-                    <View className='flex-row items-center mb-3'>
-                      <View
-                        className='rounded-2xl p-2.5 mr-3'
-                        style={{
-                          backgroundColor: `${statusColor.icon}20`
-                        }}
-                      >
-                        <Ionicons name='restaurant-outline' size={24} color={statusColor.icon} />
-                      </View>
-                      <View className='flex-1'>
-                        <Text className='font-bold text-lg mb-1' style={{ color: colors.text }}>
-                          {table.tableNumber}
-                        </Text>
-                        {table.customerName && (
-                          <Text className='text-sm mb-1' style={{ color: colors.textSecondary }}>
-                            {table.customerName}
-                          </Text>
-                        )}
-                        <Text className='text-xs' style={{ color: colors.textSecondary }}>
-                          {table.time} • {table.orderCount} món
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Order Items */}
-                    <View className='ml-14'>
-                      {table.items.slice(0, 3).map((item, index) => (
-                        <View key={index} className='flex-row items-center mb-2'>
-                          <View className='w-1.5 h-1.5 rounded-full mr-2' style={{ backgroundColor: colors.primary }} />
-                          <Text className='text-sm flex-1' style={{ color: colors.textSecondary }}>
-                            {item}
-                          </Text>
-                        </View>
-                      ))}
-                      {table.items.length > 3 && (
-                        <Text className='text-xs mt-1' style={{ color: colors.textSecondary }}>
-                          +{table.items.length - 3} món khác
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-
-                  {/* Total Price */}
-                  <View className='items-end'>
-                    <Text className='text-xl font-bold mb-1' style={{ color: colors.text }}>
-                      {formatCurrency(table.total)}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Table Footer */}
-                <View
-                  className='flex-row items-center justify-between pt-4'
-                  style={{
-                    borderTopWidth: 1,
-                    borderTopColor: colors.border
-                  }}
-                >
-                  <View className='px-4 py-2 rounded-full' style={{ backgroundColor: statusColor.bg }}>
-                    <Text className='text-xs font-bold' style={{ color: statusColor.text }}>
-                      {statusLabels[table.status]}
-                    </Text>
-                  </View>
-                  <View className='flex-row gap-2'>
-                    <TouchableOpacity
-                      className='px-4 py-2 rounded-xl'
-                      style={{ backgroundColor: colors.primary }}
-                      activeOpacity={0.8}
-                      onPress={() => {
-                        router.push(`/(protected)/order/detail?tableId=${table.id}` as any)
-                      }}
-                    >
-                      <View className='flex-row items-center'>
-                        <Ionicons name='eye-outline' size={16} color='white' />
-                        <Text className='text-white text-sm font-bold ml-1'>Chi tiết</Text>
-                      </View>
-                    </TouchableOpacity>
-                    {table.status === 'unpaid' && (
-                      <TouchableOpacity
-                        className='px-4 py-2 rounded-xl'
-                        style={{ backgroundColor: '#FF4D4D' }}
-                        activeOpacity={0.8}
-                        onPress={() => {
-                          // Handle cancel
-                        }}
-                      >
-                        <Ionicons name='close-outline' size={16} color='white' />
-                      </TouchableOpacity>
-                    )}
-                  </View>
+                <View className='flex-row items-center'>
+                  <Ionicons name='add-circle-outline' size={20} color='white' style={{ marginRight: 8 }} />
+                  <Text className='text-base font-bold text-white'>Tạo đơn hàng mới</Text>
                 </View>
               </TouchableOpacity>
-            )
-          })
+            )}
+          </View>
+        ) : (
+          <View className='flex-row flex-wrap' style={{ gap: 12 }}>
+            {orders.map((order) => (
+              <View key={order.orderID} style={{ width: '48%' }}>
+                <OrderCard
+                  order={order}
+                  colors={colors}
+                  statusColors={status}
+                  effectiveTheme={effectiveTheme}
+                  onPressDetail={() => {
+                    router.push(`/(protected)/order/detail?orderId=${order.orderID}` as any)
+                  }}
+                />
+              </View>
+            ))}
+          </View>
         )}
       </ScrollView>
 
       {/* Floating Create Order Button */}
-      <TouchableOpacity
-        onPress={() => router.push('/(protected)/order/create-order' as any)}
-        className='absolute bottom-6 right-6 rounded-full p-5'
-        style={{
-          backgroundColor: colors.primary,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 8
-        }}
-        activeOpacity={0.8}
-      >
-        <Ionicons name='add' size={28} color='white' />
-      </TouchableOpacity>
+      {orders.length > 0 && (
+        <TouchableOpacity
+          onPress={() => router.push('/(protected)/order/select-table' as any)}
+          className='absolute bottom-6 right-6 rounded-full p-5'
+          style={{
+            backgroundColor: colors.primary,
+            shadowColor: colors.primary,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.4,
+            shadowRadius: 12,
+            elevation: 8
+          }}
+          activeOpacity={0.8}
+        >
+          <Ionicons name='add' size={28} color='white' />
+        </TouchableOpacity>
+      )}
     </View>
   )
 }

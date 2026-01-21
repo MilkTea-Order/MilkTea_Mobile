@@ -48,12 +48,9 @@ class Http {
       async (error: AxiosError) => {
         const store = useAuthStore.getState()
         if (
-          ![
-            HttpStatusCode.UnprocessableEntity,
-            HttpStatusCode.Unauthorized,
-            HttpStatusCode.NotFound,
-            HttpStatusCode.Forbidden
-          ].includes(error.response?.status as number)
+          ![HttpStatusCode.UnprocessableEntity, HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden].includes(
+            error.response?.status as number
+          )
         ) {
           const data: any | undefined = error.response?.data
           const message = data?.message || error.message
@@ -93,9 +90,9 @@ class Http {
               })
             })
           }
+          // Token không đúng, không truyền, refresh token cũng hết hạn hay đã bị thu hồi
+          await store.logout()
         }
-        // Token không đúng, không truyền, refresh token cũng hết hạn hay đã bị thu hồi
-        await store.logout()
         return Promise.reject(error)
       }
     )
