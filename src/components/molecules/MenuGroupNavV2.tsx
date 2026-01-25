@@ -1,7 +1,7 @@
-import type { MenuGroupType } from '@/features/order/menu/types/menu.type'
+import type { MenuGroupType } from '@/features/order/types/menu.type'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useState } from 'react'
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { Image, NativeScrollEvent, NativeSyntheticEvent, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 type Props = {
   groups: MenuGroupType[]
@@ -17,31 +17,44 @@ type Props = {
   }
 }
 
-export const MenuGroupNavV2: React.FC<Props> = ({ groups, selectedGroupId, onSelectGroup, colors }) => {
-  const itemsPerRow = Math.ceil(groups.length / 2)
-  const firstRow = groups.slice(0, itemsPerRow)
-  const secondRow = groups.slice(itemsPerRow)
+export default function MenuGroupNavV2({ groups, selectedGroupId, onSelectGroup, colors }: Props) {
   const [scrollProgress, setScrollProgress] = useState(0)
 
-  const handleScroll = (event: any) => {
+  // Split groups into two rows
+  const [firstRow, secondRow] = groups.reduce<[MenuGroupType[], MenuGroupType[]]>(
+    (acc, group, index) => {
+      acc[index % 2].push(group)
+      return acc
+    },
+    [[], []]
+  )
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    //   nativeEvent: {
+    //   contentInset: {bottom, left, right, top},
+    //   contentOffset: {x, y}, // Ví trí hiện tại của scroll
+    //   contentSize: {height, width}, // Kích thước toàn bộ nội dung bên trong scroll
+    //   layoutMeasurement: {height, width}, // Kích thước của viewport (khu vực hiển thị)
+    //   velocity: {x, y}, // Tốc độ di chuyển của scroll
+    //   responderIgnoreScroll: boolean,
+    //   zoomScale,
+    //   targetContentOffset: {x, y} //IOS only
+    // }
     const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent
     const scrollableWidth = contentSize.width - layoutMeasurement.width
-    if (scrollableWidth > 0) {
-      const progress = contentOffset.x / scrollableWidth
-      setScrollProgress(Math.max(0, Math.min(1, progress)))
-    } else {
-      setScrollProgress(0)
-    }
+
+    const next = scrollableWidth > 0 ? Math.max(0, Math.min(1, contentOffset.x / scrollableWidth)) : 0
+
+    setScrollProgress((prev) => (Math.abs(prev - next) < 0.001 ? prev : next))
   }
 
   const renderGroupItem = (group: MenuGroupType) => {
-    const isSelected = selectedGroupId === group.MenuGroupID
-    // TODO: Replace with actual image URL when available in API
-    const imageUrl = (group as any).MenuGroupImage || null
+    const isSelected = selectedGroupId === group.menuGroupId
+    const imageUrl = (group as any).menuGroupImage || null
 
     return (
       <TouchableOpacity
-        key={group.MenuGroupID}
+        key={group.menuGroupId}
         onPress={() => onSelectGroup(group)}
         activeOpacity={0.8}
         className='items-center mr-4'
@@ -73,7 +86,7 @@ export const MenuGroupNavV2: React.FC<Props> = ({ groups, selectedGroupId, onSel
             fontWeight: isSelected ? '600' : '400'
           }}
         >
-          {group.MenuGroupName}
+          {group.menuGroupName}
         </Text>
       </TouchableOpacity>
     )
@@ -85,7 +98,6 @@ export const MenuGroupNavV2: React.FC<Props> = ({ groups, selectedGroupId, onSel
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 12 }}
-        nestedScrollEnabled={true}
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
@@ -97,29 +109,13 @@ export const MenuGroupNavV2: React.FC<Props> = ({ groups, selectedGroupId, onSel
         </View>
       </ScrollView>
       {/* Scroll Indicator */}
-      <View
-        style={{
-          height: 2,
-          backgroundColor: `${colors.border}40`,
-          width: 120,
-          alignSelf: 'center',
-          marginBottom: 8,
-          borderRadius: 1,
-          overflow: 'hidden',
-          position: 'relative',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
+      <View className='relative justify-center align-middle mb-[8px] rounded-[1px] h-[2px] w-[120px] mx-auto'>
         <View
+          className='h-full rounded-[1px] absolute w-[24px]'
           style={{
-            height: '100%',
-            width: 24,
             backgroundColor: colors.primary,
-            borderRadius: 1,
             position: 'absolute',
-            left: `${50 + (scrollProgress - 0.5) * 40}%`,
-            marginLeft: -12
+            left: `${50 + (scrollProgress - 0.5) * 40}%`
           }}
         />
       </View>

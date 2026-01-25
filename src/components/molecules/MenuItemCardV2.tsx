@@ -1,12 +1,12 @@
-import { useMenuSizes } from '@/features/order/menu/hooks/useMenu'
-import type { MenuItem, MenuSize } from '@/features/order/menu/types/menu.type'
+import { useMenuSizes } from '@/features/order/hooks/useMenu'
 import { useOrderStore } from '@/features/order/store/order.store'
+import type { MenuItem, MenuSize } from '@/features/order/types/menu.type'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useState } from 'react'
 import { ActivityIndicator, Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
-const CARD_WIDTH = (SCREEN_WIDTH - 32 - 8) / 2 // Screen width - padding (16*2) - gap (8) divided by 2
+const CARD_WIDTH = (SCREEN_WIDTH - 32 - 8) / 2
 
 type OnAdd = (menu: MenuItem, size: MenuSize) => void
 type OnRemove = (menuId: number, sizeId: number) => void
@@ -25,31 +25,25 @@ type Props = {
   formatCurrency: (amount: number) => string
 }
 
-export const MenuItemCardV2: React.FC<Props> = ({ menu, colors, onAdd, onRemove, formatCurrency }) => {
+export default function MenuItemCardV2({ menu, colors, onAdd, onRemove, formatCurrency }: Props) {
   const [expandedBadge, setExpandedBadge] = useState<number | null>(null) // sizeId của badge đang mở rộng
   const [selectedSizeForPrice, setSelectedSizeForPrice] = useState<MenuSize | null>(null) // size được chọn để hiển thị giá
-  const { data: sizes, isLoading } = useMenuSizes(menu.MenuID, true)
+  const { data: sizes, isLoading } = useMenuSizes(menu.menuId)
 
-  // Subscribe to store items để có thể reactive update
   const orderItems = useOrderStore((s) => s.items)
-  // Tạo một hàm getQuantity local để có thể reactive
   const getQuantityReactive = (menuId: number, sizeId: number) => {
     return orderItems.find((item) => item.menuId === menuId && item.sizeId === sizeId)?.quantity ?? 0
   }
 
-  // TODO: Replace with actual image URL when available in API
   const imageUrl = (menu as any).MenuImage || null
 
+  //Làn đầu tiên thì tăng quantity nhưng lần sau chỉ cần mở badge
   const handleSizePress = (size: MenuSize) => {
-    const quantity = getQuantityReactive(menu.MenuID, size.SizeID)
-    if (quantity > 0) {
-      // Nếu đã có quantity và ấn lại size đó => xóa size khỏi giỏ hàng
-      handleRemoveSize(size)
-    } else {
-      // Nếu chưa có, thêm vào
-      setSelectedSizeForPrice(size)
+    const quantity = getQuantityReactive(menu.menuId, size.sizeId)
+    setSelectedSizeForPrice(size)
+    setExpandedBadge(size.sizeId)
+    if (selectedSizeForPrice?.sizeId !== size.sizeId && quantity === 0) {
       onAdd(menu, size)
-      setExpandedBadge(size.SizeID)
     }
   }
 
@@ -58,22 +52,20 @@ export const MenuItemCardV2: React.FC<Props> = ({ menu, colors, onAdd, onRemove,
   }
 
   const handleDecrement = (size: MenuSize) => {
-    onRemove(menu.MenuID, size.SizeID)
-    // Sử dụng setTimeout để đợi store update trước khi check
-    setTimeout(() => {
-      const newQuantity = getQuantityReactive(menu.MenuID, size.SizeID)
-      if (newQuantity === 0) {
-        setExpandedBadge(null)
-        setSelectedSizeForPrice(null)
-      }
-    }, 0)
+    const quantity = getQuantityReactive(menu.menuId, size.sizeId)
+    if (quantity <= 0) return
+    if (quantity === 1) {
+      setExpandedBadge(null)
+      setSelectedSizeForPrice(null)
+    }
+    onRemove(menu.menuId, size.sizeId)
   }
 
   const handleRemoveSize = (size: MenuSize) => {
     // Xóa tất cả quantity của size này
-    const quantity = getQuantityReactive(menu.MenuID, size.SizeID)
+    const quantity = getQuantityReactive(menu.menuId, size.sizeId)
     for (let i = 0; i < quantity; i++) {
-      onRemove(menu.MenuID, size.SizeID)
+      onRemove(menu.menuId, size.sizeId)
     }
     setExpandedBadge(null)
     setSelectedSizeForPrice(null)
@@ -103,7 +95,7 @@ export const MenuItemCardV2: React.FC<Props> = ({ menu, colors, onAdd, onRemove,
           </View>
         )}
         {/* Quantity Badge - chỉ hiển thị khi có size nào đó có quantity > 0 */}
-        {sizes && sizes.length > 0 && sizes.some((s) => getQuantityReactive(menu.MenuID, s.SizeID) > 0) && (
+        {sizes && sizes.length > 0 && sizes.some((s) => getQuantityReactive(menu.menuId, s.sizeId) > 0) && (
           <View className='absolute bottom-2 right-2'>
             {expandedBadge ? (
               <View
@@ -115,9 +107,10 @@ export const MenuItemCardV2: React.FC<Props> = ({ menu, colors, onAdd, onRemove,
                   gap: 8
                 }}
               >
+                {/* Decrement */}
                 <TouchableOpacity
                   onPress={() => {
-                    const size = sizes.find((s) => s.SizeID === expandedBadge)
+                    const size = sizes.find((s) => s.sizeId === expandedBadge)
                     if (size) handleDecrement(size)
                   }}
                   className='rounded-full'
@@ -132,12 +125,14 @@ export const MenuItemCardV2: React.FC<Props> = ({ menu, colors, onAdd, onRemove,
                 >
                   <Ionicons name='remove' size={14} color='white' />
                 </TouchableOpacity>
+                {/* Quantity */}
                 <Text className='text-sm font-bold text-white min-w-[24px] text-center'>
-                  {expandedBadge ? getQuantityReactive(menu.MenuID, expandedBadge) : 0}
+                  {expandedBadge ? getQuantityReactive(menu.menuId, expandedBadge) : 0}
                 </Text>
+                {/* Increment */}
                 <TouchableOpacity
                   onPress={() => {
-                    const size = sizes.find((s) => s.SizeID === expandedBadge)
+                    const size = sizes.find((s) => s.sizeId === expandedBadge)
                     if (size) handleIncrement(size)
                   }}
                   className='rounded-full'
@@ -152,9 +147,10 @@ export const MenuItemCardV2: React.FC<Props> = ({ menu, colors, onAdd, onRemove,
                 >
                   <Ionicons name='add' size={14} color='white' />
                 </TouchableOpacity>
+                {/* Remove Size Button */}
                 <TouchableOpacity
                   onPress={() => {
-                    const size = sizes.find((s) => s.SizeID === expandedBadge)
+                    const size = sizes.find((s) => s.sizeId === expandedBadge)
                     if (size) handleRemoveSize(size)
                   }}
                   className='rounded-full'
@@ -174,9 +170,9 @@ export const MenuItemCardV2: React.FC<Props> = ({ menu, colors, onAdd, onRemove,
               <TouchableOpacity
                 onPress={() => {
                   // Tìm size đầu tiên có quantity > 0
-                  const sizeWithQuantity = sizes.find((s) => getQuantityReactive(menu.MenuID, s.SizeID) > 0)
+                  const sizeWithQuantity = sizes.find((s) => getQuantityReactive(menu.menuId, s.sizeId) > 0)
                   if (sizeWithQuantity) {
-                    setExpandedBadge(sizeWithQuantity.SizeID)
+                    setExpandedBadge(sizeWithQuantity.sizeId)
                     setSelectedSizeForPrice(sizeWithQuantity)
                   }
                 }}
@@ -207,11 +203,12 @@ export const MenuItemCardV2: React.FC<Props> = ({ menu, colors, onAdd, onRemove,
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className='flex-row' style={{ gap: 8 }}>
               {sizes.map((size) => {
-                const quantity = getQuantityReactive(menu.MenuID, size.SizeID)
-                const isSelected = selectedSizeForPrice?.SizeID === size.SizeID
+                const quantity = getQuantityReactive(menu.menuId, size.sizeId)
+
+                const isSelected = selectedSizeForPrice?.sizeId === size.sizeId
                 return (
                   <TouchableOpacity
-                    key={size.SizeID}
+                    key={size.sizeId}
                     onPress={() => handleSizePress(size)}
                     className='px-3 py-1.5 rounded-lg flex-row items-center'
                     style={{
@@ -230,7 +227,7 @@ export const MenuItemCardV2: React.FC<Props> = ({ menu, colors, onAdd, onRemove,
                       className='text-xs font-semibold'
                       style={{ color: isSelected || quantity > 0 ? colors.primary : colors.text }}
                     >
-                      {size.SizeName}
+                      {size.sizeName}
                     </Text>
                     {quantity > 0 && (
                       <View className='rounded-full px-1.5 py-0.5' style={{ backgroundColor: colors.primary }}>
@@ -248,17 +245,17 @@ export const MenuItemCardV2: React.FC<Props> = ({ menu, colors, onAdd, onRemove,
       {/* Name and Price */}
       <View className='px-3 pb-3'>
         <Text className='text-base font-bold mb-2' style={{ color: colors.text }} numberOfLines={2}>
-          {menu.MenuName}
+          {menu.menuName}
         </Text>
         {sizes && sizes.length > 0 && (
           <View>
             {sizes.map((size, index) => (
-              <View key={size.SizeID} className='flex-row items-center mb-1'>
+              <View key={size.sizeId} className='flex-row items-center mb-1'>
                 <Text className='text-xs font-semibold mr-2' style={{ color: colors.textSecondary, minWidth: 40 }}>
-                  {size.SizeName}:
+                  {size.sizeName}:
                 </Text>
                 <Text className='text-sm font-bold' style={{ color: colors.primary }}>
-                  {formatCurrency(size.Price)}
+                  {formatCurrency(size.price)}
                 </Text>
               </View>
             ))}

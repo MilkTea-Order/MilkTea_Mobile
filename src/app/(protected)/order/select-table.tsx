@@ -1,23 +1,28 @@
 import { Header } from '@/components/layouts/Header'
-import { useTables } from '@/features/order/table/hooks/useTable'
-import type { DinnerTable } from '@/features/order/table/types/table.type'
-import { STATUS } from '@/shared/constants/status'
+import { useEmptyTables } from '@/features/order/hooks/useTable'
+import { useOrderStore } from '@/features/order/store/order.store'
+import type { DinnerTable } from '@/features/order/types/table.type'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
-import React from 'react'
-import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import React, { useCallback, useState } from 'react'
+import { ActivityIndicator, Image, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 export default function SelectTableScreen() {
   const router = useRouter()
   const { colors } = useTheme()
-  const { data: availableTables, isLoading, isRefetching, refetch } = useTables(STATUS.DINNER_TABLE.AVAILABLE)
+  const [refreshing, setRefreshing] = useState(false)
+  const { data: availableTables, isLoading, isRefetching, refetch } = useEmptyTables()
+  const setTable = useOrderStore((s) => s.setTable)
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true)
+    refetch().finally(() => setRefreshing(false))
+  }, [refetch])
 
   const handleSelect = (table: DinnerTable) => {
-    router.push({
-      pathname: '/(protected)/order/create-order',
-      params: { tableId: String(table.tableID) }
-    })
+    setTable(table)
+    router.replace('/(protected)/order/create-order')
   }
 
   return (
@@ -29,6 +34,9 @@ export default function SelectTableScreen() {
         style={{ backgroundColor: colors.background }}
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing || isRefetching} onRefresh={onRefresh} tintColor={colors.primary} />
+        }
       >
         <View className='flex-row items-center justify-between mb-4'>
           <View>

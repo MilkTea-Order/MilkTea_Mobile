@@ -38,7 +38,6 @@ export function useMenusByGroup(groupId?: number) {
     enabled: groupId != null,
     staleTime: 3 * 60 * 1000
   })
-
   return {
     data: query.data ?? [],
     isLoading: query.isPending,
@@ -47,7 +46,7 @@ export function useMenusByGroup(groupId?: number) {
   }
 }
 
-export function useMenuSizes(menuId?: number, enabled: boolean = true) {
+export function useMenuSizes(menuId?: number) {
   const query = useQuery({
     queryKey: menuKeys.sizes(menuId ?? 0),
     queryFn: async () => {
@@ -55,7 +54,7 @@ export function useMenuSizes(menuId?: number, enabled: boolean = true) {
       const res = await menuApi.getMenuSizes(menuId)
       return (res.data.data ?? []) as MenuSize[]
     },
-    enabled: enabled && menuId != null,
+    enabled: menuId != null,
     staleTime: 3 * 60 * 1000
   })
 

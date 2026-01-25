@@ -2,17 +2,14 @@ import { Header } from '@/components/layouts/Header'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 import { useCreateOrder } from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
-import { useTables } from '@/features/order/table/hooks/useTable'
-import { STATUS } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons } from '@expo/vector-icons'
-import { useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useEffect, useState } from 'react'
+import { useRouter } from 'expo-router'
+import React, { useEffect } from 'react'
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 export default function ReviewCartScreen() {
   const router = useRouter()
-  const params = useLocalSearchParams<{ tableId?: string }>()
   const { colors } = useTheme()
   const authProfile = useAuthStore((s) => s.profile)
   const orderItems = useOrderStore((s) => s.items)
@@ -20,28 +17,16 @@ export default function ReviewCartScreen() {
   const orderDecrement = useOrderStore((s) => s.decrement)
   const clearOrder = useOrderStore((s) => s.clear)
   const totalPrice = useOrderStore((s) => s.totalPrice)
-
-  const [selectedTable, setSelectedTable] = useState<any>(null)
-  const selectedTableId = Number(params.tableId ?? 0)
-
-  const {
-    data: availableTables,
-    isLoading: isLoadingTables,
-    isRefetching: isRefetchingTables
-  } = useTables(STATUS.DINNER_TABLE.AVAILABLE)
+  const selectedTable = useOrderStore((s) => s.table)
 
   const createOrderMutation = useCreateOrder()
-  console.log('totalPrice: ', totalPrice)
 
+  // Nếu không có table trong store thì redirect về chọn bàn
   useEffect(() => {
-    if (!selectedTableId || isLoadingTables || isRefetchingTables || !availableTables) {
-      return
+    if (!selectedTable) {
+      router.replace('/(protected)/order/select-table')
     }
-    const matchedTable = availableTables.find((table) => table.tableID === selectedTableId)
-    if (matchedTable) {
-      setSelectedTable(matchedTable)
-    }
-  }, [availableTables, isLoadingTables, isRefetchingTables, selectedTableId])
+  }, [router, selectedTable])
 
   const handleBack = () => {
     router.back()
@@ -76,7 +61,7 @@ export default function ReviewCartScreen() {
     })
   }
 
-  if (isLoadingTables || isRefetchingTables) {
+  if (!selectedTable) {
     return (
       <View className='flex-1' style={{ backgroundColor: colors.background }}>
         <Header title='Giỏ hàng' onBack={handleBack} />

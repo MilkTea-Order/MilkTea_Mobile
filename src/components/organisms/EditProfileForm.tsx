@@ -176,7 +176,7 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
             bounces={false}
           >
             {/* Personal Information Section */}
-            <CollapsibleSection title='Thông tin cá nhân' icon='person-outline' defaultExpanded={false}>
+            <CollapsibleSection title='Thông tin cá nhân' icon='person-outline' defaultExpanded={true}>
               {/* User name */}
               <FormTextField
                 label='Tên đăng nhập'
@@ -246,7 +246,7 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
             </CollapsibleSection>
 
             {/* Contact Information Section */}
-            <CollapsibleSection title='Thông tin liên hệ' icon='call-outline' defaultExpanded={false}>
+            <CollapsibleSection title='Thông tin liên hệ' icon='call-outline' defaultExpanded={true}>
               {/* Email */}
               <FormTextField
                 label='Email'
@@ -296,7 +296,7 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
             </CollapsibleSection>
 
             {/* Bank Information Section */}
-            <CollapsibleSection title='Thông tin ngân hàng' icon='card-outline' defaultExpanded={false}>
+            <CollapsibleSection title='Thông tin ngân hàng' icon='card-outline' defaultExpanded={true}>
               <FormTextField
                 label='Tên ngân hàng'
                 icon='business-outline'

@@ -1,4 +1,4 @@
-import type { DinnerTable } from '@/features/order/table/types/table.type'
+import type { DinnerTable } from '@/features/order/types/table.type'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useEffect, useMemo, useState } from 'react'

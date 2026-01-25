@@ -12,6 +12,7 @@ export const URL = {
   UPDATE_PROFILE: 'user/me/update-profile',
   ORDERS: 'orders',
   TABLES: 'tables',
+  TABLES_EMPTY: 'tables/empty',
   MENU_GROUP_TYPES: 'menus/groups/avaliable',
   MENUS_GROUP_BASE: 'menus/groups',
   MENU_SIZES_BASE: 'menus'

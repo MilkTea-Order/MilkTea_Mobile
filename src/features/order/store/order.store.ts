@@ -1,4 +1,5 @@
-import type { MenuItem, MenuSize } from '@/features/order/menu/types/menu.type'
+import type { MenuItem, MenuSize } from '@/features/order/types/menu.type'
+import type { DinnerTable } from '@/features/order/types/table.type'
 import { create } from 'zustand'
 
 export type OrderLine = {
@@ -17,19 +18,22 @@ const calculateTotalPrice = (items: OrderLine[]): number => {
 type OrderState = {
   items: OrderLine[]
   totalPrice: number
+  table: DinnerTable | null
   add: (menu: MenuItem, size: MenuSize) => void
   increment: (menuId: number, sizeId: number) => void
   decrement: (menuId: number, sizeId: number) => void
+  setTable: (table: DinnerTable | null) => void
   clear: () => void
 }
 
 export const useOrderStore = create<OrderState>((set) => ({
   items: [],
   totalPrice: 0,
+  table: null,
 
   add: (menu, size) => {
     set((state) => {
-      const existingIndex = state.items.findIndex((item) => item.menuId === menu.MenuID && item.sizeId === size.SizeID)
+      const existingIndex = state.items.findIndex((item) => item.menuId === menu.menuId && item.sizeId === size.sizeId)
       let nextItems: OrderLine[]
 
       if (existingIndex >= 0) {
@@ -39,11 +43,11 @@ export const useOrderStore = create<OrderState>((set) => ({
         nextItems = [
           ...state.items,
           {
-            menuId: menu.MenuID,
-            menuName: menu.MenuName,
-            sizeId: size.SizeID,
-            sizeName: size.SizeName,
-            price: size.Price,
+            menuId: menu.menuId,
+            menuName: menu.menuName,
+            sizeId: size.sizeId,
+            sizeName: size.sizeName,
+            price: size.price,
             quantity: 1
           }
         ]
@@ -86,5 +90,7 @@ export const useOrderStore = create<OrderState>((set) => ({
     })
   },
 
-  clear: () => set({ items: [], totalPrice: 0 })
+  setTable: (table) => set({ table }),
+
+  clear: () => set({ items: [], totalPrice: 0, table: null })
 }))
