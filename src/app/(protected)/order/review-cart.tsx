@@ -2,12 +2,13 @@ import { Header } from '@/components/layouts/Header'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 import { useCreateOrder } from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
+import { getCreateOrderErrorFromMutation } from '@/features/order/utils/mapCreateOrderError'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
-import React, { useEffect } from 'react'
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 export default function ReviewCartScreen() {
   const router = useRouter()
   const { colors } = useTheme()
@@ -20,6 +21,7 @@ export default function ReviewCartScreen() {
   const selectedTable = useOrderStore((s) => s.table)
 
   const createOrderMutation = useCreateOrder()
+  const [itemErrors, setItemErrors] = useState<Record<string, string>>({})
 
   // Nếu không có table trong store thì redirect về chọn bàn
   useEffect(() => {
@@ -33,12 +35,11 @@ export default function ReviewCartScreen() {
   }
 
   const handleSubmit = () => {
-    if (!selectedTable) {
-      return
-    }
-    if (!orderItems.length) {
-      return
-    }
+    if (!selectedTable) return
+    if (!orderItems.length) return
+
+    setItemErrors({})
+
     const userId = Number(authProfile?.user?.id ?? 0)
     const payload = {
       dinnerTableID: selectedTable.tableID,
@@ -53,10 +54,39 @@ export default function ReviewCartScreen() {
       })),
       note: null
     }
+
     createOrderMutation.mutate(payload, {
       onSuccess: () => {
         clearOrder()
         router.replace('/(protected)/(tabs)')
+      },
+      onError: (error) => {
+        const mapped = getCreateOrderErrorFromMutation(error)
+
+        if (!mapped) {
+          Alert.alert('Lỗi', 'Đã xảy ra lỗi. Vui lòng thử lại.')
+          router.replace('/(protected)/(tabs)')
+          return
+        }
+
+        if (mapped.type === 'request' || mapped.type === 'other') {
+          Alert.alert('Lỗi', mapped.message, [{ text: 'OK', onPress: () => router.replace('/(protected)/(tabs)') }])
+          return
+        }
+
+        if (mapped.type === 'item') {
+          setItemErrors({ [`${mapped.menuId}-${mapped.sizeId}`]: mapped.message })
+          return
+        }
+
+        if (mapped.type === 'material') {
+          const next: Record<string, string> = {}
+          mapped.items.forEach((it) => {
+            const txt = it.materialNames.length ? `Thiếu: ${it.materialNames.join(', ')}` : 'Không đủ nguyên liệu.'
+            next[`${it.menuId}-${it.sizeId}`] = txt
+          })
+          setItemErrors(next)
+        }
       }
     })
   }
@@ -217,6 +247,15 @@ export default function ReviewCartScreen() {
                     </Text>
                   </View>
                 </View>
+
+                {itemErrors[`${item.menuId}-${item.sizeId}`] ? (
+                  <View className='mt-2 flex-row items-center'>
+                    <Ionicons name='alert-circle' size={14} color={colors.error} />
+                    <Text className='ml-1.5 text-sm' style={{ color: colors.error }}>
+                      {itemErrors[`${item.menuId}-${item.sizeId}`]}
+                    </Text>
+                  </View>
+                ) : null}
               </View>
             ))}
 
