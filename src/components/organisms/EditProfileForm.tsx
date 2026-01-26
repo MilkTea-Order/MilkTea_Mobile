@@ -56,6 +56,7 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
     const bankAccountNameChanged = isChangedText(values.bankAccountName, initialValues.bankAccountName)
     const bankAccountNumberChanged = isChangedText(values.bankAccountNumber, initialValues.bankAccountNumber)
     const bankQRCodeChanged = isRNFile(values.bankQRCode)
+    const bankInfoChanged = bankNameChanged || bankAccountNameChanged || bankAccountNumberChanged || bankQRCodeChanged
 
     try {
       await editProfileSchema.validate(values, {
@@ -67,7 +68,8 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
           bankNameChanged,
           bankAccountNameChanged,
           bankAccountNumberChanged,
-          bankQRCodeChanged
+          bankQRCodeChanged,
+          bankInfoChanged
         }
       })
       return {}
@@ -113,21 +115,26 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
       if (isChangedText(values.address ?? '', initialValues.address ?? '')) {
         formData.append('address', values.address ?? '')
       }
-      if (isChangedText(values.bankName ?? '', initialValues.bankName ?? '')) {
+      const bankNameChanged = isChangedText(values.bankName ?? '', initialValues.bankName ?? '')
+      const bankAccountNameChanged = isChangedText(values.bankAccountName ?? '', initialValues.bankAccountName ?? '')
+      const bankAccountNumberChanged = isChangedText(
+        values.bankAccountNumber ?? '',
+        initialValues.bankAccountNumber ?? ''
+      )
+      const bankQRCodeChanged = isRNFile(values.bankQRCode)
+      const bankInfoChanged = bankNameChanged || bankAccountNameChanged || bankAccountNumberChanged || bankQRCodeChanged
+
+      if (bankInfoChanged) {
         formData.append('bankName', values.bankName ?? '')
-      }
-      if (isChangedText(values.bankAccountName ?? '', initialValues.bankAccountName ?? '')) {
         formData.append('bankAccountName', values.bankAccountName ?? '')
-      }
-      if (isChangedText(values.bankAccountNumber ?? '', initialValues.bankAccountNumber ?? '')) {
         formData.append('bankAccountNumber', values.bankAccountNumber ?? '')
-      }
-      if (values.bankQRCode && isRNFile(values.bankQRCode)) {
-        formData.append('bankQRCode', {
-          uri: values.bankQRCode.uri,
-          name: values.bankQRCode.name,
-          type: values.bankQRCode.type
-        } as any)
+        if (bankQRCodeChanged && values.bankQRCode && isRNFile(values.bankQRCode)) {
+          formData.append('bankQRCode', {
+            uri: values.bankQRCode.uri,
+            name: values.bankQRCode.name,
+            type: values.bankQRCode.type
+          } as any)
+        }
       }
 
       await updateProfileMutation.mutateAsync(formData)

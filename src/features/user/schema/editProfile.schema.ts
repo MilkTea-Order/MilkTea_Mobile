@@ -72,56 +72,28 @@ const editProfileSchema = yup.object({
   bankName: yup
     .string()
     .trim()
-    .when('$bankNameChanged', {
+    .when('$bankInfoChanged', {
       is: true,
-      then: (schema) =>
-        schema
-          .required('Vui lòng nhập tên ngân hàng.')
-          .test('bank-name-required-when-has-number', 'Vui lòng nhập tên ngân hàng.', function (value) {
-            const bankAccountNumber = (this.parent?.bankAccountNumber || '').toString().trim()
-            if (!bankAccountNumber) return true
-            return Boolean(value && value.toString().trim().length > 0)
-          }),
+      then: (schema) => schema.required('Vui lòng nhập tên ngân hàng.'),
       otherwise: (schema) => schema.notRequired()
     }),
 
   bankAccountName: yup
     .string()
     .trim()
-    .when('$bankAccountNameChanged', {
+    .when('$bankInfoChanged', {
       is: true,
-      then: (schema) =>
-        schema
-          .required('Vui lòng nhập tên chủ tài khoản.')
-          .test('bank-account-name-required-when-has-number', 'Vui lòng nhập tên chủ tài khoản.', function (value) {
-            const bankAccountNumber = (this.parent?.bankAccountNumber || '').toString().trim()
-            if (!bankAccountNumber) return true
-            return Boolean(value && value.toString().trim().length > 0)
-          }),
+      then: (schema) => schema.required('Vui lòng nhập tên chủ tài khoản.'),
       otherwise: (schema) => schema.notRequired()
     }),
 
   bankAccountNumber: yup
     .string()
     .trim()
-    .when('$bankAccountNumberChanged', {
+    .when('$bankInfoChanged', {
       is: true,
       then: (schema) =>
-        schema
-          .required('Vui lòng nhập số tài khoản.')
-          .test('bank-account-name-exists', 'Vui lòng nhập tên chủ tài khoản.', function (value) {
-            const v = (value || '').toString().trim()
-            if (!v) return true
-            const bankAccountName = (this.parent?.bankAccountName || '').toString().trim()
-            return bankAccountName.length > 0
-          })
-          .test('bank-name-exists', 'Vui lòng nhập tên ngân hàng.', function (value) {
-            const v = (value || '').toString().trim()
-            if (!v) return true
-            const bankName = (this.parent?.bankName || '').toString().trim()
-            return bankName.length > 0
-          })
-          .matches(/^[0-9]+$/, 'Số tài khoản chỉ được chứa số.'),
+        schema.required('Vui lòng nhập số tài khoản.').matches(/^[0-9]+$/, 'Số tài khoản chỉ được chứa số.'),
       otherwise: (schema) => schema.notRequired()
     }),
   bankQRCode: yup

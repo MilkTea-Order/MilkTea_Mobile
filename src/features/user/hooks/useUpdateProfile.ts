@@ -1,8 +1,8 @@
 import { extractFieldErrors } from '@/shared/utils/formErrors'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { userApi } from '../apis/user.api'
-import { userKeys } from './useUser'
 import { UpdateProfilePayload } from '../types/user.type'
+import { userKeys } from './useUser'
 
 export function useUpdateProfile() {
   const queryClient = useQueryClient()
@@ -17,7 +17,20 @@ export function useUpdateProfile() {
       queryClient.invalidateQueries({ queryKey: userKeys.me() })
     },
     onError: (error: any) => {
-      const fieldErrors = extractFieldErrors(error, 'user')
+      // Map API field names -> Formik field names to avoid lower-case mismatches (e.g. cellPhone -> cellphone)
+      const fieldErrors = extractFieldErrors(error, 'user', {
+        fullName: 'fullName',
+        genderId: 'genderID',
+        birthDay: 'birthDay',
+        identityCode: 'identityCode',
+        email: 'email',
+        cellphone: 'cellPhone',
+        address: 'address',
+        bankName: 'bankName',
+        bankAccountName: 'bankAccountName',
+        bankAccountNumber: 'bankAccountNumber',
+        bankQRCode: 'bankQRCode'
+      })
       if (fieldErrors.length > 0) {
         error.fieldErrors = fieldErrors
       }

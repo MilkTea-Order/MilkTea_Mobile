@@ -2,12 +2,15 @@ import { Header } from '@/components/layouts/Header'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 import { useCreateOrder } from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
+import { parseCreateOrderError } from '@/features/order/utils/parseCreateOrderError'
 import { useTheme } from '@/shared/hooks/useTheme'
+import { ApiErrorResponse } from '@/shared/types/api.type'
 import { formatCurrencyVND } from '@/shared/utils/currency'
+import { isApiError } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
-import React, { useEffect } from 'react'
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 export default function ReviewCartScreen() {
   const router = useRouter()
   const { colors } = useTheme()
@@ -20,6 +23,7 @@ export default function ReviewCartScreen() {
   const selectedTable = useOrderStore((s) => s.table)
 
   const createOrderMutation = useCreateOrder()
+  const [itemErrors, setItemErrors] = useState<Record<string, string>>({})
 
   // Nếu không có table trong store thì redirect về chọn bàn
   useEffect(() => {
@@ -33,12 +37,11 @@ export default function ReviewCartScreen() {
   }
 
   const handleSubmit = () => {
-    if (!selectedTable) {
-      return
-    }
-    if (!orderItems.length) {
-      return
-    }
+    if (!selectedTable) return
+    if (!orderItems.length) return
+
+    setItemErrors({})
+
     const userId = Number(authProfile?.user?.id ?? 0)
     const payload = {
       dinnerTableID: selectedTable.tableID,
@@ -53,9 +56,24 @@ export default function ReviewCartScreen() {
       })),
       note: null
     }
+
     createOrderMutation.mutate(payload, {
       onSuccess: () => {
         clearOrder()
+        router.replace('/(protected)/(tabs)')
+      },
+      onError: (error) => {
+        if (isApiError(error)) {
+          const result = parseCreateOrderError(error as ApiErrorResponse)
+          if (result.type === 'item') {
+            setItemErrors({ [`${result.menuId}-${result.sizeId}`]: result.message })
+            Alert.alert('Lỗi', result.message)
+            return
+          }
+          Alert.alert('Lỗi', result.message)
+          router.replace('/(protected)/(tabs)')
+        }
+        Alert.alert('Lỗi', 'Đã xảy ra lỗi. Vui lòng thử lại.')
         router.replace('/(protected)/(tabs)')
       }
     })
@@ -146,79 +164,92 @@ export default function ReviewCartScreen() {
               </Text>
             </View>
 
-            {orderItems.map((item) => (
-              <View
-                key={`${item.menuId}-${item.sizeId}`}
-                className='rounded-2xl p-4 mb-3 border overflow-hidden'
-                style={{
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 8,
-                  elevation: 2
-                }}
-              >
-                <View className='flex-row items-start justify-between mb-3'>
-                  <View className='flex-1 mr-3'>
-                    <Text className='text-lg font-bold mb-1' style={{ color: colors.text }}>
-                      {item.menuName}
-                    </Text>
-                    <View className='flex-row items-center mt-1'>
-                      <View className='px-2 py-0.5 rounded' style={{ backgroundColor: `${colors.primary}15` }}>
-                        <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
-                          {item.sizeName}
-                        </Text>
+            {orderItems.map((item) => {
+              const hasError = !!itemErrors[`${item.menuId}-${item.sizeId}`]
+              return (
+                <View
+                  key={`${item.menuId}-${item.sizeId}`}
+                  className='rounded-2xl p-4 mb-3 border overflow-hidden'
+                  style={{
+                    backgroundColor: colors.card,
+                    borderColor: hasError ? colors.error : colors.border,
+                    borderWidth: hasError ? 2 : 1,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 8,
+                    elevation: 2
+                  }}
+                >
+                  <View className='flex-row items-start justify-between mb-3'>
+                    <View className='flex-1 mr-3'>
+                      <Text className='text-lg font-bold mb-1' style={{ color: colors.text }}>
+                        {item.menuName}
+                      </Text>
+                      <View className='flex-row items-center mt-1'>
+                        <View className='px-2 py-0.5 rounded' style={{ backgroundColor: `${colors.primary}15` }}>
+                          <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
+                            {item.sizeName}
+                          </Text>
+                        </View>
                       </View>
                     </View>
+                    <View className='items-end'>
+                      <Text className='text-base font-bold mb-1' style={{ color: colors.primary }}>
+                        {formatCurrencyVND(item.price)}
+                      </Text>
+                      <Text className='text-xs' style={{ color: colors.textSecondary }}>
+                        / phần
+                      </Text>
+                    </View>
                   </View>
-                  <View className='items-end'>
-                    <Text className='text-base font-bold mb-1' style={{ color: colors.primary }}>
-                      {formatCurrencyVND(item.price)}
-                    </Text>
-                    <Text className='text-xs' style={{ color: colors.textSecondary }}>
-                      / phần
-                    </Text>
-                  </View>
-                </View>
 
-                <View
-                  className='flex-row items-center justify-between pt-3 border-t'
-                  style={{ borderTopColor: colors.border }}
-                >
-                  <View className='flex-row items-center'>
-                    <TouchableOpacity
-                      onPress={() => orderDecrement(item.menuId, item.sizeId)}
-                      className='rounded-full p-2'
-                      style={{ backgroundColor: `${colors.primary}20` }}
-                      activeOpacity={0.8}
-                    >
-                      <Ionicons name='remove' size={18} color={colors.primary} />
-                    </TouchableOpacity>
-                    <Text className='text-lg font-bold mx-4 min-w-[32px] text-center' style={{ color: colors.text }}>
-                      {item.quantity}
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => orderIncrement(item.menuId, item.sizeId)}
-                      className='rounded-full p-2'
-                      style={{ backgroundColor: `${colors.primary}20` }}
-                      activeOpacity={0.8}
-                    >
-                      <Ionicons name='add' size={18} color={colors.primary} />
-                    </TouchableOpacity>
+                  <View
+                    className='flex-row items-center justify-between pt-3 border-t'
+                    style={{ borderTopColor: colors.border }}
+                  >
+                    <View className='flex-row items-center'>
+                      <TouchableOpacity
+                        onPress={() => orderDecrement(item.menuId, item.sizeId)}
+                        className='rounded-full p-2'
+                        style={{ backgroundColor: `${colors.primary}20` }}
+                        activeOpacity={0.8}
+                      >
+                        <Ionicons name='remove' size={18} color={colors.primary} />
+                      </TouchableOpacity>
+                      <Text className='text-lg font-bold mx-4 min-w-[32px] text-center' style={{ color: colors.text }}>
+                        {item.quantity}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => orderIncrement(item.menuId, item.sizeId)}
+                        className='rounded-full p-2'
+                        style={{ backgroundColor: `${colors.primary}20` }}
+                        activeOpacity={0.8}
+                      >
+                        <Ionicons name='add' size={18} color={colors.primary} />
+                      </TouchableOpacity>
+                    </View>
+                    <View className='items-end'>
+                      <Text className='text-lg font-bold' style={{ color: colors.primary }}>
+                        {formatCurrencyVND(item.price * item.quantity)}
+                      </Text>
+                      <Text className='text-xs' style={{ color: colors.textSecondary }}>
+                        Tổng
+                      </Text>
+                    </View>
                   </View>
-                  <View className='items-end'>
-                    <Text className='text-lg font-bold' style={{ color: colors.primary }}>
-                      {formatCurrencyVND(item.price * item.quantity)}
-                    </Text>
-                    <Text className='text-xs' style={{ color: colors.textSecondary }}>
-                      Tổng
-                    </Text>
-                  </View>
+
+                  {itemErrors[`${item.menuId}-${item.sizeId}`] ? (
+                    <View className='mt-2 flex-row items-center'>
+                      <Ionicons name='alert-circle' size={14} color={colors.error} />
+                      <Text className='ml-1.5 text-sm' style={{ color: colors.error }}>
+                        {itemErrors[`${item.menuId}-${item.sizeId}`]}
+                      </Text>
+                    </View>
+                  ) : null}
                 </View>
-              </View>
-            ))}
+              )
+            })}
 
             {/* Total Summary */}
             <View
