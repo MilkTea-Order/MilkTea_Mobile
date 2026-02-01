@@ -8,7 +8,6 @@ import editProfileSchema, { EditProfileSchema } from '@/features/user/schema/edi
 import { User } from '@/features/user/types/user.type'
 import { GENDER_OPTIONS } from '@/shared/constants/other'
 import { useTheme } from '@/shared/hooks/useTheme'
-import { setFormikFieldErrors } from '@/shared/utils/formErrors'
 import { isChangedNumber, isChangedText, isRNFile } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -140,11 +139,7 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
       await updateProfileMutation.mutateAsync(formData)
       onSuccess?.()
     } catch (error: any) {
-      if (error.fieldErrors) {
-        setFormikFieldErrors(setFieldError, error.fieldErrors)
-      } else {
-        handleUpdateProfileFormErrors(error, setFieldError)
-      }
+      handleUpdateProfileFormErrors(error, setFieldError)
     }
   }
 
@@ -153,16 +148,15 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
       <Formik
         initialValues={initialValues}
         validate={validateWithChangedContext}
-        validateOnMount
+        validateOnMount={false}
         validateOnBlur
-        validateOnChange
+        validateOnChange={false}
         onSubmit={(values, { setFieldError }) => handleSubmit(values, setFieldError)}
       >
         {({
           handleChange,
           handleBlur,
           handleSubmit: handleSubmitFormik,
-          setTouched,
           setFieldTouched,
           setFieldValue,
           values,
@@ -178,7 +172,9 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
               paddingVertical: 16,
               paddingBottom: 100
             }}
-            keyboardShouldPersistTaps='handled'
+            // keyboardShouldPersistTaps='handled'
+            keyboardShouldPersistTaps='always'
+            keyboardDismissMode='none'
             showsVerticalScrollIndicator={false}
             bounces={false}
           >

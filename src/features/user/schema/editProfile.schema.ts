@@ -26,10 +26,10 @@ const editProfileSchema = yup.object({
     then: (schema) =>
       schema
         .required('Vui lòng chọn ngày sinh.')
-        .matches(/^\d{4}-\d{2}-\d{2}$/, 'Định dạng ngày sinh không đúng (yyyy-mm-dd).')
+        .matches(/^\d{2}\/\d{2}\/\d{4}$/, 'Định dạng ngày sinh không đúng (dd/mm/yyyy).')
         .test('valid-date', 'Ngày sinh không hợp lệ.', (value) => {
           if (!value) return false
-          const [year, month, day] = value.split('-').map(Number)
+          const [day, month, year] = value.split('/').map(Number)
           return !isNaN(year) && !isNaN(month) && !isNaN(day) && month >= 1 && month <= 12 && day >= 1 && day <= 31
         }),
     otherwise: (schema) => schema.notRequired()
@@ -39,7 +39,7 @@ const editProfileSchema = yup.object({
     .string()
     .trim()
     .required('Vui lòng nhập số CMND/CCCD.')
-    .matches(/^[0-9]+$/, 'Số CMND/CCCD chỉ được chứa số.')
+    .matches(/^(\d{9}|\d{12})$/, 'Số CMND/CCCD chỉ được chứa số.')
     .test('valid-length', 'Số CMND/CCCD phải có 9 hoặc 12 chữ số.', (value) => {
       if (!value) return false
       return value.length === 9 || value.length === 12
@@ -50,7 +50,10 @@ const editProfileSchema = yup.object({
     .trim()
     .when('$emailChanged', {
       is: true,
-      then: (schema) => schema.required('Vui lòng nhập email.').email('Email không hợp lệ.'),
+      then: (schema) =>
+        schema
+          .required('Vui lòng nhập email.')
+          .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Email không hợp lệ.'),
       otherwise: (schema) => schema.notRequired()
     }),
 
@@ -58,7 +61,8 @@ const editProfileSchema = yup.object({
     .string()
     .trim()
     .required('Vui lòng nhập số điện thoại.')
-    .matches(/^((03|05|07|08|09)[0-9]{8}|02[0-9]{8,9})$/, 'Số điện thoại không hợp lệ.'),
+    // .matches(/^((03|05|07|08|09)[0-9]{8}|02[0-9]{8,9})$/, 'Số điện thoại không hợp lệ.'),
+    .matches(/^\+?[0-9]{8,15}$/, 'Số điện thoại không hợp lệ.'),
 
   address: yup
     .string()
@@ -93,7 +97,9 @@ const editProfileSchema = yup.object({
     .when('$bankInfoChanged', {
       is: true,
       then: (schema) =>
-        schema.required('Vui lòng nhập số tài khoản.').matches(/^[0-9]+$/, 'Số tài khoản chỉ được chứa số.'),
+        schema
+          .required('Vui lòng nhập số tài khoản.')
+          .matches(/^[0-9]{6,20}$/, 'Số tài khoản chỉ được chứa số và có độ dài từ 6 đến 20 chữ số.'),
       otherwise: (schema) => schema.notRequired()
     }),
   bankQRCode: yup

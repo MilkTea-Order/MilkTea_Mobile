@@ -1,6 +1,6 @@
 import { DatePickerModal } from '@/components/molecules/DatePickerModal'
 import { useTheme } from '@/shared/hooks/useTheme'
-import { formatDisplayDate, formatUTCDate, parseStringToDate } from '@/shared/utils/date.util'
+import { formatDisplayDate, parseStringToDate } from '@/shared/utils/date.util'
 import { Ionicons } from '@expo/vector-icons'
 import dayjs from 'dayjs'
 import React, { useMemo, useState } from 'react'
@@ -90,7 +90,7 @@ export function FormDatePicker({
         initialDate={committedDate ?? dayjs()}
         onCancel={close}
         onConfirm={(d) => {
-          onChange(formatUTCDate(d))
+          onChange(formatDisplayDate(d))
           close()
         }}
       />
