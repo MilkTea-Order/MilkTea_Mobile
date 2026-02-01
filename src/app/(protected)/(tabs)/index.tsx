@@ -13,7 +13,7 @@ import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-
 
 export default function HomeScreen() {
   const { colors, status, effectiveTheme } = useTheme()
-  const [selectedFilter, setSelectedFilter] = useState<OrderFilter>('all')
+  const [selectedFilter, setSelectedFilter] = useState<OrderFilter>(STATUS.ORDER.UNPAID)
   const [refreshing, setRefreshing] = useState(false)
   const router = useRouter()
   const params = useLocalSearchParams<{ filter?: string }>()
@@ -29,17 +29,17 @@ export default function HomeScreen() {
       const filterValue = params.filter
       // Validate filter value
       if (
-        filterValue === 'all' ||
         filterValue === STATUS.ORDER.UNPAID ||
         filterValue === STATUS.ORDER.PAID ||
-        filterValue === STATUS.ORDER.CANCELED
+        filterValue === STATUS.ORDER.CANCELED ||
+        filterValue === STATUS.ORDER.NO_COLLECTED
       ) {
         setSelectedFilter(filterValue as OrderFilter)
       } else {
-        setSelectedFilter('all')
+        setSelectedFilter(STATUS.ORDER.UNPAID)
       }
     } else {
-      setSelectedFilter('all')
+      setSelectedFilter(STATUS.ORDER.UNPAID)
     }
   }, [params.filter])
 
@@ -106,8 +106,7 @@ export default function HomeScreen() {
                   Danh sách đơn
                 </Text>
                 <Text className='text-sm mt-0.5' style={{ color: colors.textSecondary }}>
-                  {orders.length} đơn hàng
-                  {selectedFilter !== 'all' && <Text> • {ORDER_STATUS_LABEL[selectedFilter as OrderStatus]}</Text>}
+                  {orders.length} đơn hàng • {ORDER_STATUS_LABEL[selectedFilter as OrderStatus]}
                 </Text>
               </View>
             </View>
@@ -136,23 +135,8 @@ export default function HomeScreen() {
               Chưa có đơn hàng
             </Text>
             <Text className='text-sm mt-2 text-center px-8' style={{ color: colors.textSecondary }}>
-              {selectedFilter !== 'all'
-                ? `Không có đơn hàng ${ORDER_STATUS_LABEL[selectedFilter as OrderStatus].toLowerCase()} nào`
-                : 'Bắt đầu tạo đơn hàng mới để quản lý'}
+              Không có đơn hàng {ORDER_STATUS_LABEL[selectedFilter as OrderStatus].toLowerCase()} nào
             </Text>
-            {selectedFilter === 'all' && (
-              <TouchableOpacity
-                onPress={() => router.push('/(protected)/order/select-table' as any)}
-                className='mt-6 px-6 py-3 rounded-2xl'
-                style={{ backgroundColor: colors.primary }}
-                activeOpacity={0.8}
-              >
-                <View className='flex-row items-center'>
-                  <Ionicons name='add-circle-outline' size={20} color='white' style={{ marginRight: 8 }} />
-                  <Text className='text-base font-bold text-white'>Tạo đơn hàng mới</Text>
-                </View>
-              </TouchableOpacity>
-            )}
           </View>
         ) : (
           <View className='flex-row flex-wrap' style={{ gap: 12 }}>

@@ -6,13 +6,13 @@ import { AxiosResponse } from 'axios'
 import type { CreateOrderPayload, CreateOrderResponse } from '../types/create-order.type'
 import { Order } from '../types/order.type'
 
-export type OrderFilter = OrderStatus | 'all'
+export type OrderFilter = OrderStatus
 export type OrdersApiResponse = ApiResponse<Order[]>
 export type OrderDetailApiResponse = ApiResponse<Order>
 
 export const orderApi = {
   getOrders(filter: OrderFilter): Promise<AxiosResponse<OrdersApiResponse>> {
-    const params = filter === 'all' ? {} : { StatusID: filter }
+    const params = { StatusID: filter }
     return http.get<OrdersApiResponse>(URL.ORDERS, { params })
   },
   getOrderDetail(orderId: number, isCancelled: boolean = false): Promise<AxiosResponse<OrderDetailApiResponse>> {

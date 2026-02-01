@@ -2,7 +2,8 @@ export const STATUS = {
   ORDER: {
     UNPAID: '1',
     PAID: '2',
-    CANCELED: '3'
+    CANCELED: '3',
+    NO_COLLECTED: '4'
   } as const,
   DINNER_TABLE: {
     AVAILABLE: 1,
@@ -24,19 +25,11 @@ export type OrderStatus = (typeof STATUS.ORDER)[keyof typeof STATUS.ORDER]
  */
 export const ORDER_STATUS_OPTIONS = [
   { value: STATUS.ORDER.UNPAID, label: 'Chưa thanh toán', icon: 'receipt-outline' },
+  { value: STATUS.ORDER.NO_COLLECTED, label: 'Đã thanh toán', icon: 'hourglass-outline' },
   { value: STATUS.ORDER.PAID, label: 'Đã thu tiền', icon: 'checkmark-circle-outline' },
   { value: STATUS.ORDER.CANCELED, label: 'Hủy', icon: 'close-circle-outline' }
 ] as const
 
-/**
- * Mapping object from `OrderStatus` to display label.
- * Derived from `ORDER_STATUS_OPTIONS` to avoid duplicated data.
- *
- * @example
- * ```ts
- * ORDER_STATUS_LABEL[OrderStatus.PAID] // 'Đã thu tiền'
- * ```
- */
 export const ORDER_STATUS_LABEL = ORDER_STATUS_OPTIONS.reduce(
   (acc, cur) => {
     acc[cur.value] = cur.label

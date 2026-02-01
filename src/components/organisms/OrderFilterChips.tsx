@@ -8,28 +8,26 @@ import { Ionicons } from '@expo/vector-icons'
 import React, { useMemo } from 'react'
 import { ScrollView, Text, TouchableOpacity } from 'react-native'
 
-type OrderFilter = OrderStatus | 'all'
-
 type Props = {
-  selected: OrderFilter
-  onChange: (v: OrderFilter) => void
+  selected: OrderStatus
+  onChange: (v: OrderStatus) => void
   colors: any
 }
 
-type ChipOption =
-  | { value: 'all'; label: string; icon: keyof typeof Ionicons.glyphMap }
-  | { value: OrderStatus; label: string; icon: keyof typeof Ionicons.glyphMap }
+type ChipOption = {
+  value: OrderStatus
+  label: string
+  icon: keyof typeof Ionicons.glyphMap
+}
 
 export const OrderFilterChips = ({ selected, onChange, colors }: Props) => {
   const options: ChipOption[] = useMemo(
-    () => [
-      { value: 'all', label: 'Tất cả', icon: 'grid-outline' },
-      ...ORDER_STATUS_OPTIONS.map((o) => ({
+    () =>
+      ORDER_STATUS_OPTIONS.map((o) => ({
         value: o.value as OrderStatus,
         label: ORDER_STATUS_LABEL[o.value as OrderStatus],
         icon: ORDER_STATUS_ICON[o.value as OrderStatus] as keyof typeof Ionicons.glyphMap
-      }))
-    ],
+      })),
     []
   )
 
