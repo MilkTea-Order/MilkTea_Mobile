@@ -25,7 +25,6 @@ export default function ReviewCartScreen() {
   const createOrderMutation = useCreateOrder()
   const [itemErrors, setItemErrors] = useState<Record<string, string>>({})
 
-  // Nếu không có table trong store thì redirect về chọn bàn
   useEffect(() => {
     if (!selectedTable) {
       router.replace('/(protected)/order/select-table')

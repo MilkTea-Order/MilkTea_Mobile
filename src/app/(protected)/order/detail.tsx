@@ -2,6 +2,7 @@ import { Header } from '@/components/layouts/Header'
 import { useOrderDetail } from '@/features/order/hooks/useOrder'
 import { ORDER_STATUS_LABEL, type OrderStatus } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
+import { formatDateTime } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams } from 'expo-router'
 import React from 'react'
@@ -18,17 +19,6 @@ export default function OrderDetailScreen() {
       style: 'currency',
       currency: 'VND'
     }).format(amount)
-  }
-
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
   }
 
   if (isLoading) {

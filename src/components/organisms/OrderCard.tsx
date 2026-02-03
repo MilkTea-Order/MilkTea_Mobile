@@ -2,6 +2,7 @@ import type { Order } from '@/features/order/types/order.type'
 import { type OrderStatus } from '@/shared/constants/status'
 import type { ThemeVariant } from '@/shared/constants/theme'
 import { statusColors } from '@/shared/constants/theme'
+import { formatDateTime } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
@@ -20,15 +21,6 @@ export const OrderCard = ({ order, colors, statusColors, effectiveTheme, onPress
 
   const formatCurrency = (amount?: number | null) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount ?? 0)
-
-  const formatDateTime = (value?: string | null) => {
-    if (!value) return '--'
-    const date = new Date(value)
-    return `${date.toLocaleDateString('vi-VN')} • ${date.toLocaleTimeString('vi-VN', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })}`
-  }
 
   const getTableLabel = () =>
     order.dinnerTable?.name ?? (order.dinnerTableID ? `Bàn ${order.dinnerTableID}` : 'Mang đi')

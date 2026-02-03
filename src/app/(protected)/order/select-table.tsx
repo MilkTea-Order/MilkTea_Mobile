@@ -47,7 +47,7 @@ export default function SelectTableScreen() {
               Chọn bàn để bắt đầu tạo đơn
             </Text>
           </View>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => refetch()}
             className='px-3 py-2 rounded-xl'
             style={{
@@ -59,7 +59,7 @@ export default function SelectTableScreen() {
             <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
               Làm mới
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {isLoading || isRefetching ? (
@@ -71,8 +71,7 @@ export default function SelectTableScreen() {
         ) : (
           <View className='flex-row flex-wrap' style={{ gap: 12 }}>
             {availableTables.map((table) => {
-              // TODO: Replace with actual image URL when available in API
-              const tableImageUrl = (table as any).TableImage || null
+              const tableImageUrl = (table as any).emptyImg || null
               return (
                 <TouchableOpacity
                   key={table.tableID}
@@ -90,12 +89,18 @@ export default function SelectTableScreen() {
                   }}
                   activeOpacity={0.85}
                 >
-                  <View style={{ width: '100%', height: 120, backgroundColor: `${colors.primary}10` }}>
+                  <View
+                    style={{
+                      width: '100%',
+                      height: 120,
+                      backgroundColor: `${colors.primary}10`
+                    }}
+                  >
                     {tableImageUrl ? (
                       <Image
                         source={{ uri: tableImageUrl }}
                         style={{ width: '100%', height: '100%' }}
-                        resizeMode='cover'
+                        resizeMode='contain'
                       />
                     ) : (
                       <View className='flex-1 items-center justify-center'>
@@ -103,6 +108,7 @@ export default function SelectTableScreen() {
                       </View>
                     )}
                   </View>
+
                   <View className='p-3'>
                     <Text className='text-base font-bold mb-1' style={{ color: colors.text }}>
                       {table.tableName}

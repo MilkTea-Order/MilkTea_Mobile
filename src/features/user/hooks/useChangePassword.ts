@@ -37,15 +37,6 @@ export function useChangePassword() {
   })
 }
 
-// /**
-//  * Validate change password form using yup schema
-//  */
-// export async function validateChangePasswordForm(
-//   values: ChangePasswordSchema
-// ): Promise<void> {
-//   await changePasswordSchema.validate(values, { abortEarly: false });
-// }
-
 /**
  * Helper to set form errors from API response
  */

@@ -132,6 +132,21 @@ export const statusColors: Record<OrderStatus, StatusColor> = {
       badge: '#065F46' // Emerald-800
     },
     icon: '#10B981' // Emerald-500
+  },
+  [STATUS.ORDER.NO_COLLECTED]: {
+    [THEME_VARIANT.LIGHT]: {
+      bg: '#DBEAFE', // Blue-100
+      border: '#93C5FD', // Blue-300
+      text: '#1E40AF', // Blue-800
+      badge: '#BFDBFE' // Blue-200
+    },
+    [THEME_VARIANT.DARK]: {
+      bg: '#1E3A8A', // Blue-900/20
+      border: '#3B82F6', // Blue-500
+      text: '#93C5FD', // Blue-300
+      badge: '#1E40AF' // Blue-800
+    },
+    icon: '#3B82F6' // Blue-500
   }
 }
 

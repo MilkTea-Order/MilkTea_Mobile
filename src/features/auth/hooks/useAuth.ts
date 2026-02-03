@@ -37,7 +37,6 @@ export function useLogin() {
         permissions
       }
       await login(session)
-      // Prefetch user data sau khi login thành công
       await queryClient.prefetchQuery({
         queryKey: userKeys.me(),
         queryFn: async () => {

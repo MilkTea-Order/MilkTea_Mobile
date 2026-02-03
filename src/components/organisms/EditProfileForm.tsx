@@ -172,9 +172,9 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
               paddingVertical: 16,
               paddingBottom: 100
             }}
-            // keyboardShouldPersistTaps='handled'
-            keyboardShouldPersistTaps='always'
-            keyboardDismissMode='none'
+            keyboardShouldPersistTaps='handled'
+            // keyboardShouldPersistTaps='always'
+            // keyboardDismissMode='none'
             showsVerticalScrollIndicator={false}
             bounces={false}
           >

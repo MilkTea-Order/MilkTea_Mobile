@@ -37,7 +37,7 @@ export function Header({ title, subtitle, onBack, rightContent, children, showBa
         paddingHorizontal: 20
       }}
     >
-      <View className='flex-row items-center justify-between mb-3'>
+      <View className='flex-row items-center justify-between'>
         <View className='flex-row items-center flex-1'>
           {showBackButton && (
             <TouchableOpacity

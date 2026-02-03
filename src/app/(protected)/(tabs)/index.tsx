@@ -157,24 +157,21 @@ export default function HomeScreen() {
         )}
       </ScrollView>
 
-      {/* Floating Create Order Button */}
-      {orders.length > 0 && (
-        <TouchableOpacity
-          onPress={() => router.push('/(protected)/order/select-table' as any)}
-          className='absolute bottom-6 right-6 rounded-full p-5'
-          style={{
-            backgroundColor: colors.primary,
-            shadowColor: colors.primary,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.4,
-            shadowRadius: 12,
-            elevation: 8
-          }}
-          activeOpacity={0.8}
-        >
-          <Ionicons name='add' size={28} color='white' />
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity
+        onPress={() => router.push('/(protected)/order/select-table' as any)}
+        className='absolute bottom-6 right-6 rounded-full p-7'
+        style={{
+          backgroundColor: colors.primary,
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.4,
+          shadowRadius: 12,
+          elevation: 8
+        }}
+        activeOpacity={0.8}
+      >
+        <Ionicons name='add' size={28} color='white' />
+      </TouchableOpacity>
     </View>
   )
 }

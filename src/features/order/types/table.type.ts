@@ -8,6 +8,8 @@ export type DinnerTable = {
   tableNote: string | null
   statusID: number
   statusName: string
+  usingImg: string | null
+  emptyImg: string | null
 }
 
 export type DinnerTablesResponse = ApiResponse<DinnerTable[]>

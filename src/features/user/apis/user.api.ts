@@ -15,7 +15,7 @@ export const userApi = {
   },
 
   changePassword(body: ChangePasswordPayload): Promise<AxiosResponse<ChangePasswordApiResponse>> {
-    return http.put<ChangePasswordApiResponse>(URL.CHANGE_PASSWORD, body)
+    return http.patch<ChangePasswordApiResponse>(URL.CHANGE_PASSWORD, body)
   },
 
   updateProfile(body: UpdateProfilePayload): Promise<AxiosResponse<UpdateProfileApiResponse>> {
