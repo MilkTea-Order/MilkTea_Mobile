@@ -14,20 +14,26 @@ export default function SelectTableScreen() {
   const [refreshing, setRefreshing] = useState(false)
   const { data: availableTables, isLoading, isRefetching, refetch } = useEmptyTables()
   const setTable = useOrderStore((s) => s.setTable)
+  const clearOrder = useOrderStore((s) => s.clear)
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
     refetch().finally(() => setRefreshing(false))
   }, [refetch])
 
+  const handleBack = () => {
+    clearOrder()
+    router.back()
+  }
+
   const handleSelect = (table: DinnerTable) => {
     setTable(table)
-    router.replace('/(protected)/order/create-order')
+    router.push('/(protected)/order/select-menu')
   }
 
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
-      <Header title='Chọn bàn' />
+      <Header title='Chọn bàn' onBack={handleBack} />
 
       <ScrollView
         className='flex-1'
@@ -40,10 +46,7 @@ export default function SelectTableScreen() {
       >
         <View className='flex-row items-center justify-between mb-4'>
           <View>
-            <Text className='text-2xl font-bold' style={{ color: colors.text }}>
-              Bàn trống
-            </Text>
-            <Text className='text-sm mt-1' style={{ color: colors.textSecondary }}>
+            <Text className='text-xl font-bold' style={{ color: colors.text }}>
               Chọn bàn để bắt đầu tạo đơn
             </Text>
           </View>
@@ -78,7 +81,7 @@ export default function SelectTableScreen() {
                   onPress={() => handleSelect(table)}
                   className='rounded-2xl border overflow-hidden'
                   style={{
-                    width: '48%',
+                    width: '31%',
                     backgroundColor: colors.card,
                     borderColor: colors.border,
                     shadowColor: '#000',
@@ -92,7 +95,7 @@ export default function SelectTableScreen() {
                   <View
                     style={{
                       width: '100%',
-                      height: 120,
+                      height: 95,
                       backgroundColor: `${colors.primary}10`
                     }}
                   >
@@ -110,9 +113,9 @@ export default function SelectTableScreen() {
                   </View>
 
                   <View className='p-3'>
-                    <Text className='text-base font-bold mb-1' style={{ color: colors.text }}>
+                    {/* <Text className='text-base font-bold mb-1' style={{ color: colors.text }}>
                       {table.tableName}
-                    </Text>
+                    </Text> */}
                     <View className='flex-row items-center'>
                       <Ionicons name='people-outline' size={14} color={colors.textSecondary} />
                       <Text className='text-xs ml-1' style={{ color: colors.textSecondary }}>

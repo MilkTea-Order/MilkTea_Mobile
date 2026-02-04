@@ -1,4 +1,4 @@
-import type { MenuGroupType } from '@/features/order/types/menu.type'
+import type { MenuGroupType } from '@/features/order/types/meny_catalog.type'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useState } from 'react'
 import { Image, NativeScrollEvent, NativeSyntheticEvent, ScrollView, Text, TouchableOpacity, View } from 'react-native'
@@ -66,8 +66,8 @@ export default function MenuGroupNavV2({ groups, selectedGroupId, onSelectGroup,
             backgroundColor: isSelected ? colors.primary : `${colors.primary}15`,
             borderWidth: isSelected ? 2 : 1,
             borderColor: isSelected ? colors.primary : colors.border,
-            width: 70,
-            height: 70,
+            width: 50,
+            height: 50,
             alignItems: 'center',
             justifyContent: 'center'
           }}
@@ -75,7 +75,7 @@ export default function MenuGroupNavV2({ groups, selectedGroupId, onSelectGroup,
           {imageUrl ? (
             <Image source={{ uri: imageUrl }} className='w-full h-full rounded-full' resizeMode='cover' />
           ) : (
-            <Ionicons name='restaurant-outline' size={32} color={isSelected ? 'white' : colors.primary} />
+            <Ionicons name='restaurant-outline' size={24} color={isSelected ? 'white' : colors.primary} />
           )}
         </View>
         <Text

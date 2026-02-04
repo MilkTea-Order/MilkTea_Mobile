@@ -3,27 +3,25 @@ import MenuGroupNavV2 from '@/components/molecules/MenuGroupNavV2'
 import MenuItemCardV2 from '@/components/molecules/MenuItemCardV2'
 import { useMenuGroupTypes, useMenusByGroup } from '@/features/order/hooks/useMenu'
 import { useOrderStore } from '@/features/order/store/order.store'
-import type { MenuGroupType } from '@/features/order/types/menu.type'
+import type { MenuGroupType } from '@/features/order/types/meny_catalog.type'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons } from '@expo/vector-icons'
-import { useFocusEffect } from '@react-navigation/native'
 import { useRouter } from 'expo-router'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
-export default function CreateOrderScreen() {
+export default function SelectMenuScreen() {
   const router = useRouter()
   const { colors } = useTheme()
 
   const [selectedGroup, setSelectedGroup] = useState<MenuGroupType | null>(null)
-  const isNavigatingToReviewCart = useRef(false)
+  const [activeSize, setActiveSize] = useState<{ menuId: number; sizeId: number } | null>(null)
 
   // Store
   const orderItems = useOrderStore((s) => s.items)
   const orderAdd = useOrderStore((s) => s.add)
   const orderDecrement = useOrderStore((s) => s.decrement)
-  const clearOrder = useOrderStore((s) => s.clear)
   const totalPrice = useOrderStore((s) => s.totalPrice)
   const selectedTable = useOrderStore((s) => s.table)
 
@@ -51,33 +49,19 @@ export default function CreateOrderScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuGroups])
 
-  // Chỉ clear khi không phải đang đi đến review-cart
-  useFocusEffect(
-    useCallback(() => {
-      isNavigatingToReviewCart.current = false
-      return () => {
-        if (!isNavigatingToReviewCart.current) {
-          clearOrder()
-          setSelectedGroup(null)
-        }
-      }
-    }, [clearOrder])
-  )
+  // Khi đổi group thì đóng expanded hiện tại (tránh giữ state của group cũ)
+  useEffect(() => {
+    setActiveSize(null)
+  }, [selectedGroup?.menuGroupId])
 
   const handleBack = () => {
-    // Always go back to home when leaving create-order
-    clearOrder()
-    setSelectedGroup(null)
-    // router.replace('/(protected)/(tabs)' as any)
     router.back()
   }
-
-  const subtitle = selectedTable ? `${selectedTable.tableName}` : undefined
 
   if (!selectedTable) {
     return (
       <View className='flex-1' style={{ backgroundColor: colors.background }}>
-        <Header title='Tạo đơn hàng' onBack={handleBack} />
+        <Header title='Chọn món' onBack={handleBack} />
         <View className='flex-1 items-center justify-center'>
           <ActivityIndicator color={colors.primary} />
         </View>
@@ -87,7 +71,7 @@ export default function CreateOrderScreen() {
 
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
-      <Header title='Tạo đơn hàng' subtitle={subtitle} onBack={handleBack} />
+      <Header title={`Chọn món •  ${selectedTable?.tableName ?? ''}`} onBack={handleBack} />
 
       {/* Menu Group Navigation */}
       {menuGroups && menuGroups.length > 0 && (
@@ -153,6 +137,8 @@ export default function CreateOrderScreen() {
                   onAdd={orderAdd}
                   onRemove={orderDecrement}
                   formatCurrency={formatCurrencyVND}
+                  activeSize={activeSize}
+                  onChangeActiveSize={setActiveSize}
                 />
               </View>
             ))}
@@ -163,7 +149,7 @@ export default function CreateOrderScreen() {
       {/* View Cart Button */}
       {orderItems.length > 0 && (
         <View
-          className='border-t-2 px-5 py-4'
+          className='border-t-2 px-5 py-4 mb-2'
           style={{
             backgroundColor: colors.card,
             borderTopColor: colors.border
@@ -171,18 +157,19 @@ export default function CreateOrderScreen() {
         >
           <TouchableOpacity
             onPress={() => {
-              isNavigatingToReviewCart.current = true
               router.push('/(protected)/order/review-cart')
             }}
-            className='rounded-2xl py-4 flex-row items-center justify-center'
+            className='rounded-2xl py-4 flex-row items-center justify-between p-5'
             style={{ backgroundColor: colors.primary }}
             activeOpacity={0.8}
           >
-            <Ionicons name='cart-outline' size={24} color='white' />
-            <Text className='text-white text-center text-lg font-bold ml-2'>
-              Xem giỏ hàng ({orderItems.reduce((sum, item) => sum + item.quantity, 0)})
-            </Text>
-            <Text className='text-white text-center text-lg font-bold ml-2'>• {formatCurrencyVND(totalPrice)}</Text>
+            <View className='flex-row items-center justify-between'>
+              <Ionicons name='cart-outline' size={24} color='white' />
+              <Text className='text-white text-center text-lg font-bold ml-2'>
+                Giỏ hàng • {orderItems.reduce((sum, item) => sum + item.quantity, 0)} món
+              </Text>
+            </View>
+            <Text className='text-white text-center text-lg font-bold ml-2'> {formatCurrencyVND(totalPrice)}</Text>
           </TouchableOpacity>
         </View>
       )}

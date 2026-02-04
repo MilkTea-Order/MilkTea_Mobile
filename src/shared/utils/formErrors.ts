@@ -7,6 +7,12 @@ export interface FieldError {
   message: string
 }
 
+export interface ErrorDetail {
+  code: string
+  field: string
+  message: string
+}
+
 /**
  * Extract field errors from API error response
  * @param error - Error object from API call (can be from axios or direct error)
@@ -22,9 +28,17 @@ export function extractFieldErrors(
   domain: ErrorDomain = 'common',
   fieldMapping?: ((apiFieldName: string) => string) | Record<string, string> | string
 ): FieldError[] {
+  return extractErrorDetails(error, domain, fieldMapping).map(({ field, message }) => ({ field, message }))
+}
+
+export function extractErrorDetails(
+  error: any,
+  domain: ErrorDomain = 'common',
+  fieldMapping?: ((apiFieldName: string) => string) | Record<string, string> | string
+): ErrorDetail[] {
   const errorResponse = error?.response?.data || error
-  const fieldErrors: FieldError[] = []
-  if (!isErrorResponse(errorResponse)) return fieldErrors
+  const details: ErrorDetail[] = []
+  if (!isErrorResponse(errorResponse)) return details
   const errorData = errorResponse.data ?? {}
   const mappingLower =
     fieldMapping && typeof fieldMapping === 'object'
@@ -57,11 +71,11 @@ export function extractFieldErrors(
       const normalizedForMessage = String(raw).toLowerCase()
       const errorMessage = getErrorMessage(errorCode, domain, normalizedForMessage)
       const targetField = mapFieldName(String(raw))
-      fieldErrors.push({ field: targetField, message: errorMessage })
+      details.push({ code: errorCode, field: targetField, message: errorMessage })
     })
   })
 
-  return fieldErrors
+  return details
 }
 
 //   domain: ErrorDomain = 'common',

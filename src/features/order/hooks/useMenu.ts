@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { menuApi } from '../api/menu.api'
-import type { MenuGroupType, MenuItem, MenuSize } from '../types/menu.type'
+import type { MenuGroupType, MenuItem, MenuSize } from '../types/meny_catalog.type'
 
 export const menuKeys = {
   all: ['menus'] as const,

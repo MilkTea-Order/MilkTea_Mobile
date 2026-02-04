@@ -10,7 +10,7 @@ import { isApiError } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 export default function ReviewCartScreen() {
   const router = useRouter()
   const { colors } = useTheme()
@@ -51,7 +51,7 @@ export default function ReviewCartScreen() {
         quantity: item.quantity,
         toppingIDs: [],
         kindOfHotpotIDs: [],
-        note: null
+        note: item.note ?? null
       })),
       note: null
     }
@@ -91,46 +91,13 @@ export default function ReviewCartScreen() {
 
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
-      <Header title='Giỏ hàng' onBack={handleBack} />
+      <Header title={`Các món đã đặt •  ${selectedTable?.tableName ?? ''}`} onBack={handleBack} />
 
       <ScrollView
         className='flex-1'
         style={{ backgroundColor: colors.background }}
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
       >
-        {/* Table Info */}
-        {selectedTable && (
-          <View
-            className='p-4 rounded-2xl border mb-4'
-            style={{
-              backgroundColor: colors.card,
-              borderColor: colors.border,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 8,
-              elevation: 2
-            }}
-          >
-            <View className='flex-row items-center'>
-              <View className='rounded-full p-3' style={{ backgroundColor: `${colors.primary}15` }}>
-                <Ionicons name='restaurant-outline' size={24} color={colors.primary} />
-              </View>
-              <View className='ml-3 flex-1'>
-                <Text className='text-lg font-bold mb-1' style={{ color: colors.text }}>
-                  {selectedTable.tableName}
-                </Text>
-                <View className='flex-row items-center'>
-                  <Ionicons name='people-outline' size={16} color={colors.textSecondary} />
-                  <Text className='text-sm ml-1' style={{ color: colors.textSecondary }}>
-                    {selectedTable.numberOfSeat} ghế
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        )}
-
         {/* Cart Items */}
         {orderItems.length === 0 ? (
           <View className='items-center py-16'>
@@ -154,13 +121,15 @@ export default function ReviewCartScreen() {
           </View>
         ) : (
           <>
-            <View className='mb-4'>
-              <Text className='text-2xl font-bold mb-1' style={{ color: colors.text }}>
-                Đơn hàng của bạn
+            <View className='mb-3 flex-row items-center justify-between'>
+              <Text className='text-xl font-bold' style={{ color: colors.text }}>
+                Danh sách món
               </Text>
-              <Text className='text-sm' style={{ color: colors.textSecondary }}>
-                {orderItems.length} món • {orderItems.reduce((sum, item) => sum + item.quantity, 0)} phần
-              </Text>
+              <TouchableOpacity onPress={() => router.back()} activeOpacity={0.8}>
+                <Text className='text-sm font-semibold' style={{ color: colors.primary }}>
+                  Thêm món
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {orderItems.map((item) => {
@@ -168,84 +137,122 @@ export default function ReviewCartScreen() {
               return (
                 <View
                   key={`${item.menuId}-${item.sizeId}`}
-                  className='rounded-2xl p-4 mb-3 border overflow-hidden'
+                  className='rounded-2xl p-3 mb-3 border'
                   style={{
                     backgroundColor: colors.card,
                     borderColor: hasError ? colors.error : colors.border,
-                    borderWidth: hasError ? 2 : 1,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.05,
-                    shadowRadius: 8,
-                    elevation: 2
+                    borderWidth: hasError ? 2 : 1
                   }}
                 >
-                  <View className='flex-row items-start justify-between mb-3'>
+                  <View className='flex-row items-center justify-between'>
+                    <View
+                      className='rounded-xl mr-3 overflow-hidden items-center justify-center'
+                      style={{ width: 52, height: 52, backgroundColor: `${colors.primary}10` }}
+                    >
+                      {(item as any).MenuImage ? (
+                        <Image
+                          source={{ uri: (item as any).MenuImage }}
+                          style={{ width: '100%', height: '100%' }}
+                          resizeMode='cover'
+                        />
+                      ) : (
+                        <Ionicons name='restaurant-outline' size={28} color={colors.primary} />
+                      )}
+                    </View>
+
                     <View className='flex-1 mr-3'>
-                      <Text className='text-lg font-bold mb-1' style={{ color: colors.text }}>
-                        {item.menuName}
-                      </Text>
-                      <View className='flex-row items-center mt-1'>
-                        <View className='px-2 py-0.5 rounded' style={{ backgroundColor: `${colors.primary}15` }}>
+                      <View className='flex-row items-center mt-2'>
+                        <Text className='text-lg font-bold mr-2' style={{ color: colors.text }} numberOfLines={2}>
+                          {item.menuName}
+                        </Text>
+                        <View className='px-2 py-1 rounded' style={{ backgroundColor: `${colors.primary}15` }}>
                           <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
                             {item.sizeName}
                           </Text>
                         </View>
                       </View>
-                    </View>
-                    <View className='items-end'>
-                      <Text className='text-base font-bold mb-1' style={{ color: colors.primary }}>
-                        {formatCurrencyVND(item.price)}
-                      </Text>
-                      <Text className='text-xs' style={{ color: colors.textSecondary }}>
-                        / phần
-                      </Text>
-                    </View>
-                  </View>
+                      {item.note ? (
+                        <View className='mt-1 flex-row items-start' style={{ gap: 6 }}>
+                          <Ionicons name='chatbubble-ellipses-outline' size={14} color={colors.textSecondary} />
+                          <Text className='flex-1 text-xs' style={{ color: colors.textSecondary }} numberOfLines={2}>
+                            {item.note}
+                          </Text>
+                        </View>
+                      ) : null}
+                      <View className='flex-row items-center mt-1'>
+                        <TouchableOpacity
+                          activeOpacity={0.8}
+                          onPress={() =>
+                            router.push({
+                              pathname: '/(protected)/order/item-detail',
+                              params: { menuId: String(item.menuId), sizeId: String(item.sizeId) }
+                            })
+                          }
+                        >
+                          <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
+                            Chỉnh sửa
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
 
-                  <View
-                    className='flex-row items-center justify-between pt-3 border-t'
-                    style={{ borderTopColor: colors.border }}
-                  >
-                    <View className='flex-row items-center'>
-                      <TouchableOpacity
-                        onPress={() => orderDecrement(item.menuId, item.sizeId)}
-                        className='rounded-full p-2'
-                        style={{ backgroundColor: `${colors.primary}20` }}
-                        activeOpacity={0.8}
-                      >
-                        <Ionicons name='remove' size={18} color={colors.primary} />
-                      </TouchableOpacity>
-                      <Text className='text-lg font-bold mx-4 min-w-[32px] text-center' style={{ color: colors.text }}>
-                        {item.quantity}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => orderIncrement(item.menuId, item.sizeId)}
-                        className='rounded-full p-2'
-                        style={{ backgroundColor: `${colors.primary}20` }}
-                        activeOpacity={0.8}
-                      >
-                        <Ionicons name='add' size={18} color={colors.primary} />
-                      </TouchableOpacity>
+                      {itemErrors[`${item.menuId}-${item.sizeId}`] ? (
+                        <View className='mt-1 flex-row items-center'>
+                          <Ionicons name='alert-circle' size={14} color={colors.error} />
+                          <Text className='ml-1.5 text-xs' style={{ color: colors.error }}>
+                            {itemErrors[`${item.menuId}-${item.sizeId}`]}
+                          </Text>
+                        </View>
+                      ) : null}
                     </View>
+
                     <View className='items-end'>
-                      <Text className='text-lg font-bold' style={{ color: colors.primary }}>
+                      <Text className='text-sm font-bold' style={{ color: colors.textSecondary }}>
                         {formatCurrencyVND(item.price * item.quantity)}
                       </Text>
-                      <Text className='text-xs' style={{ color: colors.textSecondary }}>
-                        Tổng
-                      </Text>
+
+                      <View
+                        className='flex-row items-center rounded-full mt-2'
+                        style={{
+                          borderWidth: 1.5,
+                          borderColor: colors.primary,
+                          paddingHorizontal: 6,
+                          paddingVertical: 4
+                        }}
+                      >
+                        <TouchableOpacity
+                          onPress={() => orderDecrement(item.menuId, item.sizeId)}
+                          className='rounded-full'
+                          style={{
+                            width: 26,
+                            height: 26,
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          activeOpacity={0.8}
+                        >
+                          <Ionicons name='remove' size={16} color={colors.primary} />
+                        </TouchableOpacity>
+
+                        <Text className='text-sm font-bold min-w-[24px] text-center' style={{ color: colors.text }}>
+                          {item.quantity}
+                        </Text>
+
+                        <TouchableOpacity
+                          onPress={() => orderIncrement(item.menuId, item.sizeId)}
+                          className='rounded-full'
+                          style={{
+                            width: 26,
+                            height: 26,
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          activeOpacity={0.8}
+                        >
+                          <Ionicons name='add' size={16} color={colors.primary} />
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
-
-                  {itemErrors[`${item.menuId}-${item.sizeId}`] ? (
-                    <View className='mt-2 flex-row items-center'>
-                      <Ionicons name='alert-circle' size={14} color={colors.error} />
-                      <Text className='ml-1.5 text-sm' style={{ color: colors.error }}>
-                        {itemErrors[`${item.menuId}-${item.sizeId}`]}
-                      </Text>
-                    </View>
-                  ) : null}
                 </View>
               )
             })}
@@ -279,7 +286,7 @@ export default function ReviewCartScreen() {
                   Tổng số lượng
                 </Text>
                 <Text className='text-base font-semibold' style={{ color: colors.text }}>
-                  {orderItems.reduce((sum, item) => sum + item.quantity, 0)} phần
+                  {orderItems.reduce((sum, item) => sum + item.quantity, 0)} Món
                 </Text>
               </View>
               <View

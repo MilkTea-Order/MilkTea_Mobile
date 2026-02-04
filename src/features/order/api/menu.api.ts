@@ -1,7 +1,7 @@
 import { URL } from '@/shared/constants/urls'
 import http from '@/shared/utils/http'
 import type { AxiosResponse } from 'axios'
-import type { MenuGroupTypeResponse, MenuItemsResponse, MenuSizesResponse } from '../types/menu.type'
+import type { MenuGroupTypeResponse, MenuItemsResponse, MenuSizesResponse } from '../types/meny_catalog.type'
 
 export const menuApi = {
   getGroupTypes(): Promise<AxiosResponse<MenuGroupTypeResponse>> {

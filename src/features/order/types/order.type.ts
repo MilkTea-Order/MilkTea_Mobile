@@ -32,6 +32,7 @@ export interface Menu {
   id: number
   code: string
   name: string
+  image: string | null
   menuGroupName: string
   statusName: string
   unitName: string

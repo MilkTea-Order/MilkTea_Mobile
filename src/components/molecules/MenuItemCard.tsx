@@ -1,11 +1,12 @@
 import { useMenuSizes } from '@/features/order/hooks/useMenu'
-import type { MenuItem, MenuSize } from '@/features/order/types/menu.type'
+import type { OrderLine } from '@/features/order/store/order.store'
+import type { MenuItem } from '@/features/order/types/meny_catalog.type'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useState } from 'react'
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
 
 type CartQuantityGetter = (menuId: number, sizeId: number) => number
-type OnAdd = (menu: MenuItem, size: MenuSize) => void
+type OnAdd = (orderLine: OrderLine) => void
 type OnRemove = (menuId: number, sizeId: number) => void
 
 type Props = {
@@ -113,7 +114,17 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
                       {quantity}
                     </Text>
                     <TouchableOpacity
-                      onPress={() => onAdd(menu, size)}
+                      onPress={() =>
+                        onAdd({
+                          menuId: menu.menuId,
+                          menuName: menu.menuName,
+                          menuImage: menu.menuImage ?? null,
+                          sizeId: size.sizeId,
+                          sizeName: size.sizeName,
+                          price: size.price,
+                          quantity: 1
+                        })
+                      }
                       className='rounded-full p-1.5'
                       style={{ backgroundColor: colors.primary }}
                       activeOpacity={0.8}
@@ -123,7 +134,17 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
                   </View>
                 ) : (
                   <TouchableOpacity
-                    onPress={() => onAdd(menu, size)}
+                    onPress={() =>
+                      onAdd({
+                        menuId: menu.menuId,
+                        menuName: menu.menuName,
+                        menuImage: menu.menuImage ?? null,
+                        sizeId: size.sizeId,
+                        sizeName: size.sizeName,
+                        price: size.price,
+                        quantity: 1
+                      })
+                    }
                     className='rounded-full px-4 py-2'
                     style={{ backgroundColor: colors.primary }}
                     activeOpacity={0.8}

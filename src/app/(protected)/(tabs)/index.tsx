@@ -95,27 +95,17 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header Section */}
-        <View className='mb-6'>
-          <View className='flex-row items-center justify-between mb-2'>
-            <View className='flex-row items-center'>
-              <View className='rounded-2xl p-3 mr-3' style={{ backgroundColor: `${colors.primary}15` }}>
-                <Ionicons name='receipt-outline' size={24} color={colors.primary} />
-              </View>
-              <View>
-                <Text className='text-2xl font-bold' style={{ color: colors.text }}>
-                  Danh sách đơn
-                </Text>
-                <Text className='text-sm mt-0.5' style={{ color: colors.textSecondary }}>
-                  {orders.length} đơn hàng • {ORDER_STATUS_LABEL[selectedFilter as OrderStatus]}
-                </Text>
-              </View>
-            </View>
+        <View className='flex-row items-center justify-between mb-2'>
+          <View className='flex-row items-center'>
+            <Text className='text-lg font-bold' style={{ color: colors.text }}>
+              Tổng cộng: {orders.length} bàn
+            </Text>
           </View>
         </View>
 
         {/* Content */}
         {isLoadingOrders && orders.length === 0 ? (
-          <View className='items-center justify-center py-32'>
+          <View className='items-center justify-center py-20'>
             <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
               <Ionicons name='time-outline' size={48} color={colors.primary} />
             </View>
@@ -158,7 +148,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       <TouchableOpacity
-        onPress={() => router.push('/(protected)/order/select-table' as any)}
+        onPress={() => router.push('/(protected)/order/select-menu' as any)}
         className='absolute bottom-6 right-6 rounded-full p-7'
         style={{
           backgroundColor: colors.primary,

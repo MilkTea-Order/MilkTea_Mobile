@@ -23,6 +23,7 @@ export default function ProtectedLayout() {
         name='order'
         options={{
           headerShown: false,
+          gestureEnabled: false,
           presentation: 'card',
           animation: 'slide_from_right'
         }}

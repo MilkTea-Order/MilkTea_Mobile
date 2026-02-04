@@ -22,5 +22,23 @@ export const orderApi = {
   },
   createOrder(payload: CreateOrderPayload): Promise<AxiosResponse<CreateOrderResponse>> {
     return http.post<CreateOrderResponse>(URL.ORDERS, payload)
+  },
+  cancelOrderItems(
+    orderId: number,
+    orderDetailIDs: number[]
+  ): Promise<AxiosResponse<ApiResponse<{ cancelledDetailIDs: number[] }>>> {
+    return http.patch<ApiResponse<{ cancelledDetailIDs: number[] }>>(`${URL.ORDERS}/${orderId}/items/cancel`, {
+      orderDetailIDs
+    })
+  },
+  updateOrderItem(
+    orderId: number,
+    orderDetailId: number,
+    payload: { quantity?: number; note?: string | null; sizeId?: number }
+  ): Promise<AxiosResponse<ApiResponse<{ status: boolean }>>> {
+    return http.patch<ApiResponse<{ status: boolean }>>(
+      `${URL.ORDERS}/${orderId}/items/${orderDetailId}/update`,
+      payload
+    )
   }
 }

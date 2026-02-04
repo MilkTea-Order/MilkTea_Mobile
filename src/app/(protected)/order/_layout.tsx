@@ -9,6 +9,7 @@ export default function OrderStackLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
+        gestureEnabled: false,
         contentStyle: {
           backgroundColor: colors.background
         }
@@ -18,21 +19,24 @@ export default function OrderStackLayout() {
         name='select-table'
         options={{
           presentation: 'card',
-          animation: 'slide_from_right'
+          animation: 'slide_from_right',
+          gestureEnabled: false
         }}
       />
       <Stack.Screen
-        name='create-order'
+        name='select-menu'
         options={{
           presentation: 'card',
-          animation: 'slide_from_right'
+          animation: 'slide_from_right',
+          gestureEnabled: false
         }}
       />
       <Stack.Screen
         name='detail'
         options={{
           presentation: 'card',
-          animation: 'slide_from_right'
+          animation: 'slide_from_right',
+          gestureEnabled: false
         }}
       />
     </Stack>

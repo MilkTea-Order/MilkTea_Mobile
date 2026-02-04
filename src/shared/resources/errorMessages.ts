@@ -61,7 +61,13 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
     }
   },
   order: {
+    [ERROR_CODE.E0001]: {
+      orderid: 'Đơn hàng không tồn tại',
+      orderdetailids: 'Hủy món không hợp lệ'
+    },
     [ERROR_CODE.E0036]: {
+      orderid: 'Đơn hàng không tồn tại',
+      orderdetailids: 'Hủy món không hợp lệ',
       dinnerTableId: 'Bàn không hợp lệ (không tìm thấy or đang bán)',
       orderedBy: 'Nếu có giá trị nhưng bé hơn 0',
       items: 'danh sách rỗng',
@@ -69,8 +75,18 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
       quantity: 'món chọn không hợp lệ',
       price: 'món chọn không hợp lệ'
     },
+    [ERROR_CODE.E0042]: {
+      orderid: 'Đơn hàng phải có trạng thái chưa thanh toán mới hủy món'
+    },
     [ERROR_CODE.E9999]: {
-      createorder: 'Tạo order không thành công'
+      dinnerTableId: 'Bàn không hợp lệ (không tìm thấy or đang bán)',
+      orderedBy: 'Nếu có giá trị nhưng bé hơn 0',
+      items: 'danh sách rỗng',
+      menu: 'món chọn không hợp lệ',
+      quantity: 'món chọn không hợp lệ',
+      price: 'món chọn không hợp lệ',
+      createorder: 'Tạo order không thành công',
+      cancelorderdetails: 'Hủy món thất bại'
     }
   },
   common: {}

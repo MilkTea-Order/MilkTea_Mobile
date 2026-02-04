@@ -1,4 +1,4 @@
-import type { MenuGroupType } from '@/features/order/types/menu.type'
+import type { MenuGroupType } from '@/features/order/types/meny_catalog.type'
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'

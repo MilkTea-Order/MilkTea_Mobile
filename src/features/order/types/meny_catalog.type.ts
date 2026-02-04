@@ -12,6 +12,7 @@ export type MenuItem = {
   menuId: number
   menuCode: string
   menuName: string
+  menuImage: string | null
   menuGroupId: number
   menuGroupName: string
   statusId: number

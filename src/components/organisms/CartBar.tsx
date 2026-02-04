@@ -1,15 +1,9 @@
+import type { OrderLine } from '@/features/order/store/order.store'
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
-type CartItem = {
-  menuId: number
-  menuName: string
-  sizeId: number
-  sizeName: string
-  price: number
-  quantity: number
-}
+type CartItem = OrderLine
 
 type Props = {
   items: CartItem[]
@@ -21,7 +15,7 @@ type Props = {
   }
   totalLabel: string
   totalValue: string
-  onAdd: (menuId: number, sizeId: number) => void
+  onAdd: (orderLine: OrderLine) => void
   onRemove: (menuId: number, sizeId: number) => void
   onSubmit: () => Promise<void> | void
   isSubmitting?: boolean
@@ -86,7 +80,18 @@ export const CartBar: React.FC<Props> = ({
                 {item.quantity}
               </Text>
               <TouchableOpacity
-                onPress={() => onAdd(item.menuId, item.sizeId)}
+                onPress={() =>
+                  onAdd({
+                    menuId: item.menuId,
+                    menuName: item.menuName,
+                    menuImage: item.menuImage ?? null,
+                    sizeId: item.sizeId,
+                    sizeName: item.sizeName,
+                    price: item.price,
+                    quantity: 1,
+                    note: item.note ?? null
+                  })
+                }
                 className='rounded-full p-1'
                 style={{ backgroundColor: colors.primary }}
               >

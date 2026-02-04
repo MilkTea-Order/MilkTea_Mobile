@@ -71,15 +71,9 @@ export const OrderCard = ({ order, colors, statusColors, effectiveTheme, onPress
       {/* Footer */}
       <View className='flex-row items-center justify-between'>
         <View className='flex-1'>
-          <Text className='text-[10px] mb-1' style={{ color: colors.textSecondary }}>
-            Tổng tiền
-          </Text>
           <Text className='text-base font-bold' style={{ color: colors.primary }}>
             {formatCurrency(order?.totalAmount ?? 0)}
           </Text>
-        </View>
-        <View className='rounded-full p-2' style={{ backgroundColor: `${colors.primary}10` }}>
-          <Ionicons name='chevron-forward' size={16} color={colors.primary} />
         </View>
       </View>
     </TouchableOpacity>
