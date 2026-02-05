@@ -41,7 +41,12 @@ export default function SelectTableScreen() {
         contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing || isRefetching} onRefresh={onRefresh} tintColor={colors.primary} />
+          <RefreshControl
+            refreshing={refreshing || isRefetching}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            progressBackgroundColor={colors.card}
+          />
         }
       >
         <View className='flex-row items-center justify-between mb-4'>

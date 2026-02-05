@@ -1,11 +1,12 @@
 import { Header } from '@/components/layouts/Header'
 import { useUpdateOrderItem } from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
+import { ORDER_FLOW_MODE } from '@/shared/constants/other'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons } from '@expo/vector-icons'
-import { useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useCallback, useMemo, useState } from 'react'
 import { ActivityIndicator, Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { Toast } from 'react-native-toast-notifications'
 
@@ -18,56 +19,39 @@ export default function OrderItemDetailScreen() {
   const router = useRouter()
   const { colors } = useTheme()
 
-  const { menuId, sizeId, orderId, orderDetailId, isUpdate } = useLocalSearchParams<{
+  const { menuId, sizeId } = useLocalSearchParams<{
     menuId?: string
     sizeId?: string
-    orderId?: string
-    orderDetailId?: string
-    isUpdate?: 'true' | 'false'
   }>()
 
-  const hasNavigatedRef = React.useRef(false)
+  const menuIdNumber = useMemo(() => Number(menuId), [menuId])
+  const sizeIdNumber = useMemo(() => Number(sizeId), [sizeId])
 
-  // Params -> number
-  const menuIdNumber = useMemo(() => (menuId ? Number(menuId) : NaN), [menuId])
-  const sizeIdNumber = useMemo(() => (sizeId ? Number(sizeId) : NaN), [sizeId])
+  const mode = useOrderStore((s) => s.mode)
+  const isUpdateMode = mode === ORDER_FLOW_MODE.UPDATE_ITEMS
+  const orderIdNumber = useOrderStore((s) => s.targetOrderId) ?? NaN
+  const orderDetailIdNumber = useOrderStore((s) => s.editingOrderDetailId) ?? NaN
 
-  // Update mode
-  const orderIdNumber = useMemo(() => (orderId ? Number(orderId) : NaN), [orderId])
-  const orderDetailIdNumber = useMemo(() => (orderDetailId ? Number(orderDetailId) : NaN), [orderDetailId])
-  const isUpdateMode = useMemo(() => isUpdate === 'true', [isUpdate])
-
-  // Store
   const orderItems = useOrderStore((s) => s.items)
   const increment = useOrderStore((s) => s.increment)
   const decrement = useOrderStore((s) => s.decrement)
   const setLineNote = useOrderStore((s) => s.setLineNote)
 
-  // Find current item in store
   const menuItem = useMemo(() => {
     if (!Number.isFinite(menuIdNumber) || !Number.isFinite(sizeIdNumber)) return null
     return orderItems.find((x) => x.menuId === menuIdNumber && x.sizeId === sizeIdNumber) ?? null
-  }, [menuIdNumber, sizeIdNumber, orderItems])
+  }, [orderItems, menuIdNumber, sizeIdNumber])
 
-  // Freeze initial snapshot (không dùng ref)
   const [initialItem, setInitialItem] = useState<InitialItemSnapshot | null>(null)
-
-  // Note draft
   const [noteDraft, setNoteDraft] = useState('')
 
-  // Set initial snapshot + note draft đúng 1 lần khi menuItem xuất hiện
-  useEffect(() => {
-    if (!menuItem) return
-    if (initialItem) return
-
-    const init: InitialItemSnapshot = {
+  if (menuItem && !initialItem) {
+    setInitialItem({
       quantity: menuItem.quantity,
       note: menuItem.note ?? null
-    }
-
-    setInitialItem(init)
-    setNoteDraft(init.note ?? '')
-  }, [menuItem, initialItem])
+    })
+    setNoteDraft(menuItem.note ?? '')
+  }
 
   const normalizedNote = useMemo(() => {
     const t = noteDraft.trim()
@@ -77,40 +61,36 @@ export default function OrderItemDetailScreen() {
   const hasChanged = useMemo(() => {
     if (!menuItem || !initialItem) return false
     return menuItem.quantity !== initialItem.quantity || normalizedNote !== initialItem.note
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [menuItem?.quantity, normalizedNote, initialItem])
+  }, [menuItem, initialItem, normalizedNote])
 
-  const hasValidUpdateIds = useMemo(() => {
-    if (!isUpdateMode) return false
-    return Number.isFinite(orderIdNumber) && Number.isFinite(orderDetailIdNumber)
-  }, [isUpdateMode, orderIdNumber, orderDetailIdNumber])
+  const hasValidUpdateIds = isUpdateMode && Number.isFinite(orderIdNumber) && Number.isFinite(orderDetailIdNumber)
 
   const updateMutation = useUpdateOrderItem(orderIdNumber, orderDetailIdNumber, {
     onSuccess: () => {
-      hasNavigatedRef.current = true
       Toast.show('Cập nhật món thành công', { type: 'success' })
       useOrderStore.getState().clear()
       router.back()
     }
   })
 
-  // If item disappears from store, navigate back with alert
-  useEffect(() => {
-    if (menuItem || hasNavigatedRef.current) return
-    if (!Number.isFinite(menuIdNumber) || !Number.isFinite(sizeIdNumber)) return
+  const isSaving = isUpdateMode && updateMutation.isPending
+  useFocusEffect(
+    useCallback(() => {
+      const item = useOrderStore.getState().items.find((x) => x.menuId === menuIdNumber && x.sizeId === sizeIdNumber)
 
-    Alert.alert('Lỗi', 'Món không còn trong giỏ hàng', [{ text: 'OK', onPress: () => router.back() }])
-  }, [menuItem, menuIdNumber, sizeIdNumber, router])
+      if (!item) {
+        Alert.alert('Lỗi', 'Món không còn trong giỏ hàng', [{ text: 'OK', onPress: () => router.back() }])
+      }
+    }, [menuIdNumber, sizeIdNumber, router])
+  )
 
   if (!menuItem) return null
 
-  const isSaving = isUpdateMode ? updateMutation.isPending : false
-
+  // ===== HANDLERS =====
   const handleBack = () => {
     if (isUpdateMode) {
       useOrderStore.getState().clear()
     }
-    hasNavigatedRef.current = true
     router.back()
   }
 
@@ -119,28 +99,26 @@ export default function OrderItemDetailScreen() {
 
     if (isUpdateMode) {
       if (!hasValidUpdateIds) {
-        Alert.alert('Lỗi', 'Thiếu thông tin để cập nhật món.')
+        Alert.alert('Lỗi', 'Thiếu thông tin cập nhật.')
         return
       }
 
-      Alert.alert('Xác nhận cập nhật', 'Bạn có chắc chắn muốn cập nhật món này không?', [
+      Alert.alert('Xác nhận', 'Cập nhật món này?', [
+        { text: 'Huỷ', style: 'destructive' },
         {
           text: 'Cập nhật',
-          style: 'destructive',
+          style: 'default',
           onPress: () => {
             updateMutation.mutate({
               quantity: menuItem.quantity,
               note: normalizedNote
             })
           }
-        },
-        { text: 'Huỷ', style: 'cancel' }
+        }
       ])
-
       return
     }
 
-    // Create / Save mode
     setLineNote(menuItem.menuId, menuItem.sizeId, normalizedNote)
     router.back()
   }

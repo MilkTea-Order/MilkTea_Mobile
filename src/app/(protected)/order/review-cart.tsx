@@ -1,50 +1,98 @@
 import { Header } from '@/components/layouts/Header'
 import { useAuthStore } from '@/features/auth/store/auth.store'
-import { useCreateOrder } from '@/features/order/hooks/useOrder'
+import { useAddOrderItems, useCreateOrder } from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
-import { parseCreateOrderError } from '@/features/order/utils/parseCreateOrderError'
+import { parseOrderError } from '@/features/order/utils/parseOrderError'
+import { ORDER_FLOW_MODE } from '@/shared/constants/other'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { ApiErrorResponse } from '@/shared/types/api.type'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { isApiError } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
-import React, { useEffect, useState } from 'react'
+import { useFocusEffect, useRouter } from 'expo-router'
+import React, { useCallback, useState } from 'react'
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { Toast } from 'react-native-toast-notifications'
+
 export default function ReviewCartScreen() {
   const router = useRouter()
   const { colors } = useTheme()
+
   const authProfile = useAuthStore((s) => s.profile)
+
   const orderItems = useOrderStore((s) => s.items)
   const orderIncrement = useOrderStore((s) => s.increment)
   const orderDecrement = useOrderStore((s) => s.decrement)
   const clearOrder = useOrderStore((s) => s.clear)
   const totalPrice = useOrderStore((s) => s.totalPrice)
-  const selectedTable = useOrderStore((s) => s.table)
+  const mode = useOrderStore((s) => s.mode)
+  const targetOrderId = useOrderStore((s) => s.targetOrderId)
 
-  const createOrderMutation = useCreateOrder()
+  const selectedTable = useOrderStore.getState().table
+
   const [itemErrors, setItemErrors] = useState<Record<string, string>>({})
 
-  useEffect(() => {
-    if (!selectedTable) {
-      router.replace('/(protected)/order/select-table')
-    }
-  }, [router, selectedTable])
+  const createOrderMutation = useCreateOrder()
 
-  const handleBack = () => {
-    router.back()
-  }
+  const addItemsMutation = useAddOrderItems(targetOrderId ?? 0, {
+    onSuccess: () => {
+      Toast.show('Thêm món thành công', { type: 'success' })
+      router.dismissAll()
+      clearOrder()
+    },
+    onError: (err: any) => {
+      if (err?.type === 'item') {
+        setItemErrors({ [`${err.menuId}-${err.sizeId}`]: err.message })
+      }
+      if (err?.type === 'items') {
+        const next: Record<string, string> = {}
+        err.items.forEach((it: any) => {
+          next[`${it.menuId}-${it.sizeId}`] = it.message
+        })
+        setItemErrors(next)
+      }
+    }
+  })
+
+  useFocusEffect(
+    useCallback(() => {
+      const table = useOrderStore.getState().table
+      if (!table) {
+        router.replace('/(protected)/order/select-table')
+      }
+    }, [router])
+  )
+
+  const handleBack = () => router.back()
 
   const handleSubmit = () => {
-    if (!selectedTable) return
-    if (!orderItems.length) return
+    const table = useOrderStore.getState().table
+    if (!table || !orderItems.length) return
 
     setItemErrors({})
 
-    const userId = Number(authProfile?.user?.id ?? 0)
+    if (mode === ORDER_FLOW_MODE.ADD_ITEMS) {
+      if (!targetOrderId) {
+        Alert.alert('Lỗi', 'Không tìm thấy OrderID.')
+        return
+      }
+
+      addItemsMutation.mutate({
+        items: orderItems.map((item) => ({
+          menuID: item.menuId,
+          sizeID: item.sizeId,
+          quantity: item.quantity,
+          toppingIDs: [],
+          kindOfHotpotIDs: [],
+          note: item.note ?? null
+        }))
+      })
+      return
+    }
+
     const payload = {
-      dinnerTableID: selectedTable.tableID,
-      orderByID: userId || 0,
+      dinnerTableID: table.tableID,
+      orderByID: Number(authProfile?.user?.id ?? 0),
       items: orderItems.map((item) => ({
         menuID: item.menuId,
         sizeID: item.sizeId,
@@ -63,17 +111,10 @@ export default function ReviewCartScreen() {
       },
       onError: (error) => {
         if (isApiError(error)) {
-          const result = parseCreateOrderError(error as ApiErrorResponse)
-          if (result.type === 'item') {
-            setItemErrors({ [`${result.menuId}-${result.sizeId}`]: result.message })
-            Alert.alert('Lỗi', result.message)
-            return
-          }
+          const result = parseOrderError(error as ApiErrorResponse)
           Alert.alert('Lỗi', result.message)
           router.replace('/(protected)/(tabs)')
         }
-        Alert.alert('Lỗi', 'Đã xảy ra lỗi. Vui lòng thử lại.')
-        router.replace('/(protected)/(tabs)')
       }
     })
   }
@@ -171,6 +212,7 @@ export default function ReviewCartScreen() {
                           </Text>
                         </View>
                       </View>
+
                       {item.note ? (
                         <View className='mt-1 flex-row items-start' style={{ gap: 6 }}>
                           <Ionicons name='chatbubble-ellipses-outline' size={14} color={colors.textSecondary} />
@@ -179,6 +221,7 @@ export default function ReviewCartScreen() {
                           </Text>
                         </View>
                       ) : null}
+
                       <View className='flex-row items-center mt-1'>
                         <TouchableOpacity
                           activeOpacity={0.8}
@@ -281,6 +324,7 @@ export default function ReviewCartScreen() {
                   </Text>
                 </View>
               </View>
+
               <View className='flex-row items-center justify-between mb-2'>
                 <Text className='text-base' style={{ color: colors.textSecondary }}>
                   Tổng số lượng
@@ -289,6 +333,7 @@ export default function ReviewCartScreen() {
                   {orderItems.reduce((sum, item) => sum + item.quantity, 0)} Món
                 </Text>
               </View>
+
               <View
                 className='flex-row items-center justify-between pt-2 border-t'
                 style={{ borderTopColor: colors.border }}
@@ -322,19 +367,33 @@ export default function ReviewCartScreen() {
           <TouchableOpacity
             className='rounded-2xl py-4 flex-row items-center justify-center'
             style={{
-              backgroundColor: createOrderMutation.isPending ? `${colors.primary}60` : colors.primary,
-              opacity: createOrderMutation.isPending ? 0.8 : 1
+              backgroundColor:
+                createOrderMutation.isPending || addItemsMutation.isPending ? `${colors.primary}60` : colors.primary,
+              opacity: createOrderMutation.isPending || addItemsMutation.isPending ? 0.8 : 1
             }}
             activeOpacity={0.8}
-            disabled={createOrderMutation.isPending}
-            onPress={handleSubmit}
+            disabled={createOrderMutation.isPending || addItemsMutation.isPending}
+            onPress={() => {
+              Alert.alert(
+                'Xác nhận',
+                mode === ORDER_FLOW_MODE.CREATE
+                  ? 'Bạn chắc chắn muốn tạo đơn hàng này?'
+                  : 'Bạn chắc chắn muốn cập nhật đơn hàng này?',
+                [
+                  { text: 'Huỷ', style: 'destructive' },
+                  { text: 'Đồng ý', onPress: handleSubmit }
+                ]
+              )
+            }}
           >
-            {createOrderMutation.isPending ? (
+            {createOrderMutation.isPending || addItemsMutation.isPending ? (
               <ActivityIndicator color='white' size='small' />
             ) : (
               <>
                 <Ionicons name='checkmark-circle-outline' size={24} color='white' />
-                <Text className='text-white text-center text-lg font-bold ml-2'>Tạo đơn hàng</Text>
+                <Text className='text-white text-center text-lg font-bold ml-2'>
+                  {mode === ORDER_FLOW_MODE.CREATE ? 'Tạo đơn hàng' : 'Cập nhật đơn hàng'}
+                </Text>
               </>
             )}
           </TouchableOpacity>

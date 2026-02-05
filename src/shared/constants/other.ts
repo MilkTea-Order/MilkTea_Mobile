@@ -10,3 +10,11 @@ export const GENDER_OPTIONS = [
   { label: 'Nam', value: 1 },
   { label: 'Nữ', value: 2 }
 ]
+
+export const ORDER_FLOW_MODE = {
+  CREATE: 'create',
+  ADD_ITEMS: 'add-items',
+  UPDATE_ITEMS: 'update-items'
+} as const
+
+export type OrderFlowMode = (typeof ORDER_FLOW_MODE)[keyof typeof ORDER_FLOW_MODE]

@@ -3,7 +3,7 @@ import { URL } from '@/shared/constants/urls'
 import { ApiResponse } from '@/shared/types/api.type'
 import http from '@/shared/utils/http'
 import { AxiosResponse } from 'axios'
-import type { CreateOrderPayload, CreateOrderResponse } from '../types/create-order.type'
+import type { CreateOrderItemPayload, CreateOrderPayload, CreateOrderResponse } from '../types/create-order.type'
 import { Order } from '../types/order.type'
 
 export type OrderFilter = OrderStatus
@@ -40,5 +40,12 @@ export const orderApi = {
       `${URL.ORDERS}/${orderId}/items/${orderDetailId}/update`,
       payload
     )
+  },
+
+  addOrderItems(
+    orderId: number,
+    payload: { items: CreateOrderItemPayload[] }
+  ): Promise<AxiosResponse<ApiResponse<{ status: boolean }>>> {
+    return http.patch<ApiResponse<{ status: boolean }>>(`${URL.ORDERS}/${orderId}/add-items`, payload)
   }
 }

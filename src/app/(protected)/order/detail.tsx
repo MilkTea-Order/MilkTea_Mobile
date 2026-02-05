@@ -5,7 +5,8 @@ import { OrderItemsSection } from '@/features/order/components/organisms/OrderIt
 import { useCancelOrderItems, useOrderDetail } from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
 import { ERROR_CODE } from '@/shared/constants/errorCode'
-import { ORDER_STATUS_LABEL, type OrderStatus } from '@/shared/constants/status'
+import { ORDER_FLOW_MODE } from '@/shared/constants/other'
+import { ORDER_STATUS_LABEL, STATUS, type OrderStatus } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { extractErrorDetails } from '@/shared/utils/formErrors'
 import { formatCurrency } from '@/shared/utils/utils'
@@ -112,10 +113,29 @@ export default function OrderDetailScreen() {
 
       {/* Content */}
       <View className='flex-1 p-4' style={{ backgroundColor: colors.background }}>
-        <OrderActionPanel filterMode={filterMode} onFilterToggle={handleFilterToggle} colors={colors} />
+        <OrderActionPanel
+          filterMode={filterMode}
+          onFilterToggle={handleFilterToggle}
+          onAddItems={() => {
+            if (!orderIdNumber || !order) return
+
+            useOrderStore.getState().clear()
+            useOrderStore.getState().setMode(ORDER_FLOW_MODE.ADD_ITEMS)
+            useOrderStore.getState().setTargetOrderId(orderIdNumber)
+            useOrderStore.getState().setTable({
+              tableID: Number(order.dinnerTableID ?? 0),
+              tableName: String(order.dinnerTable?.name ?? ''),
+              numberOfSeat: Number(order.dinnerTable?.numberOfSeats ?? 0)
+            } as any)
+
+            router.push('/(protected)/order/select-menu')
+          }}
+          colors={colors}
+        />
 
         <OrderItemsSection
           items={order?.orderDetails ?? []}
+          canActionButton={filterMode === 'placed' && Number(order?.statusID ?? 0) === Number(STATUS.ORDER.UNPAID)}
           totalQty={totalQty}
           isLoading={isLoading}
           isRefetching={isRefetching}
@@ -126,6 +146,9 @@ export default function OrderDetailScreen() {
             if (!detail || !orderIdNumber) return
 
             useOrderStore.getState().clear()
+            useOrderStore.getState().setMode(ORDER_FLOW_MODE.UPDATE_ITEMS)
+            useOrderStore.getState().setTargetOrderId(orderIdNumber)
+            useOrderStore.getState().setEditingOrderDetailId(Number(orderDetailId))
 
             useOrderStore.getState().add({
               menuId: Number(detail.menuID ?? 0),
@@ -141,9 +164,6 @@ export default function OrderDetailScreen() {
             router.push({
               pathname: '/(protected)/order/item-detail',
               params: {
-                isUpdate: 'true',
-                orderId: String(orderIdNumber),
-                orderDetailId: String(orderDetailId),
                 menuId: String(detail.menuID ?? ''),
                 sizeId: String(detail.size?.id ?? '')
               }

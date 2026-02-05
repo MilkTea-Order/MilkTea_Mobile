@@ -1,4 +1,5 @@
 import type { DinnerTable } from '@/features/order/types/table.type'
+import { ORDER_FLOW_MODE, OrderFlowMode } from '@/shared/constants/other'
 import { create } from 'zustand'
 
 export type OrderLine = {
@@ -20,11 +21,17 @@ type OrderState = {
   items: OrderLine[]
   totalPrice: number
   table: DinnerTable | null
+  mode: OrderFlowMode
+  targetOrderId: number | null
+  editingOrderDetailId: number | null
   add: (orderLine: OrderLine) => void
   increment: (menuId: number, sizeId: number) => void
   decrement: (menuId: number, sizeId: number) => void
   setLineNote: (menuId: number, sizeId: number, note: string | null) => void
   setTable: (table: DinnerTable | null) => void
+  setMode: (mode: OrderFlowMode) => void
+  setTargetOrderId: (orderId: number | null) => void
+  setEditingOrderDetailId: (orderDetailId: number | null) => void
   clear: () => void
 }
 
@@ -32,6 +39,9 @@ export const useOrderStore = create<OrderState>((set) => ({
   items: [],
   totalPrice: 0,
   table: null,
+  mode: ORDER_FLOW_MODE.CREATE,
+  targetOrderId: null,
+  editingOrderDetailId: null,
 
   add: (orderLine) => {
     set((state) => {
@@ -106,5 +116,19 @@ export const useOrderStore = create<OrderState>((set) => ({
 
   setTable: (table) => set({ table }),
 
-  clear: () => set({ items: [], totalPrice: 0, table: null })
+  setMode: (mode) => set({ mode }),
+
+  setTargetOrderId: (orderId) => set({ targetOrderId: orderId }),
+
+  setEditingOrderDetailId: (orderDetailId) => set({ editingOrderDetailId: orderDetailId }),
+
+  clear: () =>
+    set({
+      items: [],
+      totalPrice: 0,
+      table: null,
+      mode: ORDER_FLOW_MODE.CREATE,
+      targetOrderId: null,
+      editingOrderDetailId: null
+    })
 }))

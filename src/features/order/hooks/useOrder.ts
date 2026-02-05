@@ -1,10 +1,13 @@
 import { ERROR_CODE } from '@/shared/constants/errorCode'
+import type { ApiErrorResponse } from '@/shared/types/api.type'
 import { extractErrorDetails } from '@/shared/utils/formErrors'
+import { isApiError } from '@/shared/utils/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { Toast } from 'react-native-toast-notifications'
 import { orderApi, type OrderFilter } from '../api/order.api'
-import type { CreateOrderPayload } from '../types/create-order.type'
+import type { CreateOrderItemPayload, CreateOrderPayload } from '../types/create-order.type'
+import { parseOrderError } from '../utils/parseOrderError'
 
 export const orderKeys = {
   all: ['orders'] as const,
@@ -169,6 +172,80 @@ export function useUpdateOrderItem(
         type: 'danger',
         placement: 'top'
       })
+    }
+  })
+}
+
+export function useAddOrderItems(
+  orderId: number,
+  options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }
+) {
+  const queryClient = useQueryClient()
+  const router = useRouter()
+
+  return useMutation({
+    mutationKey: [...orderKeys.all, 'add-items', orderId] as const,
+    mutationFn: async (payload: { items: CreateOrderItemPayload[] }) => {
+      const res = await orderApi.addOrderItems(orderId, payload)
+      return res.data
+    },
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
+      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, true) })
+      options?.onSuccess?.(data)
+      return data
+    },
+    onError: (error: any) => {
+      if (isApiError(error)) {
+        const result = parseOrderError(error as ApiErrorResponse)
+        // Trường hợp có nhiều items bị lỗi
+        if (result.type === 'items') {
+          // Hiển thị tất cả các lỗi của items
+          result.items.forEach((it) => {
+            Toast.show(it.message, { type: 'danger', placement: 'top' })
+          })
+          if (result.message) {
+            Toast.show(result.message, { type: 'danger', placement: 'top' })
+          }
+          options?.onError?.(result)
+          return
+        }
+        // Trường hợp chỉ có 1 item bị lỗi
+        if (result.type === 'item') {
+          Toast.show(result.message, { type: 'danger', placement: 'top' })
+          options?.onError?.(result)
+          return
+        }
+        // Trường hợp chỉ cần toast lỗi
+        if (result.type === 'alert') {
+          //Nếu lỗi liên quan tới order: không tồn tại hay bé hơn 0
+          if (
+            result.code === ERROR_CODE.E0001 ||
+            (result.code === ERROR_CODE.E0036 && result.field?.toLowerCase() === 'orderid')
+          ) {
+            Toast.show(result.message, {
+              type: 'info',
+              placement: 'top',
+              duration: 3000,
+              onClose: () => router.replace('/(protected)/(tabs)')
+            })
+            return
+          }
+          // Lỗi liên quan tới stauts của order
+          if (result.code === ERROR_CODE.E0042) {
+            Toast.show(result.message, {
+              type: 'info',
+              placement: 'top',
+              duration: 3000,
+              onClose: () => router.back()
+            })
+            router.back()
+            return
+          }
+          options?.onError?.(result)
+          return
+        }
+      }
     }
   })
 }

@@ -6,10 +6,11 @@ import { View } from 'react-native'
 interface OrderActionPanelProps {
   filterMode: 'placed' | 'cancelled'
   onFilterToggle: () => void
+  onAddItems: () => void
   colors: ReturnType<typeof useTheme>['colors']
 }
 
-export function OrderActionPanel({ filterMode, onFilterToggle, colors }: OrderActionPanelProps) {
+export function OrderActionPanel({ filterMode, onFilterToggle, onAddItems, colors }: OrderActionPanelProps) {
   return (
     <View
       className='rounded-3xl p-3 mb-4 border'
@@ -59,7 +60,9 @@ export function OrderActionPanel({ filterMode, onFilterToggle, colors }: OrderAc
         />
       </View>
 
-      <View className='flex-row mt-2'>
+      <View className='flex-row mt-2 gap-2'>
+        <ActionButton label='Thêm món' icon='add-circle-outline' onPress={onAddItems} colors={colors as any} />
+
         <ActionButton
           label={filterMode === 'placed' ? 'Đã đặt' : 'Đã hủy'}
           icon='funnel-outline'

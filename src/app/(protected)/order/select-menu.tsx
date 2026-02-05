@@ -7,7 +7,7 @@ import type { MenuGroupType } from '@/features/order/types/meny_catalog.type'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
+import { useFocusEffect, useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
@@ -23,7 +23,6 @@ export default function SelectMenuScreen() {
   const orderAdd = useOrderStore((s) => s.add)
   const orderDecrement = useOrderStore((s) => s.decrement)
   const totalPrice = useOrderStore((s) => s.totalPrice)
-  const selectedTable = useOrderStore((s) => s.table)
 
   // Data fetching
   const { data: menuGroups } = useMenuGroupTypes()
@@ -34,14 +33,16 @@ export default function SelectMenuScreen() {
     refetch: refetchMenus
   } = useMenusByGroup(selectedGroup?.menuGroupId)
 
-  // Nếu không có table trong store thì redirect về chọn bàn
-  useEffect(() => {
-    if (!selectedTable) {
-      router.replace('/(protected)/order/select-table')
-    }
-  }, [router, selectedTable])
+  const selectedTable = useOrderStore.getState().table
 
-  // Nếu chưa có nhóm thì lấy nhóm đầu tiên
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!selectedTable) {
+        router.replace('/(protected)/order/select-table')
+      }
+    }, [router, selectedTable])
+  )
+
   useEffect(() => {
     if (menuGroups && menuGroups.length > 0 && !selectedGroup) {
       setSelectedGroup(menuGroups[0])
@@ -49,7 +50,6 @@ export default function SelectMenuScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuGroups])
 
-  // Khi đổi group thì đóng expanded hiện tại (tránh giữ state của group cũ)
   useEffect(() => {
     setActiveSize(null)
   }, [selectedGroup?.menuGroupId])

@@ -9,6 +9,7 @@ interface OrderItemRowProps {
   onCancel?: (orderDetailId: number) => void
   onUpdate?: (orderDetailId: number) => void
   isCancelling?: boolean
+  canActionButton: boolean
   colors: {
     text: string
     textSecondary: string
@@ -17,12 +18,12 @@ interface OrderItemRowProps {
   }
 }
 
-export function OrderItemRow({ item, onCancel, onUpdate, isCancelling, colors }: OrderItemRowProps) {
+export function OrderItemRow({ item, onCancel, onUpdate, isCancelling, canActionButton, colors }: OrderItemRowProps) {
   return (
     <View className='flex-row items-start justify-between py-4'>
       <View className='flex-1 mr-4'>
         <View className='flex-row items-center mb-2'>
-          <Text className='text-base font-bold flex-1' style={{ color: colors.text }}>
+          <Text className='text-base font-bold' style={{ color: colors.text }}>
             {item.menu?.name ?? `Món #${item.menuID}`}
           </Text>
 
@@ -79,7 +80,7 @@ export function OrderItemRow({ item, onCancel, onUpdate, isCancelling, colors }:
         </Text>
 
         <View className='flex-row gap-2'>
-          {!!onUpdate && (
+          {!!onUpdate && !item.cancelledBy && canActionButton && (
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={() => {
@@ -96,7 +97,7 @@ export function OrderItemRow({ item, onCancel, onUpdate, isCancelling, colors }:
             </TouchableOpacity>
           )}
 
-          {!!onCancel && (
+          {!!onCancel && !item.cancelledBy && canActionButton && (
             <TouchableOpacity
               activeOpacity={0.8}
               disabled={!!isCancelling}

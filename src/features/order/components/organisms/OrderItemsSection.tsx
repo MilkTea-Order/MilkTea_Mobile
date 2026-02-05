@@ -11,6 +11,7 @@ interface OrderItemsSectionProps {
   totalQty: number
   isLoading: boolean
   isRefetching: boolean
+  canActionButton: boolean
   onRefresh: () => void
   onCancelItem?: (orderDetailId: number) => void
   onUpdateItem?: (orderDetailId: number) => void
@@ -29,6 +30,7 @@ export function OrderItemsSection({
   totalQty,
   isLoading,
   isRefetching,
+  canActionButton,
   onRefresh,
   onCancelItem,
   onUpdateItem,
@@ -86,6 +88,7 @@ export function OrderItemsSection({
               onCancel={onCancelItem}
               onUpdate={onUpdateItem}
               isCancelling={cancellingItemId === Number(item.id)}
+              canActionButton={canActionButton}
             />
           )}
           ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: colors.border }} />}

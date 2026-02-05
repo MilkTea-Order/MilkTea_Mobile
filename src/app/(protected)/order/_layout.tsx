@@ -35,8 +35,7 @@ export default function OrderStackLayout() {
         name='detail'
         options={{
           presentation: 'card',
-          animation: 'slide_from_right',
-          gestureEnabled: false
+          animation: 'slide_from_right'
         }}
       />
     </Stack>
