@@ -5,7 +5,7 @@ import { statusColors } from '@/shared/constants/theme'
 import { formatDateTime } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
-import { Text, TouchableOpacity, View } from 'react-native'
+import { Image, Text, TouchableOpacity, View } from 'react-native'
 
 type Props = {
   order: Order
@@ -42,19 +42,50 @@ export const OrderCard = ({ order, colors, statusColors, effectiveTheme, onPress
     >
       {/* Header */}
       <View className='mb-3'>
-        <View className='flex-row items-center mb-2'>
-          <View className='rounded-xl p-1.5 mr-2' style={{ backgroundColor: `${colors.primary}15` }}>
-            <Ionicons name='restaurant' size={14} color={colors.primary} />
+        <View className='flex-row items-center' style={{ gap: 12 }}>
+          {/* Table Image */}
+          <View
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 16,
+              overflow: 'hidden',
+              backgroundColor: `${colors.primary}10`
+            }}
+          >
+            {order.dinnerTable?.usingImg ? (
+              <Image
+                source={{ uri: order.dinnerTable.usingImg }}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode='contain'
+              />
+            ) : (
+              <View className='flex-1 items-center justify-center'>
+                <Ionicons name='restaurant-outline' size={28} color={colors.primary} />
+              </View>
+            )}
           </View>
-          <Text className='font-bold text-base flex-1' style={{ color: colors.text }} numberOfLines={1}>
-            {getTableLabel()}
-          </Text>
-        </View>
-        <View className='flex-row items-center'>
-          <Ionicons name='time-outline' size={11} color={colors.textSecondary} style={{ marginRight: 4 }} />
-          <Text className='text-[10px]' style={{ color: colors.textSecondary }}>
-            {formatDateTime(order.orderDate)}
-          </Text>
+
+          {/* Meta info */}
+          <View className='flex-1'>
+            <View className='flex-row items-center'>
+              <Ionicons name='time-outline' size={11} color={colors.textSecondary} style={{ marginRight: 4 }} />
+              <Text className='text-[10px]' style={{ color: colors.textSecondary }}>
+                {formatDateTime(order.orderDate)}
+              </Text>
+            </View>
+            <View
+              className='mt-1 rounded-full px-3 py-1'
+              style={{
+                alignSelf: 'flex-start',
+                backgroundColor: `${colors.primary}10`
+              }}
+            >
+              <Text className='text-xs font-semibold' style={{ color: colors.primary }} numberOfLines={1}>
+                {getTableLabel()}
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
 

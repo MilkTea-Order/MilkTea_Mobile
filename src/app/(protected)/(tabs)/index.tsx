@@ -27,7 +27,6 @@ export default function HomeScreen() {
   useEffect(() => {
     if (params.filter) {
       const filterValue = params.filter
-      // Validate filter value
       if (
         filterValue === STATUS.ORDER.UNPAID ||
         filterValue === STATUS.ORDER.PAID ||

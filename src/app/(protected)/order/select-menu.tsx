@@ -24,7 +24,6 @@ export default function SelectMenuScreen() {
   const orderDecrement = useOrderStore((s) => s.decrement)
   const totalPrice = useOrderStore((s) => s.totalPrice)
 
-  // Data fetching
   const { data: menuGroups } = useMenuGroupTypes()
   const {
     data: menus,

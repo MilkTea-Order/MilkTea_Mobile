@@ -1,18 +1,3 @@
-export interface DinnerTable {
-  id: number
-  code: string
-  name: string
-  position: string | null
-  numberOfSeats: number
-  statusName: string
-  note: string | null
-}
-
-export interface OrderStatus {
-  id: number
-  name: string
-}
-
 export interface Order {
   orderID: number
   dinnerTableID: number
@@ -27,22 +12,21 @@ export interface Order {
   status: OrderStatus
   orderDetails: OrderDetail[]
 }
-
-export interface Menu {
+export interface DinnerTable {
   id: number
   code: string
   name: string
-  image: string | null
-  menuGroupName: string
+  position: string | null
+  numberOfSeats: number
   statusName: string
-  unitName: string
   note: string | null
+  usingImg: string | null
+  emptyImg: string | null
 }
 
-export interface Size {
+export interface OrderStatus {
   id: number
   name: string
-  rankIndex: number
 }
 
 export interface OrderDetail {
@@ -62,4 +46,21 @@ export interface OrderDetail {
   sizeID: number
   menu: Menu
   size: Size
+}
+
+export interface Menu {
+  id: number
+  code: string
+  name: string
+  image: string | null
+  menuGroupName: string
+  statusName: string
+  unitName: string
+  note: string | null
+}
+
+export interface Size {
+  id: number
+  name: string
+  rankIndex: number
 }
