@@ -1,9 +1,10 @@
+import { FilterDropdown } from '@/features/order/components/molecules/FilterDropdown'
 import { OrderItemRow } from '@/features/order/components/molecules/OrderItemRow'
 import { OrderItemsEmptyState } from '@/features/order/components/molecules/OrderItemsEmptyState'
 import type { OrderDetail } from '@/features/order/types/order.type'
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
-import { ActivityIndicator, Dimensions, FlatList, Text, View } from 'react-native'
+import { ActivityIndicator, Dimensions, FlatList, Text, TouchableOpacity, View } from 'react-native'
 const SCREEN_HEIGHT = Dimensions.get('window').height
 
 interface OrderItemsSectionProps {
@@ -16,12 +17,16 @@ interface OrderItemsSectionProps {
   onCancelItem?: (orderDetailId: number) => void
   onUpdateItem?: (orderDetailId: number) => void
   cancellingItemId?: number | null
+  filterMode?: 'placed' | 'cancelled'
+  onFilterChange?: (value: 'placed' | 'cancelled') => void
+  onAddItems?: () => void
   colors: {
     card: string
     border: string
     primary: string
     text: string
     textSecondary: string
+    background: string
   }
 }
 
@@ -35,13 +40,21 @@ export function OrderItemsSection({
   onCancelItem,
   onUpdateItem,
   cancellingItemId,
+  filterMode,
+  onFilterChange,
+  onAddItems,
   colors
 }: OrderItemsSectionProps) {
+  const filterOptions = [
+    { label: 'Đã đặt', value: 'placed' as const, icon: 'checkmark-circle-outline' as const },
+    { label: 'Đã hủy', value: 'cancelled' as const, icon: 'close-circle-outline' as const }
+  ]
+
   return (
     <View
       className='rounded-3xl p-6 border-2'
       style={{
-        maxHeight: SCREEN_HEIGHT * 0.52,
+        maxHeight: SCREEN_HEIGHT * 0.63,
         backgroundColor: colors.card,
         borderColor: colors.border,
         shadowColor: '#000',
@@ -51,19 +64,38 @@ export function OrderItemsSection({
         elevation: 3
       }}
     >
-      <View className='flex-row items-center mb-5'>
-        <View className='rounded-xl p-2 mr-3' style={{ backgroundColor: `${colors.primary}15` }}>
-          <Ionicons name='list-outline' size={24} color={colors.primary} />
-        </View>
-        <Text className='text-xl font-bold flex-1' style={{ color: colors.text }}>
-          Danh sách món - Số lượng: {totalQty}
-        </Text>
-
-        {isRefetching && (
-          <View className='ml-2'>
-            <ActivityIndicator size='small' color={colors.primary} />
+      <View className='mb-3'>
+        <View className='flex-row items-center'>
+          <View className='rounded-xl p-2 mr-3' style={{ backgroundColor: `${colors.primary}15` }}>
+            <Ionicons name='list-outline' size={24} color={colors.primary} />
           </View>
-        )}
+          <View className='flex-1'>
+            <Text className='text-xl font-bold mb-1' style={{ color: colors.text }}>
+              Danh sách món - Số lượng: {totalQty}
+            </Text>
+            {/* Filter dropdown dưới chữ Danh sách món */}
+            {onFilterChange && filterMode !== undefined && (
+              <FilterDropdown
+                value={filterMode}
+                options={filterOptions}
+                onChange={onFilterChange}
+                colors={colors}
+                icon='funnel-outline'
+              />
+            )}
+          </View>
+
+          {onAddItems && (
+            <TouchableOpacity
+              onPress={onAddItems}
+              className='rounded-full p-2'
+              style={{ backgroundColor: `${colors.primary}15` }}
+              activeOpacity={0.7}
+            >
+              <Ionicons name='add-circle-outline' size={24} color={colors.primary} />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {isLoading ? (

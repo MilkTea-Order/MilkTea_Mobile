@@ -52,7 +52,10 @@ export const isChangedNumber = (current?: number | null, initial?: number | null
 // export const isAxiosError = <T = unknown>(error: unknown): error is AxiosError<T> => axios.isAxiosError(error)
 
 export const formatDateTime = (dateString: string) => {
-  const date = new Date(dateString + 'Z')
+  const hasTimezone = /[zZ]$/.test(dateString) || /[+-]\d{2}:\d{2}$/.test(dateString)
+
+  const date = new Date(hasTimezone ? dateString : `${dateString}Z`)
+
   return date.toLocaleString('vi-VN', {
     day: '2-digit',
     month: '2-digit',

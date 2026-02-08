@@ -1,6 +1,6 @@
 import { Header } from '@/components/layouts/Header'
 import { OrderNotFoundState } from '@/features/order/components/molecules/OrderNotFoundState'
-import { OrderActionPanel } from '@/features/order/components/organisms/OrderActionPanel'
+import { OrderActionChips } from '@/features/order/components/organisms/OrderActionChips'
 import { OrderItemsSection } from '@/features/order/components/organisms/OrderItemsSection'
 import { useCancelOrderItems, useOrderDetail } from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
@@ -11,7 +11,7 @@ import { useTheme } from '@/shared/hooks/useTheme'
 import { extractErrorDetails } from '@/shared/utils/formErrors'
 import { formatCurrency } from '@/shared/utils/utils'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Alert, Text, View } from 'react-native'
 
 export default function OrderDetailScreen() {
@@ -72,8 +72,8 @@ export default function OrderDetailScreen() {
     }
   })
 
-  const handleFilterToggle = () => {
-    setFilterMode((prev) => (prev === 'placed' ? 'cancelled' : 'placed'))
+  const handleFilterChange = (value: 'placed' | 'cancelled') => {
+    setFilterMode(value)
   }
 
   const handleCancelItem = (orderDetailId: number) => {
@@ -113,26 +113,51 @@ export default function OrderDetailScreen() {
 
       {/* Content */}
       <View className='flex-1 p-4' style={{ backgroundColor: colors.background }}>
-        <OrderActionPanel
-          filterMode={filterMode}
-          onFilterToggle={handleFilterToggle}
-          onAddItems={() => {
-            if (!orderIdNumber || !order) return
+        <View className='mb-4'>
+          <OrderActionChips
+            actions={[
+              {
+                id: 'chuyen-ban',
+                label: 'Chuyển bàn',
+                icon: 'swap-horizontal-outline',
+                variant: 'info',
+                onPress: () => {
+                  // TODO: wire navigation/action
+                }
+              },
+              {
+                id: 'gop-ban',
+                label: 'Gộp bàn',
+                icon: 'git-merge-outline',
+                variant: 'warning',
+                onPress: () => {
+                  // TODO: wire navigation/action
+                }
+              },
+              {
+                id: 'thanh-toan',
+                label: 'Thanh toán',
+                icon: 'card-outline',
+                variant: 'primary',
+                onPress: () => {
+                  // TODO: wire payment flow
+                }
+              },
+              {
+                id: 'huy-ban',
+                label: 'Hủy bàn',
+                icon: 'close-circle-outline',
+                variant: 'danger',
+                onPress: () => {
+                  // TODO: wire API/action
+                }
+              }
+            ]}
+            colors={colors}
+          />
+        </View>
 
-            useOrderStore.getState().clear()
-            useOrderStore.getState().setMode(ORDER_FLOW_MODE.ADD_ITEMS)
-            useOrderStore.getState().setTargetOrderId(orderIdNumber)
-            useOrderStore.getState().setTable({
-              id: Number(order.dinnerTable.id ?? 0),
-              name: String(order.dinnerTable?.name ?? ''),
-              numberOfSeats: Number(order.dinnerTable?.numberOfSeats ?? 0)
-            } as any)
-
-            router.push('/(protected)/order/select-menu')
-          }}
-          colors={colors}
-        />
-
+        {/* Order Items Section */}
         <OrderItemsSection
           items={order?.orderDetails ?? []}
           canActionButton={filterMode === 'placed' && Number(order?.status.id ?? 0) === Number(STATUS.ORDER.UNPAID)}
@@ -170,6 +195,22 @@ export default function OrderDetailScreen() {
             })
           }}
           cancellingItemId={cancellingItemId}
+          filterMode={filterMode}
+          onFilterChange={handleFilterChange}
+          onAddItems={() => {
+            if (!orderIdNumber || !order) return
+
+            useOrderStore.getState().clear()
+            useOrderStore.getState().setMode(ORDER_FLOW_MODE.ADD_ITEMS)
+            useOrderStore.getState().setTargetOrderId(orderIdNumber)
+            useOrderStore.getState().setTable({
+              id: Number(order.dinnerTable.id ?? 0),
+              name: String(order.dinnerTable?.name ?? ''),
+              numberOfSeats: Number(order.dinnerTable?.numberOfSeats ?? 0)
+            } as any)
+
+            router.push('/(protected)/order/select-menu')
+          }}
           colors={colors}
         />
       </View>
