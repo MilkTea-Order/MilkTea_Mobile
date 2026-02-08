@@ -1,12 +1,12 @@
-import type { MenuGroupType } from '@/features/order/types/meny_catalog.type'
+import { MenuGroup } from '@/features/order/types/menu.type'
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 type Props = {
-  groups: MenuGroupType[]
+  groups: MenuGroup[]
   selectedGroupId: number | null
-  onSelectGroup: (group: MenuGroupType) => void
+  onSelectGroup: (group: MenuGroup) => void
   colors: {
     card: string
     border: string
@@ -22,14 +22,14 @@ export const MenuGroupNav: React.FC<Props> = ({ groups, selectedGroupId, onSelec
   const firstRow = groups.slice(0, itemsPerRow)
   const secondRow = groups.slice(itemsPerRow)
 
-  const renderGroupItem = (group: MenuGroupType) => {
-    const isSelected = selectedGroupId === group.menuGroupId
+  const renderGroupItem = (group: MenuGroup) => {
+    const isSelected = selectedGroupId === group.id
     // TODO: Replace with actual image URL when available in API
     const imageUrl = (group as any).MenuGroupImage || null
 
     return (
       <TouchableOpacity
-        key={group.menuGroupId}
+        key={group.id}
         onPress={() => onSelectGroup(group)}
         activeOpacity={0.8}
         className='items-center mr-4'
@@ -61,7 +61,7 @@ export const MenuGroupNav: React.FC<Props> = ({ groups, selectedGroupId, onSelec
             fontWeight: isSelected ? '600' : '400'
           }}
         >
-          {group.menuGroupName}
+          {group.name}
         </Text>
       </TouchableOpacity>
     )

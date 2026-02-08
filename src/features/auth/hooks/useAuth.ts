@@ -1,3 +1,4 @@
+import { useOrderStore } from '@/features/order/store/order.store'
 import { userApi } from '@/features/user/apis/user.api'
 import { userKeys } from '@/features/user/hooks/useUser'
 import { extractFieldErrors } from '@/shared/utils/formErrors'
@@ -57,11 +58,13 @@ export function useLogin() {
 export function useLogout() {
   const queryClient = useQueryClient()
   const { logout } = useAuthStore()
+  const { clear } = useOrderStore()
 
   return useMutation({
     mutationFn: authApi.logout,
     onSuccess: async () => {
       await logout()
+      await clear()
       queryClient.clear()
     }
   })

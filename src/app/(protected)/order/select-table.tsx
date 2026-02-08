@@ -55,19 +55,6 @@ export default function SelectTableScreen() {
               Chọn bàn để bắt đầu tạo đơn
             </Text>
           </View>
-          {/* <TouchableOpacity
-            onPress={() => refetch()}
-            className='px-3 py-2 rounded-xl'
-            style={{
-              backgroundColor: `${colors.primary}15`,
-              borderWidth: 1,
-              borderColor: `${colors.primary}30`
-            }}
-          >
-            <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
-              Làm mới
-            </Text>
-          </TouchableOpacity> */}
         </View>
 
         {isLoading || isRefetching ? (
@@ -82,7 +69,7 @@ export default function SelectTableScreen() {
               const tableImageUrl = (table as any).emptyImg || null
               return (
                 <TouchableOpacity
-                  key={table.tableID}
+                  key={table.id}
                   onPress={() => handleSelect(table)}
                   className='rounded-2xl border overflow-hidden'
                   style={{
@@ -118,13 +105,10 @@ export default function SelectTableScreen() {
                   </View>
 
                   <View className='p-3'>
-                    {/* <Text className='text-base font-bold mb-1' style={{ color: colors.text }}>
-                      {table.tableName}
-                    </Text> */}
                     <View className='flex-row items-center'>
                       <Ionicons name='people-outline' size={14} color={colors.textSecondary} />
                       <Text className='text-xs ml-1' style={{ color: colors.textSecondary }}>
-                        {table.numberOfSeat} ghế
+                        {table.numberOfSeats} ghế
                       </Text>
                     </View>
                   </View>

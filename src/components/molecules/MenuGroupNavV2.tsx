@@ -1,12 +1,12 @@
-import type { MenuGroupType } from '@/features/order/types/meny_catalog.type'
+import type { MenuGroup } from '@/features/order/types/menu.type'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useState } from 'react'
 import { Image, NativeScrollEvent, NativeSyntheticEvent, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 type Props = {
-  groups: MenuGroupType[]
+  groups: MenuGroup[]
   selectedGroupId: number | null
-  onSelectGroup: (group: MenuGroupType) => void
+  onSelectGroup: (group: MenuGroup) => void
   colors: {
     card: string
     border: string
@@ -21,7 +21,7 @@ export default function MenuGroupNavV2({ groups, selectedGroupId, onSelectGroup,
   const [scrollProgress, setScrollProgress] = useState(0)
 
   // Split groups into two rows
-  const [firstRow, secondRow] = groups.reduce<[MenuGroupType[], MenuGroupType[]]>(
+  const [firstRow, secondRow] = groups.reduce<[MenuGroup[], MenuGroup[]]>(
     (acc, group, index) => {
       acc[index % 2].push(group)
       return acc
@@ -48,13 +48,13 @@ export default function MenuGroupNavV2({ groups, selectedGroupId, onSelectGroup,
     setScrollProgress((prev) => (Math.abs(prev - next) < 0.001 ? prev : next))
   }
 
-  const renderGroupItem = (group: MenuGroupType) => {
-    const isSelected = selectedGroupId === group.menuGroupId
+  const renderGroupItem = (group: MenuGroup) => {
+    const isSelected = selectedGroupId === group.id
     const imageUrl = (group as any).menuGroupImage || null
 
     return (
       <TouchableOpacity
-        key={group.menuGroupId}
+        key={group.id}
         onPress={() => onSelectGroup(group)}
         activeOpacity={0.8}
         className='items-center mr-4'
@@ -86,7 +86,7 @@ export default function MenuGroupNavV2({ groups, selectedGroupId, onSelectGroup,
             fontWeight: isSelected ? '600' : '400'
           }}
         >
-          {group.menuGroupName}
+          {group.name}
         </Text>
       </TouchableOpacity>
     )

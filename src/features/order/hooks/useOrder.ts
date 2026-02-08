@@ -1,12 +1,13 @@
 import { ERROR_CODE } from '@/shared/constants/errorCode'
+import { STATUS } from '@/shared/constants/status'
 import type { ApiErrorResponse } from '@/shared/types/api.type'
 import { extractErrorDetails } from '@/shared/utils/formErrors'
 import { isApiError } from '@/shared/utils/utils'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { Toast } from 'react-native-toast-notifications'
-import { orderApi, type OrderFilter } from '../api/order.api'
-import type { CreateOrderItemPayload, CreateOrderPayload } from '../types/create-order.type'
+import { orderApi, OrderFilter } from '../api/order.api'
+import type { CreateOrderItemPayload, CreateOrderPayload, Order } from '../types/order.type'
 import { parseOrderError } from '../utils/parseOrderError'
 
 export const orderKeys = {
@@ -23,12 +24,13 @@ export function useOrders(filter: OrderFilter) {
       const response = await orderApi.getOrders(filter)
       return response.data.data ?? []
     },
-    staleTime: 30 * 1000 // 30 seconds
+    staleTime: 30 * 1000
   })
 
   return {
     orders: query.data ?? [],
     isLoading: query.isPending,
+    isFetching: query.isFetching,
     isRefetching: query.isRefetching,
     refetch: query.refetch
   }
@@ -43,7 +45,8 @@ export function useOrderDetail(orderId: number | null, isCancelled: boolean = fa
       return response.data.data ?? null
     },
     enabled: !!orderId,
-    staleTime: 30 * 1000 // 30 seconds
+    staleTime: 30 * 1000,
+    placeholderData: keepPreviousData
   })
 
   return {
@@ -63,9 +66,17 @@ export function useCreateOrder() {
       const res = await orderApi.createOrder(payload)
       return res.data
     },
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       Toast.show('Tạo đơn hàng thành công!', { type: 'success' })
-      await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      queryClient.setQueriesData(
+        { queryKey: orderKeys.list(STATUS.ORDER.UNPAID), exact: false },
+        (old: Order[] | undefined) => {
+          const prev = old ?? []
+
+          const withoutDup = prev.filter((o) => o.orderID !== data.data.orderID)
+          return [data.data, ...withoutDup]
+        }
+      )
     }
   })
 }

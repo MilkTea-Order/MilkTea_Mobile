@@ -7,23 +7,20 @@ import { useMe } from '@/features/user/hooks/useUser'
 import { ORDER_STATUS_LABEL, STATUS, type OrderStatus } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { Ionicons } from '@expo/vector-icons'
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
 
 export default function HomeScreen() {
   const { colors, status, effectiveTheme } = useTheme()
   const [selectedFilter, setSelectedFilter] = useState<OrderFilter>(STATUS.ORDER.UNPAID)
   const [refreshing, setRefreshing] = useState(false)
   const router = useRouter()
-  const params = useLocalSearchParams<{ filter?: string }>()
-  const { data: meData, isPending: isLoadingUser } = useMe()
-  const user = meData?.data
-  const scrollViewRef = useRef<ScrollView>(null)
+  const params = useLocalSearchParams<{ filter?: OrderStatus }>()
 
+  const { data: meData, isPending: isLoadingUser } = useMe()
   const { orders, isLoading: isLoadingOrders, isRefetching, refetch } = useOrders(selectedFilter)
 
-  // Read filter from query params
   useEffect(() => {
     if (params.filter) {
       const filterValue = params.filter
@@ -42,22 +39,65 @@ export default function HomeScreen() {
     }
   }, [params.filter])
 
-  useFocusEffect(
-    useCallback(() => {
-      scrollViewRef.current?.scrollTo({ y: 0, animated: false })
-    }, [])
-  )
-
   const onRefresh = useCallback(() => {
     setRefreshing(true)
     refetch().finally(() => setRefreshing(false))
   }, [refetch])
 
+  const ListHeader = useMemo(
+    () => (
+      <View>
+        <View className='flex-row items-center justify-between mb-2'>
+          <Text className='text-lg font-bold' style={{ color: colors.text }}>
+            Tổng cộng: {orders.length} bàn
+          </Text>
+
+          {isRefetching && <ActivityIndicator size='small' color={colors.primary} />}
+        </View>
+      </View>
+    ),
+    [colors.text, colors.primary, orders.length, isRefetching]
+  )
+
+  const EmptyComponent = useMemo(() => {
+    const showLoading = isLoadingOrders || (isRefetching && orders.length === 0)
+
+    if (showLoading) {
+      return (
+        <View className='items-center justify-center py-20'>
+          <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
+            <Ionicons name='time-outline' size={48} color={colors.primary} />
+          </View>
+          <Text className='text-lg font-semibold mt-2' style={{ color: colors.text }}>
+            Đang tải đơn hàng...
+          </Text>
+          <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
+            Vui lòng đợi trong giây lát
+          </Text>
+        </View>
+      )
+    }
+
+    return (
+      <View className='items-center justify-center py-32'>
+        <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
+          <Ionicons name='restaurant-outline' size={48} color={colors.primary} />
+        </View>
+        <Text className='text-xl font-bold mt-2' style={{ color: colors.text }}>
+          Chưa có đơn hàng
+        </Text>
+        <Text className='text-sm mt-2 text-center px-8' style={{ color: colors.textSecondary }}>
+          Không có đơn hàng {ORDER_STATUS_LABEL[selectedFilter as OrderStatus].toLowerCase()} nào
+        </Text>
+      </View>
+    )
+  }, [colors.primary, colors.text, colors.textSecondary, isLoadingOrders, isRefetching, orders.length, selectedFilter])
+
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
       <Header
         title='Xin chào'
-        subtitle={isLoadingUser ? 'Đang tải...' : user?.fullName || 'Nhân viên'}
+        subtitle={isLoadingUser ? 'Đang tải...' : meData?.data?.fullName || 'Nhân viên'}
         showBackButton={false}
         rightContent={
           <TouchableOpacity
@@ -79,73 +119,50 @@ export default function HomeScreen() {
       </Header>
 
       {/* Orders List */}
-      <ScrollView
-        ref={scrollViewRef}
-        className='flex-1'
+
+      <FlatList
+        data={orders}
+        keyExtractor={(item) => item.orderID.toString()}
+        numColumns={3}
         style={{ backgroundColor: colors.background }}
         contentContainerStyle={{
           padding: 16,
           paddingBottom: 100
         }}
+        columnWrapperStyle={{
+          gap: 12,
+          marginBottom: 8
+        }}
+        ListHeaderComponent={ListHeader}
+        ListEmptyComponent={EmptyComponent}
         refreshControl={
           <RefreshControl refreshing={refreshing || isRefetching} onRefresh={onRefresh} tintColor={colors.primary} />
         }
-        scrollEventThrottle={16}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header Section */}
-        <View className='flex-row items-center justify-between mb-2'>
-          <View className='flex-row items-center'>
-            <Text className='text-lg font-bold' style={{ color: colors.text }}>
-              Tổng cộng: {orders.length} bàn
-            </Text>
-          </View>
-        </View>
-
-        {/* Content */}
-        {isLoadingOrders && orders.length === 0 ? (
-          <View className='items-center justify-center py-20'>
-            <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
-              <Ionicons name='time-outline' size={48} color={colors.primary} />
-            </View>
-            <Text className='text-lg font-semibold mt-2' style={{ color: colors.text }}>
-              Đang tải đơn hàng...
-            </Text>
-            <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
-              Vui lòng đợi trong giây lát
-            </Text>
-          </View>
-        ) : orders.length === 0 ? (
-          <View className='items-center justify-center py-32'>
-            <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
-              <Ionicons name='restaurant-outline' size={48} color={colors.primary} />
-            </View>
-            <Text className='text-xl font-bold mt-2' style={{ color: colors.text }}>
-              Chưa có đơn hàng
-            </Text>
-            <Text className='text-sm mt-2 text-center px-8' style={{ color: colors.textSecondary }}>
-              Không có đơn hàng {ORDER_STATUS_LABEL[selectedFilter as OrderStatus].toLowerCase()} nào
-            </Text>
-          </View>
-        ) : (
-          <View className='flex-row flex-wrap' style={{ gap: 12 }}>
-            {orders.map((order) => (
-              <View key={order.orderID} style={{ width: '48%' }}>
-                <OrderCard
-                  order={order}
-                  colors={colors}
-                  statusColors={status}
-                  effectiveTheme={effectiveTheme}
-                  onPressDetail={() => {
-                    router.push(`/(protected)/order/detail?orderId=${order.orderID}` as any)
-                  }}
-                />
-              </View>
-            ))}
+        renderItem={({ item }) => (
+          <View
+            style={{
+              flexBasis: '31%',
+              maxWidth: '31%',
+              marginBottom: 8
+            }}
+          >
+            <OrderCard
+              order={item}
+              colors={colors}
+              statusColors={status}
+              effectiveTheme={effectiveTheme}
+              onPressDetail={() => {
+                router.push(`/(protected)/order/detail?orderId=${item.orderID}` as any)
+              }}
+            />
           </View>
         )}
-      </ScrollView>
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        removeClippedSubviews={false}
+      />
 
+      {/* Button Create Order */}
       <TouchableOpacity
         onPress={() => router.push('/(protected)/order/select-menu' as any)}
         className='absolute bottom-6 right-6 rounded-full p-7'

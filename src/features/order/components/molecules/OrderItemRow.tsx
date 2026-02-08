@@ -24,15 +24,15 @@ export function OrderItemRow({ item, onCancel, onUpdate, isCancelling, canAction
       <View className='flex-1 mr-4'>
         <View className='flex-row items-center mb-2'>
           <Text className='text-base font-bold' style={{ color: colors.text }}>
-            {item.menu?.name ?? `Món #${item.menuID}`}
+            {item.menu.name ?? `Món #${item.menu.id}`}
           </Text>
 
-          {item.menu?.unitName && (
+          {item.menu.unit?.name && (
             <Text
               className='text-xs px-2 py-1 rounded ml-2'
               style={{ backgroundColor: `${colors.primary}15`, color: colors.primary }}
             >
-              {item.menu.unitName}
+              {item.menu.unit.name}
             </Text>
           )}
         </View>

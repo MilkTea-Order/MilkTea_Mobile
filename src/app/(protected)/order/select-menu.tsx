@@ -1,21 +1,22 @@
 import { Header } from '@/components/layouts/Header'
 import MenuGroupNavV2 from '@/components/molecules/MenuGroupNavV2'
 import MenuItemCardV2 from '@/components/molecules/MenuItemCardV2'
-import { useMenuGroupTypes, useMenusByGroup } from '@/features/order/hooks/useMenu'
+import { useMenuGroups, useMenusByGroup } from '@/features/order/hooks/useMenu'
 import { useOrderStore } from '@/features/order/store/order.store'
-import type { MenuGroupType } from '@/features/order/types/meny_catalog.type'
+import { MenuGroup } from '@/features/order/types/menu.type'
+import { ORDER_FLOW_MODE } from '@/shared/constants/other'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons } from '@expo/vector-icons'
 import { useFocusEffect, useRouter } from 'expo-router'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 export default function SelectMenuScreen() {
   const router = useRouter()
   const { colors } = useTheme()
 
-  const [selectedGroup, setSelectedGroup] = useState<MenuGroupType | null>(null)
+  const [selectedGroup, setSelectedGroup] = useState<MenuGroup | null>(null)
   const [activeSize, setActiveSize] = useState<{ menuId: number; sizeId: number } | null>(null)
 
   // Store
@@ -23,23 +24,27 @@ export default function SelectMenuScreen() {
   const orderAdd = useOrderStore((s) => s.add)
   const orderDecrement = useOrderStore((s) => s.decrement)
   const totalPrice = useOrderStore((s) => s.totalPrice)
+  const clearOrder = useOrderStore((s) => s.clear)
+  const mode = useOrderStore((s) => s.mode)
 
-  const { data: menuGroups } = useMenuGroupTypes()
+  const { data: menuGroups } = useMenuGroups()
   const {
     data: menus,
     isLoading: isLoadingMenus,
     isRefetching: isRefetchingMenus,
     refetch: refetchMenus
-  } = useMenusByGroup(selectedGroup?.menuGroupId)
+  } = useMenusByGroup(selectedGroup?.id)
 
-  const selectedTable = useOrderStore.getState().table
+  // const selectedTable = useOrderStore.getState().table
+  const selectedTable = useOrderStore((s) => s.table)
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       if (!selectedTable) {
         router.replace('/(protected)/order/select-table')
       }
-    }, [router, selectedTable])
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router])
   )
 
   useEffect(() => {
@@ -51,9 +56,12 @@ export default function SelectMenuScreen() {
 
   useEffect(() => {
     setActiveSize(null)
-  }, [selectedGroup?.menuGroupId])
+  }, [selectedGroup?.id])
 
   const handleBack = () => {
+    if (mode === ORDER_FLOW_MODE.ADD_ITEMS) {
+      clearOrder()
+    }
     router.back()
   }
 
@@ -70,14 +78,14 @@ export default function SelectMenuScreen() {
 
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
-      <Header title={`Chọn món •  ${selectedTable?.tableName ?? ''}`} onBack={handleBack} />
+      <Header title={`Chọn món •  ${selectedTable?.name ?? ''}`} onBack={handleBack} />
 
       {/* Menu Group Navigation */}
       {menuGroups && menuGroups.length > 0 && (
         <View style={{ backgroundColor: colors.background }}>
           <MenuGroupNavV2
             groups={menuGroups}
-            selectedGroupId={selectedGroup?.menuGroupId || null}
+            selectedGroupId={selectedGroup?.id || null}
             onSelectGroup={setSelectedGroup}
             colors={{
               card: colors.card,
@@ -123,7 +131,7 @@ export default function SelectMenuScreen() {
         ) : (
           <View className='flex-row flex-wrap' style={{ marginHorizontal: -4 }}>
             {menus.map((menu) => (
-              <View key={menu.menuId} style={{ marginHorizontal: 4, marginBottom: 8 }}>
+              <View key={menu.id} style={{ marginHorizontal: 4, marginBottom: 8 }}>
                 <MenuItemCardV2
                   menu={menu}
                   colors={{

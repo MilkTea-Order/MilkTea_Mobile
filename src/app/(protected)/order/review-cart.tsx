@@ -4,6 +4,7 @@ import { useAddOrderItems, useCreateOrder } from '@/features/order/hooks/useOrde
 import { useOrderStore } from '@/features/order/store/order.store'
 import { parseOrderError } from '@/features/order/utils/parseOrderError'
 import { ORDER_FLOW_MODE } from '@/shared/constants/other'
+import { STATUS } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { ApiErrorResponse } from '@/shared/types/api.type'
 import { formatCurrencyVND } from '@/shared/utils/currency'
@@ -28,7 +29,8 @@ export default function ReviewCartScreen() {
   const mode = useOrderStore((s) => s.mode)
   const targetOrderId = useOrderStore((s) => s.targetOrderId)
 
-  const selectedTable = useOrderStore.getState().table
+  // const selectedTable = useOrderStore.getState().table
+  const selectedTable = useOrderStore((s) => s.table)
 
   const [itemErrors, setItemErrors] = useState<Record<string, string>>({})
 
@@ -56,10 +58,11 @@ export default function ReviewCartScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      const table = useOrderStore.getState().table
-      if (!table) {
+      // const table = useOrderStore.getState().table
+      if (!selectedTable) {
         router.replace('/(protected)/order/select-table')
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router])
   )
 
@@ -91,7 +94,7 @@ export default function ReviewCartScreen() {
     }
 
     const payload = {
-      dinnerTableID: table.tableID,
+      dinnerTableID: table.id,
       orderByID: Number(authProfile?.user?.id ?? 0),
       items: orderItems.map((item) => ({
         menuID: item.menuId,
@@ -107,7 +110,12 @@ export default function ReviewCartScreen() {
     createOrderMutation.mutate(payload, {
       onSuccess: () => {
         clearOrder()
-        router.replace('/(protected)/(tabs)')
+        router.replace({
+          pathname: '/(protected)/(tabs)',
+          params: {
+            filter: STATUS.ORDER.UNPAID
+          }
+        })
       },
       onError: (error) => {
         if (isApiError(error)) {
@@ -132,7 +140,7 @@ export default function ReviewCartScreen() {
 
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
-      <Header title={`Các món đã đặt •  ${selectedTable?.tableName ?? ''}`} onBack={handleBack} />
+      <Header title={`Các món đã đặt •  ${selectedTable?.name ?? ''}`} onBack={handleBack} />
 
       <ScrollView
         className='flex-1'

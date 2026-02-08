@@ -3,8 +3,7 @@ import { URL } from '@/shared/constants/urls'
 import { ApiResponse } from '@/shared/types/api.type'
 import http from '@/shared/utils/http'
 import { AxiosResponse } from 'axios'
-import type { CreateOrderItemPayload, CreateOrderPayload, CreateOrderResponse } from '../types/create-order.type'
-import { Order } from '../types/order.type'
+import { CreateOrderItemPayload, CreateOrderPayload, Order } from '../types/order.type'
 
 export type OrderFilter = OrderStatus
 export type OrdersApiResponse = ApiResponse<Order[]>
@@ -20,9 +19,11 @@ export const orderApi = {
       params: { isCancelled }
     })
   },
-  createOrder(payload: CreateOrderPayload): Promise<AxiosResponse<CreateOrderResponse>> {
-    return http.post<CreateOrderResponse>(URL.ORDERS, payload)
+
+  createOrder(payload: CreateOrderPayload): Promise<AxiosResponse<ApiResponse<Order>>> {
+    return http.post<ApiResponse<Order>>(URL.ORDERS, payload)
   },
+
   cancelOrderItems(
     orderId: number,
     orderDetailIDs: number[]

@@ -1,6 +1,6 @@
 import { useMenuSizes } from '@/features/order/hooks/useMenu'
 import type { OrderLine } from '@/features/order/store/order.store'
-import type { MenuItem } from '@/features/order/types/meny_catalog.type'
+import type { Menu } from '@/features/order/types/menu.type'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useState } from 'react'
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
@@ -10,7 +10,7 @@ type OnAdd = (orderLine: OrderLine) => void
 type OnRemove = (menuId: number, sizeId: number) => void
 
 type Props = {
-  menu: MenuItem
+  menu: Menu
   colors: {
     card: string
     border: string
@@ -26,7 +26,7 @@ type Props = {
 
 export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd, onRemove, formatCurrency }) => {
   const [expanded, setExpanded] = useState(false)
-  const { data: sizes, isLoading } = useMenuSizes(menu.menuId)
+  const { data: sizes, isLoading } = useMenuSizes(menu.id)
 
   return (
     <View
@@ -48,10 +48,10 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
       >
         <View className='flex-1 mr-3'>
           <Text className='text-lg font-bold mb-1' style={{ color: colors.text }}>
-            {menu.menuName}
+            {menu.name}
           </Text>
           <Text className='text-sm' style={{ color: colors.textSecondary }}>
-            {menu.menuCode}
+            {menu.code}
           </Text>
           <Text className='text-xs mt-1' style={{ color: colors.textSecondary }}>
             {expanded ? 'Ẩn size' : 'Chạm để chọn size'}
@@ -81,10 +81,10 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
       ) : (
         <View className='gap-2'>
           {sizes.map((size) => {
-            const quantity = getQuantity(menu.menuId, size.sizeId)
+            const quantity = getQuantity(menu.id, size.id)
             return (
               <View
-                key={size.sizeId}
+                key={size.id}
                 className='flex-row items-center justify-between rounded-xl px-3 py-2'
                 style={{
                   backgroundColor: `${colors.primary}${quantity > 0 ? '20' : '12'}`,
@@ -94,16 +94,16 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
               >
                 <View className='flex-1 mr-3'>
                   <Text className='text-base font-semibold' style={{ color: colors.text }}>
-                    {size.sizeName}
+                    {size.name}
                   </Text>
                   <Text className='text-sm font-bold' style={{ color: colors.primary }}>
-                    {formatCurrency(size.price)}
+                    {formatCurrency(size.price?.price ?? 0)}
                   </Text>
                 </View>
                 {quantity > 0 ? (
                   <View className='flex-row items-center'>
                     <TouchableOpacity
-                      onPress={() => onRemove(menu.menuId, size.sizeId)}
+                      onPress={() => onRemove(menu.id, size.id)}
                       className='rounded-full p-1.5'
                       style={{ backgroundColor: colors.primary }}
                       activeOpacity={0.8}
@@ -116,12 +116,12 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
                     <TouchableOpacity
                       onPress={() =>
                         onAdd({
-                          menuId: menu.menuId,
-                          menuName: menu.menuName,
-                          menuImage: menu.menuImage ?? null,
-                          sizeId: size.sizeId,
-                          sizeName: size.sizeName,
-                          price: size.price,
+                          menuId: menu.id,
+                          menuName: menu.name,
+                          menuImage: menu.image ?? null,
+                          sizeId: size.id,
+                          sizeName: size.name,
+                          price: size.price?.price ?? 0,
                           quantity: 1
                         })
                       }
@@ -136,12 +136,12 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
                   <TouchableOpacity
                     onPress={() =>
                       onAdd({
-                        menuId: menu.menuId,
-                        menuName: menu.menuName,
-                        menuImage: menu.menuImage ?? null,
-                        sizeId: size.sizeId,
-                        sizeName: size.sizeName,
-                        price: size.price,
+                        menuId: menu.id,
+                        menuName: menu.name,
+                        menuImage: menu.image ?? null,
+                        sizeId: size.id,
+                        sizeName: size.name,
+                        price: size.price?.price ?? 0,
                         quantity: 1
                       })
                     }

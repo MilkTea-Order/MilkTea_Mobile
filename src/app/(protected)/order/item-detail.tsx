@@ -182,7 +182,7 @@ export default function OrderItemDetailScreen() {
             >
               <TouchableOpacity
                 onPress={() => decrement(menuItem.menuId, menuItem.sizeId)}
-                disabled={menuItem.quantity <= 1 || isSaving}
+                disabled={isSaving}
                 className='rounded-full'
                 style={{
                   width: 32,
@@ -265,16 +265,6 @@ export default function OrderItemDetailScreen() {
               <Text className='text-white text-center text-base font-bold'>{isUpdateMode ? 'Cập nhật' : 'Lưu'}</Text>
             )}
           </TouchableOpacity>
-          {/* Helper text
-          {isUpdateMode && !hasValidUpdateIds ? (
-            <Text className='mt-2 text-xs' style={{ color: colors.textSecondary }}>
-              Không thể cập nhật vì orderId/orderDetailId không hợp lệ.
-            </Text>
-          ) : !hasChanged ? (
-            <Text className='mt-2 text-xs' style={{ color: colors.textSecondary }}>
-              Bạn chưa thay đổi số lượng hoặc ghi chú.
-            </Text>
-          ) : null} */}
         </View>
       </ScrollView>
     </View>

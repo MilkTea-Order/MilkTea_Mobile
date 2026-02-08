@@ -91,7 +91,7 @@ export default function OrderDetailScreen() {
     )
   }
 
-  const orderStatus = String(order?.statusID ?? '') as OrderStatus
+  const orderStatus = String(order?.status.id ?? '') as OrderStatus
   const statusName = isLoading ? 'Đang tải...' : (order?.status?.name ?? ORDER_STATUS_LABEL[orderStatus] ?? '')
   const totalQty = order?.orderDetails?.reduce((sum, d) => sum + (d.quantity ?? 0), 0) ?? 0
 
@@ -123,9 +123,9 @@ export default function OrderDetailScreen() {
             useOrderStore.getState().setMode(ORDER_FLOW_MODE.ADD_ITEMS)
             useOrderStore.getState().setTargetOrderId(orderIdNumber)
             useOrderStore.getState().setTable({
-              tableID: Number(order.dinnerTableID ?? 0),
-              tableName: String(order.dinnerTable?.name ?? ''),
-              numberOfSeat: Number(order.dinnerTable?.numberOfSeats ?? 0)
+              id: Number(order.dinnerTable.id ?? 0),
+              name: String(order.dinnerTable?.name ?? ''),
+              numberOfSeats: Number(order.dinnerTable?.numberOfSeats ?? 0)
             } as any)
 
             router.push('/(protected)/order/select-menu')
@@ -135,7 +135,7 @@ export default function OrderDetailScreen() {
 
         <OrderItemsSection
           items={order?.orderDetails ?? []}
-          canActionButton={filterMode === 'placed' && Number(order?.statusID ?? 0) === Number(STATUS.ORDER.UNPAID)}
+          canActionButton={filterMode === 'placed' && Number(order?.status.id ?? 0) === Number(STATUS.ORDER.UNPAID)}
           totalQty={totalQty}
           isLoading={isLoading}
           isRefetching={isRefetching}
@@ -151,8 +151,8 @@ export default function OrderDetailScreen() {
             useOrderStore.getState().setEditingOrderDetailId(Number(orderDetailId))
 
             useOrderStore.getState().add({
-              menuId: Number(detail.menuID ?? 0),
-              menuName: detail.menu?.name ?? `Món #${detail.menuID}`,
+              menuId: Number(detail.menu.id ?? 0),
+              menuName: detail.menu?.name ?? `Món #${detail.menu.id}`,
               menuImage: null,
               sizeId: Number(detail.size?.id ?? 0),
               sizeName: detail.size?.name ?? '',
@@ -164,8 +164,8 @@ export default function OrderDetailScreen() {
             router.push({
               pathname: '/(protected)/order/item-detail',
               params: {
-                menuId: String(detail.menuID ?? ''),
-                sizeId: String(detail.size?.id ?? '')
+                menuId: String(detail.menu.id ?? ''),
+                sizeId: String(detail.size.id ?? '')
               }
             })
           }}
@@ -176,68 +176,3 @@ export default function OrderDetailScreen() {
     </View>
   )
 }
-
-// order.orderDetails.map((item, index) => (
-//   <View
-//     key={item.id}
-//     className='flex-row items-start justify-between py-4'
-//     style={{
-//       borderBottomWidth: index !== order.orderDetails.length - 1 ? 1 : 0,
-//       borderBottomColor: colors.border
-//     }}
-//   >
-//     <View className='flex-1 mr-4'>
-//       <View className='flex-row items-center mb-2'>
-//         <Text className='text-base font-bold flex-1' style={{ color: colors.text }}>
-//           {item.menu?.name ?? `Món #${item.menuID}`}
-//         </Text>
-//         {item.menu?.unitName && (
-//           <Text
-//             className='text-xs px-2 py-1 rounded ml-2'
-//             style={{ backgroundColor: `${colors.primary}15`, color: colors.primary }}
-//           >
-//             {item.menu.unitName}
-//           </Text>
-//         )}
-//       </View>
-//       <View className='flex-row items-center flex-wrap mb-2' style={{ gap: 8 }}>
-//         <View className='flex-row items-center'>
-//           <Text className='text-sm' style={{ color: colors.textSecondary }}>
-//             {formatCurrency(item.price)}
-//           </Text>
-//           <Text className='text-sm mx-2' style={{ color: colors.textSecondary }}>
-//             ×
-//           </Text>
-//           <Text className='text-sm font-semibold' style={{ color: colors.textSecondary }}>
-//             {item.quantity}
-//           </Text>
-//         </View>
-//         {item.size?.name && (
-//           <View className='px-2 py-1 rounded' style={{ backgroundColor: colors.border }}>
-//             <Text className='text-xs font-semibold' style={{ color: colors.textSecondary }}>
-//               Size: {item.size.name}
-//             </Text>
-//           </View>
-//         )}
-//       </View>
-//       {item.note && (
-//         <View className='mt-1 flex-row items-start'>
-//           <Ionicons
-//             name='document-text-outline'
-//             size={12}
-//             color={colors.textSecondary}
-//             style={{ marginRight: 4, marginTop: 2 }}
-//           />
-//           <Text className='text-xs flex-1 italic leading-4' style={{ color: colors.textSecondary }}>
-//             {item.note}
-//           </Text>
-//         </View>
-//       )}
-//     </View>
-//     <View className='items-end'>
-//       <Text className='text-lg font-bold mb-1' style={{ color: colors.primary }}>
-//         {formatCurrency(item.price * item.quantity)}
-//       </Text>
-//     </View>
-//   </View>
-// ))

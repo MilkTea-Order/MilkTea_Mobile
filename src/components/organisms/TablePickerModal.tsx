@@ -60,12 +60,12 @@ export const TablePickerModal: React.FC<Props> = ({ visible, tables, isLoading, 
         ) : (
           <FlatList
             data={tables}
-            keyExtractor={(item) => String(item.tableID)}
+            keyExtractor={(item) => String(item.id)}
             renderItem={({ item }) => {
-              const active = selectedId === item.tableID
+              const active = selectedId === item.id
               return (
                 <TouchableOpacity
-                  onPress={() => setSelectedId(item.tableID)}
+                  onPress={() => setSelectedId(item.id)}
                   className='px-5 py-3 border-b'
                   style={{
                     borderBottomColor: colors.border,
@@ -73,10 +73,10 @@ export const TablePickerModal: React.FC<Props> = ({ visible, tables, isLoading, 
                   }}
                 >
                   <Text style={{ color: colors.text, fontWeight: '600', fontSize: 16 }}>
-                    {item.tableName || `Bàn ${item.tableID}`}
+                    {item.name || `Bàn ${item.id}`}
                   </Text>
-                  {!!item.statusName && (
-                    <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{item.statusName}</Text>
+                  {!!item.status.id && (
+                    <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{item.status.id}</Text>
                   )}
                 </TouchableOpacity>
               )
@@ -95,7 +95,7 @@ export const TablePickerModal: React.FC<Props> = ({ visible, tables, isLoading, 
           <TouchableOpacity
             disabled={!selectedId}
             onPress={() => {
-              const chosen = tables.find((t) => t.tableID === selectedId)
+              const chosen = tables.find((t) => t.id === selectedId)
               if (chosen) onSelect(chosen)
             }}
             className='px-4 py-2 rounded-xl'

@@ -1,13 +1,14 @@
 import type { ApiResponse } from '@/shared/types/api.type'
+import { Status } from '@/shared/types/common.type'
 
 export type DinnerTable = {
-  tableID: number
-  tableCode: string
-  tableName: string
-  numberOfSeat: number
-  tableNote: string | null
-  statusID: number
-  statusName: string
+  id: number
+  code: string
+  name: string
+  numberOfSeats: number
+  status: Status
+  note: string | null
+  position: string | null
   usingImg: string | null
   emptyImg: string | null
 }
