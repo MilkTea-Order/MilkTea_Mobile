@@ -199,7 +199,6 @@ export default function MenuItemCardV2({
             <View className='flex-row' style={{ gap: 8 }}>
               {sizes.map((size) => {
                 const quantity = getQuantityReactive(menu.id, size.id)
-
                 const isSelected = activeSize?.menuId === menu.id && activeSize?.sizeId === size.id
                 return (
                   <TouchableOpacity
@@ -217,7 +216,7 @@ export default function MenuItemCardV2({
                     }}
                     activeOpacity={0.7}
                   >
-                    {/* Size và Quantity cùng hàng */}
+                    {/* Size và Quantity */}
                     <View className='flex-row items-center mb-1' style={{ gap: 6 }}>
                       <Text
                         className='text-sm font-bold'
@@ -231,7 +230,7 @@ export default function MenuItemCardV2({
                         </View>
                       )}
                     </View>
-                    {/* Price nằm dưới */}
+                    {/* Price */}
                     <Text
                       className='text-xs font-bold'
                       style={{ color: isSelected || quantity > 0 ? colors.primary : colors.textSecondary }}

@@ -10,7 +10,7 @@ import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons } from '@expo/vector-icons'
 import { useFocusEffect, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 export default function SelectMenuScreen() {
   const router = useRouter()
@@ -23,6 +23,7 @@ export default function SelectMenuScreen() {
   const orderItems = useOrderStore((s) => s.items)
   const orderAdd = useOrderStore((s) => s.add)
   const orderDecrement = useOrderStore((s) => s.decrement)
+  const removeItem = useOrderStore((s) => s.removeItem)
   const totalPrice = useOrderStore((s) => s.totalPrice)
   const clearOrder = useOrderStore((s) => s.clear)
   const mode = useOrderStore((s) => s.mode)
@@ -46,6 +47,13 @@ export default function SelectMenuScreen() {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router])
   )
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setActiveSize(null)
+      }
+    }, [])
+  )
 
   useEffect(() => {
     if (menuGroups && menuGroups.length > 0 && !selectedGroup) {
@@ -63,6 +71,32 @@ export default function SelectMenuScreen() {
       clearOrder()
     }
     router.back()
+  }
+
+  const handleDecrement = (menuId: number, sizeId: number) => {
+    const item = orderItems.find((x) => x.menuId === menuId && x.sizeId === sizeId)
+    if (!item) return
+
+    // Nếu quantity = 1, hiển thị confirm dialog
+    if (item.quantity === 1) {
+      Alert.alert('Xác nhận', 'Bạn có muốn xóa món này khỏi giỏ hàng?', [
+        { text: 'Huỷ', style: 'cancel' },
+        {
+          text: 'Xóa',
+          style: 'destructive',
+          onPress: () => {
+            removeItem(menuId, sizeId)
+            if (activeSize?.menuId === menuId && activeSize?.sizeId === sizeId) {
+              setActiveSize(null)
+            }
+          }
+        }
+      ])
+      return
+    }
+
+    // Nếu quantity > 1, giảm bình thường
+    orderDecrement(menuId, sizeId)
   }
 
   if (!selectedTable) {
@@ -142,7 +176,7 @@ export default function SelectMenuScreen() {
                     primary: colors.primary
                   }}
                   onAdd={orderAdd}
-                  onRemove={orderDecrement}
+                  onRemove={handleDecrement}
                   formatCurrency={formatCurrencyVND}
                   activeSize={activeSize}
                   onChangeActiveSize={setActiveSize}

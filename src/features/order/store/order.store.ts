@@ -27,6 +27,7 @@ type OrderState = {
   add: (orderLine: OrderLine) => void
   increment: (menuId: number, sizeId: number) => void
   decrement: (menuId: number, sizeId: number) => void
+  removeItem: (menuId: number, sizeId: number) => void
   setLineNote: (menuId: number, sizeId: number, note: string | null) => void
   setTable: (table: DinnerTable | null) => void
   setMode: (mode: OrderFlowMode) => void
@@ -86,11 +87,20 @@ export const useOrderStore = create<OrderState>((set) => ({
 
   decrement: (menuId, sizeId) => {
     set((state) => {
-      const nextItems = state.items
-        .map((item) =>
-          item.menuId === menuId && item.sizeId === sizeId ? { ...item, quantity: item.quantity - 1 } : item
-        )
-        .filter((item) => item.quantity > 0)
+      const nextItems = state.items.map((item) =>
+        item.menuId === menuId && item.sizeId === sizeId ? { ...item, quantity: item.quantity - 1 } : item
+      )
+
+      return {
+        items: nextItems,
+        totalPrice: calculateTotalPrice(nextItems)
+      }
+    })
+  },
+
+  removeItem: (menuId, sizeId) => {
+    set((state) => {
+      const nextItems = state.items.filter((item) => !(item.menuId === menuId && item.sizeId === sizeId))
 
       return {
         items: nextItems,

@@ -24,6 +24,7 @@ export default function ReviewCartScreen() {
   const orderItems = useOrderStore((s) => s.items)
   const orderIncrement = useOrderStore((s) => s.increment)
   const orderDecrement = useOrderStore((s) => s.decrement)
+  const removeItem = useOrderStore((s) => s.removeItem)
   const clearOrder = useOrderStore((s) => s.clear)
   const totalPrice = useOrderStore((s) => s.totalPrice)
   const mode = useOrderStore((s) => s.mode)
@@ -67,6 +68,29 @@ export default function ReviewCartScreen() {
   )
 
   const handleBack = () => router.back()
+
+  const handleDecrement = (menuId: number, sizeId: number) => {
+    const item = orderItems.find((x) => x.menuId === menuId && x.sizeId === sizeId)
+    if (!item) return
+
+    // Nếu quantity = 1, hiển thị confirm dialog
+    if (item.quantity === 1) {
+      Alert.alert('Xác nhận', 'Bạn có muốn xóa món này khỏi giỏ hàng?', [
+        { text: 'Huỷ', style: 'cancel' },
+        {
+          text: 'Xóa',
+          style: 'destructive',
+          onPress: () => {
+            removeItem(menuId, sizeId)
+          }
+        }
+      ])
+      return
+    }
+
+    // Nếu quantity > 1, giảm bình thường
+    orderDecrement(menuId, sizeId)
+  }
 
   const handleSubmit = () => {
     const table = useOrderStore.getState().table
@@ -271,7 +295,7 @@ export default function ReviewCartScreen() {
                         }}
                       >
                         <TouchableOpacity
-                          onPress={() => orderDecrement(item.menuId, item.sizeId)}
+                          onPress={() => handleDecrement(item.menuId, item.sizeId)}
                           className='rounded-full'
                           style={{
                             width: 26,

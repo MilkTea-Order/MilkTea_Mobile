@@ -35,6 +35,7 @@ export default function OrderItemDetailScreen() {
   const orderItems = useOrderStore((s) => s.items)
   const increment = useOrderStore((s) => s.increment)
   const decrement = useOrderStore((s) => s.decrement)
+  const removeItem = useOrderStore((s) => s.removeItem)
   const setLineNote = useOrderStore((s) => s.setLineNote)
 
   const menuItem = useMemo(() => {
@@ -92,6 +93,39 @@ export default function OrderItemDetailScreen() {
       useOrderStore.getState().clear()
     }
     router.back()
+  }
+
+  const handleDecrement = () => {
+    if (isSaving) return
+
+    if (menuItem.quantity === 1) {
+      Alert.alert('Xác nhận', 'Bạn có muốn xóa món này khỏi đơn hàng?', [
+        { text: 'Huỷ', style: 'cancel' },
+        {
+          text: 'Xóa',
+          style: 'destructive',
+          onPress: () => {
+            if (isUpdateMode) {
+              if (!hasValidUpdateIds) {
+                Alert.alert('Lỗi', 'Thiếu thông tin cập nhật.')
+                return
+              }
+              updateMutation.mutate({
+                quantity: 0,
+                note: normalizedNote
+              })
+            } else {
+              removeItem(menuItem.menuId, menuItem.sizeId)
+              router.back()
+            }
+          }
+        }
+      ])
+      return
+    }
+
+    // Nếu quantity > 1, giảm bình thường
+    decrement(menuItem.menuId, menuItem.sizeId)
   }
 
   const handleSubmit = () => {
@@ -181,7 +215,7 @@ export default function OrderItemDetailScreen() {
               style={{ borderWidth: 1.5, borderColor: colors.primary, paddingHorizontal: 10, paddingVertical: 6 }}
             >
               <TouchableOpacity
-                onPress={() => decrement(menuItem.menuId, menuItem.sizeId)}
+                onPress={handleDecrement}
                 disabled={isSaving}
                 className='rounded-full'
                 style={{
@@ -189,7 +223,7 @@ export default function OrderItemDetailScreen() {
                   height: 32,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  opacity: menuItem.quantity <= 1 || isSaving ? 0.4 : 1
+                  opacity: isSaving ? 0.4 : 1
                 }}
                 activeOpacity={0.8}
               >
