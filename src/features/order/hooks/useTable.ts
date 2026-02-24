@@ -6,7 +6,7 @@ export const tableKeys = {
   all: ['tables'] as const,
   lists: () => [...tableKeys.all, 'list'] as const,
   list: (statusID?: number) => [...tableKeys.lists(), statusID ?? 'all'] as const,
-  listEmpty: () => [...tableKeys.lists(), 'empty'] as const
+  listEmpty: (isEmpty: boolean) => [...tableKeys.lists(), 'empty', isEmpty] as const
 }
 
 export function useTables(statusID?: number) {
@@ -27,14 +27,15 @@ export function useTables(statusID?: number) {
   }
 }
 
-export function useEmptyTables() {
+export function useEmptyTables(isEmpty: boolean = true, enabled: boolean = true) {
   const query = useQuery({
-    queryKey: tableKeys.listEmpty(),
+    queryKey: tableKeys.listEmpty(isEmpty),
     queryFn: async () => {
-      const res = await tableApi.getTablesEmpty()
+      const res = await tableApi.getTablesEmpty(isEmpty)
       return (res.data.data ?? []) as DinnerTable[]
     },
-    staleTime: 0 // Don't cache empty tables
+    staleTime: 0,
+    enabled
   })
 
   return {

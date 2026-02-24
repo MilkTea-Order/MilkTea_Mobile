@@ -8,7 +8,7 @@ export const tableApi = {
     const params = statusID != null ? { statusID } : {}
     return http.get<DinnerTablesResponse>(URL.TABLES, { params })
   },
-  getTablesEmpty(): Promise<AxiosResponse<DinnerTablesResponse>> {
-    return http.get<DinnerTablesResponse>(URL.TABLES_EMPTY)
+  getTablesEmpty(isEmpty: boolean = true): Promise<AxiosResponse<DinnerTablesResponse>> {
+    return http.get<DinnerTablesResponse>(URL.TABLES, { params: { isEmpty } })
   }
 }

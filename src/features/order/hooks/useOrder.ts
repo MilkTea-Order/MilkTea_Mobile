@@ -257,6 +257,50 @@ export function useUpdateOrderItem(
   })
 }
 
+export function useMergeTable(
+  orderId: number,
+  options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }
+) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationKey: [...orderKeys.all, 'merge-table', orderId] as const,
+    mutationFn: async (targetTableID: number) => {
+      const res = await orderApi.mergeTable(orderId, targetTableID)
+      return res.data
+    },
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
+      await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      // await queryClient.invalidateQueries({ queryKey: tableKeys.listEmpty(true) })
+      Alert.alert('Thành công', 'Gộp bàn thành công')
+      options?.onSuccess?.(data)
+    },
+    onError: (error: any) => {
+      options?.onError?.(error)
+      const details = extractErrorDetails(error, 'order')
+      const e0042 = details.find((e) => e.code === ERROR_CODE.E0042)
+      if (e0042) {
+        Alert.alert('Lỗi', e0042.message ?? 'Không thể gộp bàn ở trạng thái hiện tại')
+        router.dismissAll()
+        return
+      }
+      const e0001 = details.find((e) => [ERROR_CODE.E0001].includes(e.code as any))
+      if (e0001) {
+        Alert.alert('Lỗi', e0001.message ?? 'Đơn hàng không tồn tại')
+        router.dismissAll()
+        return
+      }
+      const e0002 = details.find((e) => e.code === ERROR_CODE.E0002)
+      if (e0002) {
+        Alert.alert('Lỗi', e0002.message ?? 'Không thể gộp bàn vào chính nó')
+        return
+      }
+      Alert.alert('Lỗi', 'Không thể gộp bàn. Vui lòng thử lại')
+    }
+  })
+}
+
 export function useChangeTable(
   orderId: number,
   options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }
@@ -272,7 +316,7 @@ export function useChangeTable(
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
       await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
-      await queryClient.invalidateQueries({ queryKey: tableKeys.listEmpty() })
+      await queryClient.invalidateQueries({ queryKey: tableKeys.listEmpty(true) })
       Alert.alert('Thành công', 'Chuyển bàn thành công')
       options?.onSuccess?.(data)
     },
@@ -310,6 +354,7 @@ export function useAddOrderItems(
     },
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
+      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, true) })
       await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
       options?.onSuccess?.(data)
       return data

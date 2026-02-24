@@ -3,8 +3,13 @@ import { OrderNotFoundState } from '@/features/order/components/molecules/OrderN
 import { OrderActionChips } from '@/features/order/components/organisms/OrderActionChips'
 import { OrderItemsSection } from '@/features/order/components/organisms/OrderItemsSection'
 import { TransferTableModal } from '@/features/order/components/organisms/TransferTableModal'
-import { useCancelOrder, useCancelOrderItems, useChangeTable, useOrderDetail } from '@/features/order/hooks/useOrder'
-import { useEmptyTables } from '@/features/order/hooks/useTable'
+import {
+  useCancelOrder,
+  useCancelOrderItems,
+  useChangeTable,
+  useMergeTable,
+  useOrderDetail
+} from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
 import { OrderDetail } from '@/features/order/types/order.type'
 import { ORDER_FLOW_MODE } from '@/shared/constants/other'
@@ -25,7 +30,8 @@ export default function OrderDetailScreen() {
   const [cancellingItemId, setCancellingItemId] = useState<number | null>(null)
   const [showTransferModal, setShowTransferModal] = useState(false)
   const [isTransferring, setIsTransferring] = useState(false)
-  const { data: emptyTables, isLoading: isLoadingTables } = useEmptyTables()
+  const [showMergeModal, setShowMergeModal] = useState(false)
+  const [isMerging, setIsMerging] = useState(false)
 
   const cancelMutation = useCancelOrderItems(orderIdNumber!, {
     onSuccess: () => {
@@ -49,6 +55,17 @@ export default function OrderDetailScreen() {
     }
   })
 
+  const mergeTableMutation = useMergeTable(orderIdNumber!, {
+    onSuccess: () => {
+      setShowMergeModal(false)
+      setIsMerging(false)
+    },
+    onError: () => {
+      setShowMergeModal(false)
+      setIsMerging(false)
+    }
+  })
+
   const handleCancelItem = (item: OrderDetail) => {
     if (!item) return
     Alert.alert('Xác nhận', `Bạn có chắc muốn hủy món ${item.menu.name}với size ${item.size.name} này?`, [
@@ -64,13 +81,16 @@ export default function OrderDetailScreen() {
     ])
   }
 
-  const handleFilterChange = (value: 'placed' | 'cancelled') => {
-    setFilterMode(value)
-  }
+  const handleFilterChange = (value: 'placed' | 'cancelled') => setFilterMode(value)
 
   const handleTransferTable = (tableId: number) => {
     setIsTransferring(true)
     changeTableMutation.mutate(tableId)
+  }
+
+  const handleMergeTable = (tableId: number) => {
+    setIsMerging(true)
+    mergeTableMutation.mutate(tableId)
   }
 
   if (!order && !isLoading) {
@@ -112,18 +132,14 @@ export default function OrderDetailScreen() {
                 label: 'Chuyển bàn',
                 icon: 'swap-horizontal-outline',
                 variant: 'info',
-                onPress: () => {
-                  setShowTransferModal(true)
-                }
+                onPress: () => setShowTransferModal(true)
               },
               {
                 id: 'gop-ban',
                 label: 'Gộp bàn',
                 icon: 'git-merge-outline',
                 variant: 'warning',
-                onPress: () => {
-                  // TODO: wire navigation/action
-                }
+                onPress: () => setShowMergeModal(true)
               },
               {
                 id: 'thanh-toan',
@@ -146,9 +162,7 @@ export default function OrderDetailScreen() {
                       text: 'Hủy đơn',
                       style: 'destructive',
                       onPress: () => {
-                        if (orderIdNumber) {
-                          cancelOrderMutation.mutate(orderIdNumber)
-                        }
+                        if (orderIdNumber) cancelOrderMutation.mutate(orderIdNumber)
                       }
                     }
                   ])
@@ -198,7 +212,6 @@ export default function OrderDetailScreen() {
           onFilterChange={handleFilterChange}
           onAddItems={() => {
             if (!orderIdNumber || !order) return
-
             useOrderStore.getState().clear()
             useOrderStore.getState().setMode(ORDER_FLOW_MODE.ADD_ITEMS)
             useOrderStore.getState().setTargetOrderId(orderIdNumber)
@@ -207,21 +220,27 @@ export default function OrderDetailScreen() {
               name: String(order.dinnerTable?.name ?? ''),
               numberOfSeats: Number(order.dinnerTable?.numberOfSeats ?? 0)
             } as any)
-
             router.push('/(protected)/order/select-menu')
           }}
           colors={colors}
         />
       </View>
-
-      {/* Transfer Table Modal */}
       <TransferTableModal
         visible={showTransferModal}
-        tables={emptyTables ?? []}
+        mode='transfer'
         currentTableId={Number(order?.dinnerTable?.id ?? 0)}
-        isLoading={isTransferring || isLoadingTables}
+        isSubmitting={isTransferring}
         onSelect={handleTransferTable}
         onClose={() => setShowTransferModal(false)}
+        colors={colors}
+      />
+      <TransferTableModal
+        visible={showMergeModal}
+        mode='merge'
+        currentTableId={Number(order?.dinnerTable?.id ?? 0)}
+        isSubmitting={isMerging}
+        onSelect={handleMergeTable}
+        onClose={() => setShowMergeModal(false)}
         colors={colors}
       />
     </View>

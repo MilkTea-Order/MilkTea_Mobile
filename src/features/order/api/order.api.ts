@@ -52,6 +52,10 @@ export const orderApi = {
   },
 
   changeTable(orderId: number, newTableID: number): Promise<AxiosResponse<ApiResponse<object>>> {
-    return http.patch<ApiResponse<object>>(`${URL.ORDERS}/${orderId}/items/change-table`, { newTableID })
+    return http.patch<ApiResponse<object>>(`${URL.ORDERS}/${orderId}/change-table`, { newTableID })
+  },
+
+  mergeTable(orderId: number, targetTableID: number): Promise<AxiosResponse<ApiResponse<object>>> {
+    return http.patch<ApiResponse<object>>(`${URL.ORDERS}/${orderId}/merge-table`, { targetTableID })
   }
 }

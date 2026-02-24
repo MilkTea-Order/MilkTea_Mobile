@@ -63,7 +63,11 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
   order: {
     [ERROR_CODE.E0001]: {
       orderid: 'Đơn hàng không tồn tại',
-      orderdetailid: 'Hủy món không hợp lệ'
+      orderdetailid: 'Hủy món không hợp lệ',
+      sourcetableid: 'Bàn muốn gộp không tồn tại'
+    },
+    [ERROR_CODE.E0002]: {
+      sourcetableid: 'Không thể gộp bàn vào chính nó.'
     },
     [ERROR_CODE.E0036]: {
       orderid: 'Đơn hàng không tồn tại',
@@ -76,9 +80,10 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
       price: 'món chọn không hợp lệ'
     },
     [ERROR_CODE.E0042]: {
-      orderid: 'Đơn hàng phải có trạng thái chưa thanh toán mới hủy món',
+      orderid: 'Đơn hàng phải có trạng thái chưa thanh toán mới thực hiện thao tác này',
       orderdetailid: 'Món này đã hủy trước đó',
-      newdinnertableid: 'Bàn không hợp lệ (không tìm thấy hoặc đang bán tại thời điểm này)'
+      newdinnertableid: 'Bàn không hợp lệ (không tìm thấy hoặc đang bán tại thời điểm này)',
+      sourcetableid: 'Không thể gộp vì bàn muốn gộp không hợp lệ.'
     },
     [ERROR_CODE.E9999]: {
       dinnerTableId: 'Bàn không hợp lệ (không tìm thấy hoặc đang bán tại thời điểm này)',
@@ -89,7 +94,8 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
       price: 'món chọn không hợp lệ',
       createorder: 'Tạo order không thành công',
       cancelorderdetail: 'Hủy món thất bại',
-      changetable: 'Chuyển bàn thất bại'
+      changetable: 'Chuyển bàn thất bại',
+      mergetable: 'Gộp bàn thất bại'
     }
   },
   common: {}

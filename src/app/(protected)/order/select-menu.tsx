@@ -10,7 +10,17 @@ import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons } from '@expo/vector-icons'
 import { useFocusEffect, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Keyboard,
+  Pressable,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native'
 import { useDebounce } from 'use-debounce'
 
 export default function SelectMenuScreen() {
@@ -116,8 +126,9 @@ export default function SelectMenuScreen() {
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
       <Header title={`Chọn món •  ${selectedTable?.name ?? ''}`} onBack={handleBack}>
         <View
-          className='flex-row items-center px-4 py-3 rounded-2xl mx-3 mb-3'
+          className='flex-row items-center px-4 rounded-2xl mx-3 mb-3'
           style={{
+            height: 48,
             backgroundColor: colors.card,
             borderWidth: 1.5,
             borderColor: colors.border,
@@ -128,18 +139,24 @@ export default function SelectMenuScreen() {
             elevation: 3
           }}
         >
-          <Ionicons name='search' size={20} color={colors.primary} />
+          {/* <Ionicons name='search' size={20} color={colors.primary} /> */}
+
           <TextInput
             placeholder='Tìm kiếm món ăn...'
             placeholderTextColor={colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
             className='flex-1 ml-3 text-base'
-            style={{ color: colors.text }}
+            style={{
+              color: colors.text,
+              paddingVertical: 0,
+              textAlignVertical: 'center'
+            }}
           />
+
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} className='p-1'>
-              <Ionicons name='close-circle-sharp' size={20} color={colors.primary} />
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={{ justifyContent: 'center' }}>
+              <Ionicons name='close-circle-sharp' size={24} color={colors.primary} />
             </TouchableOpacity>
           )}
         </View>
@@ -165,62 +182,46 @@ export default function SelectMenuScreen() {
       )}
 
       {/* Menu Items */}
-
       {!(selectedGroup?.id != null || normalizedSearch.length > 0) ? (
-        <View className='items-center py-10 px-6'>
-          <Ionicons name='options-outline' size={28} color={colors.textSecondary} />
-          <Text className='text-base font-semibold mt-3' style={{ color: colors.text }}>
-            Chọn tiêu chí tìm kiếm
-          </Text>
-          <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
-            Hãy chọn một nhóm món ở phía trên hoặc nhập ít nhất 2 ký tự để tìm theo tên.
-          </Text>
-        </View>
-      ) : isLoadingMenus || isRefetchingMenus ? (
-        <View className='py-8 items-center'>
-          <ActivityIndicator color={colors.primary} />
-        </View>
-      ) : !menus || menus.length === 0 ? (
-        <View className='items-center py-8'>
-          <Text className='text-base' style={{ color: colors.textSecondary }}>
-            Nhóm này chưa có món khả dụng
-          </Text>
-          <TouchableOpacity
-            onPress={() => refetchMenus()}
-            className='mt-3 px-4 py-2 rounded-xl'
-            style={{
-              backgroundColor: `${colors.primary}15`,
-              borderWidth: 1,
-              borderColor: `${colors.primary}30`
-            }}
-          >
-            <Text className='text-sm font-semibold' style={{ color: colors.primary }}>
-              Thử lại
+        <Pressable style={{ flex: 1 }} onPress={Keyboard.dismiss}>
+          <View className='items-center py-10 px-6 flex-1'>
+            <Ionicons name='options-outline' size={28} color={colors.textSecondary} />
+            <Text className='text-base font-semibold mt-3' style={{ color: colors.text }}>
+              Chọn tiêu chí tìm kiếm
             </Text>
-          </TouchableOpacity>
-        </View>
+            <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
+              Hãy chọn một nhóm món ở phía trên hoặc nhập ít nhất 2 ký tự để tìm theo tên.
+            </Text>
+          </View>
+        </Pressable>
+      ) : isLoadingMenus || isRefetchingMenus ? (
+        <Pressable style={{ flex: 1 }} onPress={Keyboard.dismiss}>
+          <View className='items-center py-10 px-6 flex-1'>
+            <ActivityIndicator color={colors.primary} />
+          </View>
+        </Pressable>
+      ) : !menus || menus.length === 0 ? (
+        <Pressable style={{ flex: 1 }} onPress={Keyboard.dismiss}>
+          <View className='items-center py-10 px-6 flex-1'>
+            <Text className='text-base' style={{ color: colors.textSecondary }}>
+              Nhóm này chưa có món khả dụng
+            </Text>
+            <TouchableOpacity
+              onPress={() => refetchMenus()}
+              className='mt-3 px-4 py-2 rounded-xl'
+              style={{
+                backgroundColor: `${colors.primary}15`,
+                borderWidth: 1,
+                borderColor: `${colors.primary}30`
+              }}
+            >
+              <Text className='text-sm font-semibold' style={{ color: colors.primary }}>
+                Thử lại
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
       ) : (
-        //   <View className='flex-row flex-wrap' style={{ marginHorizontal: -4 }}>
-        //     {menus.map((menu) => (
-        //       <View key={menu.id} style={{ marginHorizontal: 4, marginBottom: 8 }}>
-        //         <MenuItemCardV2
-        //           menu={menu}
-        //           colors={{
-        //             card: colors.card,
-        //             border: colors.border,
-        //             text: colors.text,
-        //             textSecondary: colors.textSecondary,
-        //             primary: colors.primary
-        //           }}
-        //           onAdd={orderAdd}
-        //           onRemove={handleDecrement}
-        //           formatCurrency={formatCurrencyVND}
-        //           activeSize={activeSize}
-        //           onChangeActiveSize={setActiveSize}
-        //         />
-        //       </View>
-        //     ))}
-        //   </View>
         <FlatList
           data={menus}
           keyExtractor={(item) => item.id.toString()}
@@ -280,3 +281,25 @@ export default function SelectMenuScreen() {
     </View>
   )
 }
+
+//   <View className='flex-row flex-wrap' style={{ marginHorizontal: -4 }}>
+//     {menus.map((menu) => (
+//       <View key={menu.id} style={{ marginHorizontal: 4, marginBottom: 8 }}>
+//         <MenuItemCardV2
+//           menu={menu}
+//           colors={{
+//             card: colors.card,
+//             border: colors.border,
+//             text: colors.text,
+//             textSecondary: colors.textSecondary,
+//             primary: colors.primary
+//           }}
+//           onAdd={orderAdd}
+//           onRemove={handleDecrement}
+//           formatCurrency={formatCurrencyVND}
+//           activeSize={activeSize}
+//           onChangeActiveSize={setActiveSize}
+//         />
+//       </View>
+//     ))}
+//   </View>
