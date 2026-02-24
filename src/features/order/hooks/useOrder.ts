@@ -4,11 +4,13 @@ import type { ApiErrorResponse } from '@/shared/types/api.type'
 import { extractErrorDetails } from '@/shared/utils/formErrors'
 import { isApiError } from '@/shared/utils/utils'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from 'expo-router'
+import { router, useRouter } from 'expo-router'
+import { Alert } from 'react-native'
 import { Toast } from 'react-native-toast-notifications'
 import { orderApi, OrderFilter } from '../api/order.api'
 import type { CreateOrderItemPayload, CreateOrderPayload, Order } from '../types/order.type'
 import { parseOrderError } from '../utils/parseOrderError'
+import { tableKeys } from './useTable'
 
 export const orderKeys = {
   all: ['orders'] as const,
@@ -86,20 +88,88 @@ export function useCancelOrderItems(
   options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }
 ) {
   const queryClient = useQueryClient()
-
   return useMutation({
     mutationKey: [...orderKeys.all, 'cancel-items', orderId] as const,
-    mutationFn: async (orderDetailIDs: number[]) => {
-      const res = await orderApi.cancelOrderItems(orderId, orderDetailIDs)
+    mutationFn: async (orderDetailId: number) => {
+      const res = await orderApi.cancelOrderItems(orderId, orderDetailId)
       return res.data
     },
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
-      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, true) })
+      await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      Alert.alert('Thành công', 'Hủy món thành công')
       options?.onSuccess?.(data)
       return data
     },
     onError: (error) => {
+      const details = extractErrorDetails(error, 'order')
+      if (details.some((error) => [ERROR_CODE.E0042].includes(error.code as any))) {
+        Alert.alert('Lỗi', error.message)
+        return
+      }
+      if (details.some((error) => [ERROR_CODE.E0001, ERROR_CODE.E0036].includes(error.code as any))) {
+        Alert.alert('Lỗi', error.message, [{ text: 'OK', onPress: () => router.replace('/(protected)/(tabs)') }])
+        return
+      }
+      if (details.some((error) => [ERROR_CODE.E9999].includes(error.code as any))) {
+        Alert.alert('Lỗi', error.message)
+        return
+      }
+      options?.onError?.(error)
+    }
+  })
+}
+
+export function useCancelOrder(options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }) {
+  const queryClient = useQueryClient()
+  const router = useRouter()
+
+  return useMutation({
+    mutationKey: [...orderKeys.all, 'cancel-order'] as const,
+    mutationFn: async (orderId: number) => {
+      const res = await orderApi.cancelOrder(orderId)
+      return res.data
+    },
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      Alert.alert('Thành công', 'Hủy đơn hàng thành công', [
+        {
+          text: 'OK',
+          onPress: () =>
+            router.replace({
+              pathname: '/(protected)/(tabs)',
+              params: {
+                filter: STATUS.ORDER.CANCELED
+              }
+            })
+        }
+      ])
+      options?.onSuccess?.(data)
+      return data
+    },
+    onError: (error) => {
+      const details = extractErrorDetails(error, 'order')
+
+      const e0042 = details.find((e) => e.code === ERROR_CODE.E0042)
+      if (e0042) {
+        Alert.alert('Lỗi', e0042.message ?? 'Không thể hủy đơn hàng ở trạng thái hiện tại')
+        return
+      }
+
+      const e0001Or0036 = details.find((e) => [ERROR_CODE.E0001, ERROR_CODE.E0036].includes(e.code as any))
+      if (e0001Or0036) {
+        Alert.alert('Lỗi', e0001Or0036.message ?? 'Đơn hàng không tồn tại', [
+          { text: 'OK', onPress: () => router.replace('/(protected)/(tabs)') }
+        ])
+        return
+      }
+      const e9999 = details.find((e) => e.code === ERROR_CODE.E9999)
+      if (e9999) {
+        Alert.alert('Lỗi', e9999.message ?? 'Đã xảy ra lỗi hệ thống')
+        return
+      }
+
+      Alert.alert('Lỗi', 'Không thể hủy đơn hàng. Vui lòng thử lại')
       options?.onError?.(error)
     }
   })
@@ -121,7 +191,7 @@ export function useUpdateOrderItem(
     },
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
-      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, true) })
+      await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
       options?.onSuccess?.(data)
       return data
     },
@@ -187,6 +257,44 @@ export function useUpdateOrderItem(
   })
 }
 
+export function useChangeTable(
+  orderId: number,
+  options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }
+) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationKey: [...orderKeys.all, 'change-table', orderId] as const,
+    mutationFn: async (newTableID: number) => {
+      const res = await orderApi.changeTable(orderId, newTableID)
+      return res.data
+    },
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
+      await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      await queryClient.invalidateQueries({ queryKey: tableKeys.listEmpty() })
+      Alert.alert('Thành công', 'Chuyển bàn thành công')
+      options?.onSuccess?.(data)
+    },
+    onError: (error: any) => {
+      options?.onError?.(error)
+      const details = extractErrorDetails(error, 'order')
+      console.log('details', details)
+      const e0042 = details.find((e) => e.code === ERROR_CODE.E0042)
+      if (e0042) {
+        Alert.alert('Lỗi', e0042.message ?? 'Không thể chuyển bàn ở trạng thái hiện tại')
+        return
+      }
+      const e0001Or0036 = details.find((e) => [ERROR_CODE.E0001, ERROR_CODE.E0036].includes(e.code as any))
+      if (e0001Or0036) {
+        Alert.alert('Lỗi', e0001Or0036.message ?? 'Đơn hàng không tồn tại')
+        return
+      }
+      Alert.alert('Lỗi', 'Không thể chuyển bàn. Vui lòng thử lại')
+    }
+  })
+}
+
 export function useAddOrderItems(
   orderId: number,
   options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }
@@ -202,7 +310,7 @@ export function useAddOrderItems(
     },
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
-      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, true) })
+      await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
       options?.onSuccess?.(data)
       return data
     },
@@ -247,16 +355,16 @@ export function useAddOrderItems(
             Toast.show(result.message, {
               type: 'info',
               placement: 'top',
-              duration: 3000,
-              onClose: () => router.back()
+              duration: 3000
             })
-            router.back()
+            router.dismissAll()
             return
           }
           options?.onError?.(result)
           return
         }
       }
+      options?.onError?.(error)
     }
   })
 }

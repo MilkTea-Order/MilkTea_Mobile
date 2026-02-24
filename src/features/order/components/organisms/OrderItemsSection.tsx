@@ -14,7 +14,7 @@ interface OrderItemsSectionProps {
   isRefetching: boolean
   canActionButton: boolean
   onRefresh: () => void
-  onCancelItem?: (orderDetailId: number) => void
+  onCancelItem?: (item: OrderDetail) => void
   onUpdateItem?: (orderDetailId: number) => void
   cancellingItemId?: number | null
   filterMode?: 'placed' | 'cancelled'

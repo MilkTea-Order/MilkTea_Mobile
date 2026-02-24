@@ -1,12 +1,12 @@
 import { formatCurrency } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
-import { Alert, Text, TouchableOpacity, View } from 'react-native'
+import { Text, TouchableOpacity, View } from 'react-native'
 import { OrderDetail } from '../../types/order.type'
 
 interface OrderItemRowProps {
   item: OrderDetail
-  onCancel?: (orderDetailId: number) => void
+  onCancel?: (item: OrderDetail) => void
   onUpdate?: (orderDetailId: number) => void
   isCancelling?: boolean
   canActionButton: boolean
@@ -60,14 +60,9 @@ export function OrderItemRow({ item, onCancel, onUpdate, isCancelling, canAction
         </View>
 
         {item.note && (
-          <View className='mt-1 flex-row items-start'>
-            <Ionicons
-              name='document-text-outline'
-              size={12}
-              color={colors.textSecondary}
-              style={{ marginRight: 4, marginTop: 2 }}
-            />
-            <Text className='text-xs flex-1 italic leading-4' style={{ color: colors.textSecondary }}>
+          <View className='mt-1 flex-row items-center'>
+            <Ionicons name='document-text-outline' size={14} color={colors.textSecondary} style={{ marginRight: 4 }} />
+            <Text className='text-xs flex-1 italic' style={{ color: colors.textSecondary }}>
               {item.note}
             </Text>
           </View>
@@ -101,14 +96,7 @@ export function OrderItemRow({ item, onCancel, onUpdate, isCancelling, canAction
             <TouchableOpacity
               activeOpacity={0.8}
               disabled={!!isCancelling}
-              onPress={() => {
-                const id = Number(item.id)
-                if (!Number.isFinite(id)) return
-                Alert.alert('Xác nhận', 'Bạn có chắc muốn hủy món này?', [
-                  { text: 'Không', style: 'cancel' },
-                  { text: 'Hủy món', style: 'destructive', onPress: () => onCancel(id) }
-                ])
-              }}
+              onPress={() => onCancel(item)}
               className='px-3 py-2 rounded-lg mt-2'
               style={{ backgroundColor: `${colors.primary}15`, opacity: isCancelling ? 0.6 : 1 }}
             >

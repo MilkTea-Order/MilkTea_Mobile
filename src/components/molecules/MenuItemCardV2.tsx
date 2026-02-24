@@ -35,12 +35,10 @@ export default function MenuItemCardV2({
   onChangeActiveSize
 }: Props) {
   const { data: sizes, isLoading } = useMenuSizes(menu.id)
-
   const orderItems = useOrderStore((s) => s.items)
   const getQuantityReactive = (menuId: number, sizeId: number) => {
     return orderItems.find((item) => item.menuId === menuId && item.sizeId === sizeId)?.quantity ?? 0
   }
-
   const expandedBadgeSizeId = activeSize?.menuId === menu.id && activeSize?.sizeId ? activeSize?.sizeId : null
 
   const handleSizePress = (size: MenuSize) => {

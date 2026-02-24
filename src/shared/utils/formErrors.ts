@@ -1,6 +1,6 @@
 import { getErrorMessage } from '@/shared/resources/errorMessages'
 import { isErrorResponse } from '@/shared/types/api.type'
-import { ErrorDomain } from '../constants/errorCode'
+import { ErrorCode, ErrorDomain } from '../constants/errorCode'
 
 export interface FieldError {
   field: string
@@ -8,7 +8,7 @@ export interface FieldError {
 }
 
 export interface ErrorDetail {
-  code: string
+  code: string | ErrorCode
   field: string
   message: string
 }
@@ -40,20 +40,21 @@ export function extractErrorDetails(
   const details: ErrorDetail[] = []
   if (!isErrorResponse(errorResponse)) return details
   const errorData = errorResponse.data ?? {}
-  const mappingLower =
-    fieldMapping && typeof fieldMapping === 'object'
-      ? Object.fromEntries(Object.entries(fieldMapping).map(([k, v]) => [k.toLowerCase(), v]))
-      : undefined
 
   const mapFieldName = (apiFieldNameRaw: string): string => {
     const raw = String(apiFieldNameRaw)
-
     if (!fieldMapping) return raw
 
     if (typeof fieldMapping === 'string') return fieldMapping
 
+    //Function
     if (typeof fieldMapping === 'function') return fieldMapping(raw)
 
+    // Record
+    const mappingLower =
+      fieldMapping && typeof fieldMapping === 'object'
+        ? Object.fromEntries(Object.entries(fieldMapping).map(([k, v]) => [k.toLowerCase(), v]))
+        : undefined
     return mappingLower?.[raw.toLowerCase()] ?? raw
   }
 
@@ -77,63 +78,6 @@ export function extractErrorDetails(
 
   return details
 }
-
-//   domain: ErrorDomain = 'common',
-//   fieldMapping?: ((apiFieldName: string) => string) | Record<string, string> | string
-// ): FieldError[] {
-//   const errorResponse = error?.response?.data || error
-//   const fieldErrors: FieldError[] = []
-
-//   if (isErrorResponse(errorResponse)) {
-//     const errorData = errorResponse.data
-
-//     Object.keys(errorData).forEach((errorCode) => {
-//       const fieldValue = errorData[errorCode]
-
-//       // Helper function để map field name
-//       const mapFieldName = (apiFieldName: string): string => {
-//         if (!fieldMapping) {
-//           return apiFieldName.toLowerCase()
-//         }
-
-//         if (typeof fieldMapping === 'string') {
-//           // String: Map tất cả về 1 field
-//           return fieldMapping
-//         }
-
-//         if (typeof fieldMapping === 'function') {
-//           // Function: Dynamic mapping
-//           return fieldMapping(apiFieldName)
-//         }
-
-//         // Object: Static mapping
-//         return fieldMapping[apiFieldName] || apiFieldName.toLowerCase()
-//       }
-
-//       // Nếu là array, xử lý từng field
-//       if (Array.isArray(fieldValue)) {
-//         fieldValue.forEach((fieldName) => {
-//           const errorMessage = getErrorMessage(errorCode, domain, fieldName.toLowerCase())
-//           const targetField = mapFieldName(fieldName.toLowerCase())
-
-//           fieldErrors.push({
-//             field: targetField,
-//             message: errorMessage
-//           })
-//         })
-//       } else {
-//         const errorMessage = getErrorMessage(errorCode, domain, String(fieldValue).toLowerCase())
-//         const targetField = mapFieldName(String(fieldValue).toLowerCase())
-//         fieldErrors.push({
-//           field: targetField,
-//           message: errorMessage
-//         })
-//       }
-//     })
-//   }
-
-//   return fieldErrors
-// }
 
 /**
  * Set field errors to Formik form

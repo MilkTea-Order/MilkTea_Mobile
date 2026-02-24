@@ -6,14 +6,15 @@ import { AxiosResponse } from 'axios'
 import { CreateOrderItemPayload, CreateOrderPayload, Order } from '../types/order.type'
 
 export type OrderFilter = OrderStatus
-export type OrdersApiResponse = ApiResponse<Order[]>
+
 export type OrderDetailApiResponse = ApiResponse<Order>
 
 export const orderApi = {
-  getOrders(filter: OrderFilter): Promise<AxiosResponse<OrdersApiResponse>> {
+  getOrders(filter: OrderFilter): Promise<AxiosResponse<ApiResponse<Order[]>>> {
     const params = { StatusID: filter }
-    return http.get<OrdersApiResponse>(URL.ORDERS, { params })
+    return http.get<ApiResponse<Order[]>>(URL.ORDERS, { params })
   },
+
   getOrderDetail(orderId: number, isCancelled: boolean = false): Promise<AxiosResponse<OrderDetailApiResponse>> {
     return http.get<OrderDetailApiResponse>(`${URL.ORDERS}/${orderId}`, {
       params: { isCancelled }
@@ -24,14 +25,10 @@ export const orderApi = {
     return http.post<ApiResponse<Order>>(URL.ORDERS, payload)
   },
 
-  cancelOrderItems(
-    orderId: number,
-    orderDetailIDs: number[]
-  ): Promise<AxiosResponse<ApiResponse<{ cancelledDetailIDs: number[] }>>> {
-    return http.patch<ApiResponse<{ cancelledDetailIDs: number[] }>>(`${URL.ORDERS}/${orderId}/items/cancel`, {
-      orderDetailIDs
-    })
+  cancelOrderItems(orderId: number, orderDetailId: number): Promise<AxiosResponse<ApiResponse<object>>> {
+    return http.patch<ApiResponse<object>>(`${URL.ORDERS}/${orderId}/items/${orderDetailId}/cancel`)
   },
+
   updateOrderItem(
     orderId: number,
     orderDetailId: number,
@@ -48,5 +45,13 @@ export const orderApi = {
     payload: { items: CreateOrderItemPayload[] }
   ): Promise<AxiosResponse<ApiResponse<{ status: boolean }>>> {
     return http.patch<ApiResponse<{ status: boolean }>>(`${URL.ORDERS}/${orderId}/add-items`, payload)
+  },
+
+  cancelOrder(orderId: number): Promise<AxiosResponse<ApiResponse<object>>> {
+    return http.patch<ApiResponse<object>>(`${URL.ORDERS}/${orderId}/cancel`)
+  },
+
+  changeTable(orderId: number, newTableID: number): Promise<AxiosResponse<ApiResponse<object>>> {
+    return http.patch<ApiResponse<object>>(`${URL.ORDERS}/${orderId}/items/change-table`, { newTableID })
   }
 }

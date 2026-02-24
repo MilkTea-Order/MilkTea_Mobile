@@ -14,7 +14,9 @@ export const URL = {
 
   TABLES: 'catalog/tables',
   TABLES_EMPTY: 'catalog/tables/empty',
+
   MENU_GROUP_TYPES_AVAILABLE: 'catalog/menus/groups/available',
   MENUS_GROUP_BASE: 'catalog/menus/groups',
+  MENUS_AVAILABLE_BASE: 'catalog/menus/items/available',
   MENU_SIZES_BASE: 'catalog/menus'
 } as const

@@ -2,13 +2,14 @@ import { Header } from '@/components/layouts/Header'
 import { OrderNotFoundState } from '@/features/order/components/molecules/OrderNotFoundState'
 import { OrderActionChips } from '@/features/order/components/organisms/OrderActionChips'
 import { OrderItemsSection } from '@/features/order/components/organisms/OrderItemsSection'
-import { useCancelOrderItems, useOrderDetail } from '@/features/order/hooks/useOrder'
+import { TransferTableModal } from '@/features/order/components/organisms/TransferTableModal'
+import { useCancelOrder, useCancelOrderItems, useChangeTable, useOrderDetail } from '@/features/order/hooks/useOrder'
+import { useEmptyTables } from '@/features/order/hooks/useTable'
 import { useOrderStore } from '@/features/order/store/order.store'
-import { ERROR_CODE } from '@/shared/constants/errorCode'
+import { OrderDetail } from '@/features/order/types/order.type'
 import { ORDER_FLOW_MODE } from '@/shared/constants/other'
 import { ORDER_STATUS_LABEL, STATUS, type OrderStatus } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
-import { extractErrorDetails } from '@/shared/utils/formErrors'
 import { formatCurrency } from '@/shared/utils/utils'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -16,70 +17,60 @@ import { Alert, Text, View } from 'react-native'
 
 export default function OrderDetailScreen() {
   const { colors } = useTheme()
-  const router = useRouter()
   const { orderId } = useLocalSearchParams<{ orderId: string }>()
+  const router = useRouter()
   const orderIdNumber = orderId ? parseInt(orderId, 10) : null
-
   const [filterMode, setFilterMode] = useState<'placed' | 'cancelled'>('placed')
-  const [cancellingItemId, setCancellingItemId] = useState<number | null>(null)
   const { order, isLoading, isRefetching, refetch } = useOrderDetail(orderIdNumber, filterMode === 'cancelled')
+  const [cancellingItemId, setCancellingItemId] = useState<number | null>(null)
+  const [showTransferModal, setShowTransferModal] = useState(false)
+  const [isTransferring, setIsTransferring] = useState(false)
+  const { data: emptyTables, isLoading: isLoadingTables } = useEmptyTables()
 
   const cancelMutation = useCancelOrderItems(orderIdNumber!, {
-    onSuccess: (data) => {
+    onSuccess: () => {
       setCancellingItemId(null)
-      if (data.data.cancelledDetailIDs.length > 0) {
-        Alert.alert('Thành công', 'Hủy món thành công')
-      }
     },
-    onError: (error: any) => {
+    onError: () => {
       setCancellingItemId(null)
-
-      const details = extractErrorDetails(error, 'order')
-
-      const orderIdError = details.find((e) => e.field.toLowerCase() === 'orderid')
-      if (orderIdError) {
-        if (orderIdError.code === ERROR_CODE.E0001 || orderIdError.code === ERROR_CODE.E0036) {
-          Alert.alert('Lỗi', orderIdError.message, [
-            { text: 'OK', onPress: () => router.replace('/(protected)/(tabs)') }
-          ])
-          return
-        }
-
-        if (orderIdError.code === ERROR_CODE.E0042) {
-          Alert.alert('Lỗi', orderIdError.message)
-          return
-        }
-      }
-
-      const detailIdsError = details.find((e) => e.field.toLowerCase() === 'orderdetailids')
-      if (detailIdsError) {
-        if (detailIdsError.code === ERROR_CODE.E0001 || detailIdsError.code === ERROR_CODE.E0036) {
-          Alert.alert('Lỗi', detailIdsError.message, [
-            { text: 'OK', onPress: () => router.replace('/(protected)/(tabs)') }
-          ])
-          return
-        }
-      }
-
-      const systemError = details.find((e) => e.field.toLowerCase() === 'cancelorderdetails')
-      if (systemError) {
-        if (systemError.code === ERROR_CODE.E9999) {
-          Alert.alert('Lỗi', systemError.message)
-          return
-        }
-      }
-      Alert.alert('Lỗi', 'Đã xảy ra lỗi. Vui lòng thử lại')
     }
   })
+
+  const cancelOrderMutation = useCancelOrder()
+
+  const changeTableMutation = useChangeTable(orderIdNumber!, {
+    onSuccess: () => {
+      setShowTransferModal(false)
+      setIsTransferring(false)
+    },
+    onError: () => {
+      setShowTransferModal(false)
+      setIsTransferring(false)
+    }
+  })
+
+  const handleCancelItem = (item: OrderDetail) => {
+    if (!item) return
+    Alert.alert('Xác nhận', `Bạn có chắc muốn hủy món ${item.menu.name}với size ${item.size.name} này?`, [
+      { text: 'Không', style: 'cancel' },
+      {
+        text: 'Hủy món',
+        style: 'destructive',
+        onPress: () => {
+          setCancellingItemId(item.id)
+          cancelMutation.mutate(item.id)
+        }
+      }
+    ])
+  }
 
   const handleFilterChange = (value: 'placed' | 'cancelled') => {
     setFilterMode(value)
   }
 
-  const handleCancelItem = (orderDetailId: number) => {
-    if (!orderIdNumber) return
-    setCancellingItemId(orderDetailId)
-    cancelMutation.mutate([orderDetailId])
+  const handleTransferTable = (tableId: number) => {
+    setIsTransferring(true)
+    changeTableMutation.mutate(tableId)
   }
 
   if (!order && !isLoading) {
@@ -99,7 +90,7 @@ export default function OrderDetailScreen() {
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
       {/* Header */}
       <Header
-        title='Chi tiết đơn hàng'
+        title={order?.dinnerTable?.name ?? 'Chi tiết đơn hàng'}
         subtitle={statusName}
         rightContent={
           <View className='items-end'>
@@ -122,7 +113,7 @@ export default function OrderDetailScreen() {
                 icon: 'swap-horizontal-outline',
                 variant: 'info',
                 onPress: () => {
-                  // TODO: wire navigation/action
+                  setShowTransferModal(true)
                 }
               },
               {
@@ -149,7 +140,18 @@ export default function OrderDetailScreen() {
                 icon: 'close-circle-outline',
                 variant: 'danger',
                 onPress: () => {
-                  // TODO: wire API/action
+                  Alert.alert('Xác nhận', 'Bạn có chắc muốn hủy toàn bộ đơn hàng này?', [
+                    { text: 'Không', style: 'cancel' },
+                    {
+                      text: 'Hủy đơn',
+                      style: 'destructive',
+                      onPress: () => {
+                        if (orderIdNumber) {
+                          cancelOrderMutation.mutate(orderIdNumber)
+                        }
+                      }
+                    }
+                  ])
                 }
               }
             ]}
@@ -166,15 +168,14 @@ export default function OrderDetailScreen() {
           isRefetching={isRefetching}
           onRefresh={refetch}
           onCancelItem={handleCancelItem}
+          cancellingItemId={cancellingItemId}
           onUpdateItem={(orderDetailId) => {
             const detail = (order?.orderDetails ?? []).find((d: any) => Number(d.id) === Number(orderDetailId))
             if (!detail || !orderIdNumber) return
-
             useOrderStore.getState().clear()
             useOrderStore.getState().setMode(ORDER_FLOW_MODE.UPDATE_ITEMS)
             useOrderStore.getState().setTargetOrderId(orderIdNumber)
             useOrderStore.getState().setEditingOrderDetailId(Number(orderDetailId))
-
             useOrderStore.getState().add({
               menuId: Number(detail.menu.id ?? 0),
               menuName: detail.menu?.name ?? `Món #${detail.menu.id}`,
@@ -185,7 +186,6 @@ export default function OrderDetailScreen() {
               quantity: Number(detail.quantity ?? 1),
               note: detail.note ?? null
             })
-
             router.push({
               pathname: '/(protected)/order/item-detail',
               params: {
@@ -194,7 +194,6 @@ export default function OrderDetailScreen() {
               }
             })
           }}
-          cancellingItemId={cancellingItemId}
           filterMode={filterMode}
           onFilterChange={handleFilterChange}
           onAddItems={() => {
@@ -214,6 +213,17 @@ export default function OrderDetailScreen() {
           colors={colors}
         />
       </View>
+
+      {/* Transfer Table Modal */}
+      <TransferTableModal
+        visible={showTransferModal}
+        tables={emptyTables ?? []}
+        currentTableId={Number(order?.dinnerTable?.id ?? 0)}
+        isLoading={isTransferring || isLoadingTables}
+        onSelect={handleTransferTable}
+        onClose={() => setShowTransferModal(false)}
+        colors={colors}
+      />
     </View>
   )
 }

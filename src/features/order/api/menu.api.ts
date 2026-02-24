@@ -9,6 +9,22 @@ export const menuApi = {
     return http.get<ApiResponse<MenuGroup[]>>(URL.MENU_GROUP_TYPES_AVAILABLE)
   },
 
+  getMenus(groupId?: number, name?: string): Promise<AxiosResponse<ApiResponse<Menu[]>>> {
+    // const params: Record<string, any> = {}
+    // if (name && name.trim()) {
+    //   params.menuName = name.trim()
+    // }
+    // if (groupId) {
+    //   params.groupID = groupId
+    // }
+    return http.get<ApiResponse<Menu[]>>(`${URL.MENUS_AVAILABLE_BASE}`, {
+      params: {
+        ...(groupId != null && { groupID: groupId }),
+        ...(name?.trim() && { menuName: name.trim() })
+      }
+    })
+  },
+
   getMenusByGroup(groupId: number): Promise<AxiosResponse<ApiResponse<Menu[]>>> {
     return http.get<ApiResponse<Menu[]>>(`${URL.MENUS_GROUP_BASE}/${groupId}/items/available`)
   },

@@ -44,6 +44,14 @@ export default function HomeScreen() {
     refetch().finally(() => setRefreshing(false))
   }, [refetch])
 
+  const isInitialLoad = isLoadingOrders && orders.length === 0
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     setRefreshing(false)
+  //   }, [])
+  // )
+
   const ListHeader = useMemo(
     () => (
       <View>
@@ -118,49 +126,60 @@ export default function HomeScreen() {
         <OrderFilterChips selected={selectedFilter} onChange={setSelectedFilter} colors={colors} />
       </Header>
 
-      {/* Orders List */}
-
-      <FlatList
-        data={orders}
-        keyExtractor={(item) => item.orderID.toString()}
-        numColumns={3}
-        style={{ backgroundColor: colors.background }}
-        contentContainerStyle={{
-          padding: 16,
-          paddingBottom: 100
-        }}
-        columnWrapperStyle={{
-          gap: 12,
-          marginBottom: 8
-        }}
-        ListHeaderComponent={ListHeader}
-        ListEmptyComponent={EmptyComponent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing || isRefetching} onRefresh={onRefresh} tintColor={colors.primary} />
-        }
-        renderItem={({ item }) => (
-          <View
-            style={{
-              flexBasis: '31%',
-              maxWidth: '31%',
-              marginBottom: 8
-            }}
-          >
-            <OrderCard
-              order={item}
-              colors={colors}
-              statusColors={status}
-              effectiveTheme={effectiveTheme}
-              onPressDetail={() => {
-                router.push(`/(protected)/order/detail?orderId=${item.orderID}` as any)
-              }}
-            />
+      {/* Orders List - only mount when first load done to avoid list jump */}
+      {isInitialLoad ? (
+        <View className='flex-1 items-center justify-center py-20'>
+          <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
+            <Ionicons name='time-outline' size={48} color={colors.primary} />
           </View>
-        )}
-        showsVerticalScrollIndicator={false}
-        scrollEventThrottle={16}
-        removeClippedSubviews={false}
-      />
+          <Text className='text-lg font-semibold mt-2' style={{ color: colors.text }}>
+            Đang tải đơn hàng...
+          </Text>
+          <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
+            Vui lòng đợi trong giây lát
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={orders}
+          keyExtractor={(item) => item.orderID.toString()}
+          numColumns={3}
+          style={{ backgroundColor: colors.background }}
+          contentContainerStyle={{
+            padding: 16,
+            paddingBottom: 100
+          }}
+          columnWrapperStyle={{
+            gap: 12,
+            marginBottom: 8
+          }}
+          ListHeaderComponent={ListHeader}
+          ListEmptyComponent={EmptyComponent}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+          renderItem={({ item }) => (
+            <View
+              style={{
+                flexBasis: '31%',
+                maxWidth: '31%',
+                marginBottom: 8
+              }}
+            >
+              <OrderCard
+                order={item}
+                colors={colors}
+                statusColors={status}
+                effectiveTheme={effectiveTheme}
+                onPressDetail={() => {
+                  router.push(`/(protected)/order/detail?orderId=${item.orderID}` as any)
+                }}
+              />
+            </View>
+          )}
+          showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+          removeClippedSubviews={false}
+        />
+      )}
 
       {/* Button Create Order */}
       <TouchableOpacity

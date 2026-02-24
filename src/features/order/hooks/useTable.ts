@@ -34,7 +34,7 @@ export function useEmptyTables() {
       const res = await tableApi.getTablesEmpty()
       return (res.data.data ?? []) as DinnerTable[]
     },
-    staleTime: 30 * 1000
+    staleTime: 0 // Don't cache empty tables
   })
 
   return {

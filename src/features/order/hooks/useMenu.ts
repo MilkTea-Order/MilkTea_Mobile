@@ -5,7 +5,7 @@ import type { Menu, MenuGroup, MenuSize } from '../types/menu.type'
 export const menuKeys = {
   all: ['menus'] as const,
   groupTypes: () => [...menuKeys.all, 'group-types'] as const,
-  groups: (groupId: number) => [...menuKeys.all, 'groups', groupId] as const,
+  groups: (groupId?: number | null, name?: string) => [...menuKeys.all, 'groups', groupId ?? null, name ?? ''] as const,
   sizes: (menuId: number) => [...menuKeys.all, 'sizes', menuId] as const
 }
 
@@ -27,15 +27,13 @@ export function useMenuGroups() {
   }
 }
 
-export function useMenusByGroup(groupId?: number) {
+export function useMenusByGroup(groupId?: number | null, name?: string) {
   const query = useQuery({
-    queryKey: menuKeys.groups(groupId ?? 0),
+    queryKey: menuKeys.groups(groupId, name),
     queryFn: async () => {
-      if (groupId == null) return [] as Menu[]
-      const res = await menuApi.getMenusByGroup(groupId)
+      const res = await menuApi.getMenus(groupId ?? undefined, name)
       return (res.data.data ?? []) as Menu[]
     },
-    enabled: groupId != null,
     staleTime: 3 * 60 * 1000
   })
   return {
