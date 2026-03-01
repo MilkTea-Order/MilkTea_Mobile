@@ -27,7 +27,7 @@ export function useMenuGroups() {
   }
 }
 
-export function useMenusByGroup(groupId?: number | null, name?: string) {
+export function useMenusByGroupAndName(groupId?: number | null, name?: string) {
   const query = useQuery({
     queryKey: menuKeys.groups(groupId, name),
     queryFn: async () => {

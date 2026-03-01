@@ -68,7 +68,7 @@ export default function OrderDetailScreen() {
 
   const handleCancelItem = (item: OrderDetail) => {
     if (!item) return
-    Alert.alert('Xác nhận', `Bạn có chắc muốn hủy món ${item.menu.name}với size ${item.size.name} này?`, [
+    Alert.alert('Xác nhận', `Bạn có chắc muốn hủy món ${item.menu.name} với size ${item.size.name} này?`, [
       { text: 'Không', style: 'cancel' },
       {
         text: 'Hủy món',
@@ -187,9 +187,7 @@ export default function OrderDetailScreen() {
             const detail = (order?.orderDetails ?? []).find((d: any) => Number(d.id) === Number(orderDetailId))
             if (!detail || !orderIdNumber) return
             useOrderStore.getState().clear()
-            useOrderStore.getState().setMode(ORDER_FLOW_MODE.UPDATE_ITEMS)
-            useOrderStore.getState().setTargetOrderId(orderIdNumber)
-            useOrderStore.getState().setEditingOrderDetailId(Number(orderDetailId))
+
             useOrderStore.getState().add({
               menuId: Number(detail.menu.id ?? 0),
               menuName: detail.menu?.name ?? `Món #${detail.menu.id}`,
@@ -204,7 +202,10 @@ export default function OrderDetailScreen() {
               pathname: '/(protected)/order/item-detail',
               params: {
                 menuId: String(detail.menu.id ?? ''),
-                sizeId: String(detail.size.id ?? '')
+                sizeId: String(detail.size.id ?? ''),
+                mode: ORDER_FLOW_MODE.UPDATE_ITEMS,
+                orderId: String(orderIdNumber),
+                orderDetailId: String(orderDetailId)
               }
             })
           }}
@@ -213,14 +214,18 @@ export default function OrderDetailScreen() {
           onAddItems={() => {
             if (!orderIdNumber || !order) return
             useOrderStore.getState().clear()
-            useOrderStore.getState().setMode(ORDER_FLOW_MODE.ADD_ITEMS)
-            useOrderStore.getState().setTargetOrderId(orderIdNumber)
             useOrderStore.getState().setTable({
               id: Number(order.dinnerTable.id ?? 0),
               name: String(order.dinnerTable?.name ?? ''),
               numberOfSeats: Number(order.dinnerTable?.numberOfSeats ?? 0)
             } as any)
-            router.push('/(protected)/order/select-menu')
+            router.push({
+              pathname: '/(protected)/order/select-menu',
+              params: {
+                mode: String(ORDER_FLOW_MODE.ADD_ITEMS),
+                orderId: String(orderIdNumber)
+              }
+            })
           }}
           colors={colors}
         />

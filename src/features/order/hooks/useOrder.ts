@@ -75,7 +75,7 @@ export function useCreateOrder() {
         (old: Order[] | undefined) => {
           const prev = old ?? []
 
-          const withoutDup = prev.filter((o) => o.orderID !== data.data.orderID)
+          const withoutDup = prev.filter((o) => o.id !== data.data.id)
           return [data.data, ...withoutDup]
         }
       )

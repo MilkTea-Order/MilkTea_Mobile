@@ -14,7 +14,8 @@ export default function SelectTableScreen() {
   const [refreshing, setRefreshing] = useState(false)
   const { data: availableTables, isLoading, isRefetching, refetch } = useEmptyTables()
   const setTable = useOrderStore((s) => s.setTable)
-  const clearOrder = useOrderStore((s) => s.clear)
+  const selectedTable = useOrderStore((s) => s.table)
+  // const clearOrder = useOrderStore((s) => s.clear)
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
@@ -22,13 +23,19 @@ export default function SelectTableScreen() {
   }, [refetch])
 
   const handleBack = () => {
-    clearOrder()
-    router.back()
+    // clearOrder()
+    // router.back()
+    if (selectedTable) {
+      router.replace('/(protected)/order/select-menu')
+    } else {
+      router.dismissAll()
+    }
   }
 
   const handleSelect = (table: DinnerTable) => {
     setTable(table)
-    router.push('/(protected)/order/select-menu')
+    // router.push('/(protected)/order/select-menu')
+    router.replace('/(protected)/order/select-menu')
   }
 
   return (
@@ -65,56 +72,58 @@ export default function SelectTableScreen() {
           <Text style={{ color: colors.textSecondary }}>Không có bàn khả dụng</Text>
         ) : (
           <View className='flex-row flex-wrap' style={{ gap: 12 }}>
-            {availableTables.map((table) => {
-              const tableImageUrl = (table as any).emptyImg || null
-              return (
-                <TouchableOpacity
-                  key={table.id}
-                  onPress={() => handleSelect(table)}
-                  className='rounded-2xl border overflow-hidden'
-                  style={{
-                    width: '31%',
-                    backgroundColor: colors.card,
-                    borderColor: colors.border,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.05,
-                    shadowRadius: 8,
-                    elevation: 2
-                  }}
-                  activeOpacity={0.85}
-                >
-                  <View
+            {availableTables
+              .filter((table) => table.id !== selectedTable?.id)
+              .map((table) => {
+                const tableImageUrl = (table as any).emptyImg || null
+                return (
+                  <TouchableOpacity
+                    key={table.id}
+                    onPress={() => handleSelect(table)}
+                    className='rounded-2xl border overflow-hidden'
                     style={{
-                      width: '100%',
-                      height: 95,
-                      backgroundColor: `${colors.primary}10`
+                      width: '31%',
+                      backgroundColor: colors.card,
+                      borderColor: colors.border,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.05,
+                      shadowRadius: 8,
+                      elevation: 2
                     }}
+                    activeOpacity={0.85}
                   >
-                    {tableImageUrl ? (
-                      <Image
-                        source={{ uri: tableImageUrl }}
-                        style={{ width: '100%', height: '100%' }}
-                        resizeMode='contain'
-                      />
-                    ) : (
-                      <View className='flex-1 items-center justify-center'>
-                        <Ionicons name='restaurant-outline' size={48} color={colors.primary} />
-                      </View>
-                    )}
-                  </View>
-
-                  <View className='p-3'>
-                    <View className='flex-row items-center'>
-                      <Ionicons name='people-outline' size={14} color={colors.textSecondary} />
-                      <Text className='text-xs ml-1' style={{ color: colors.textSecondary }}>
-                        {table.numberOfSeats} ghế
-                      </Text>
+                    <View
+                      style={{
+                        width: '100%',
+                        height: 95,
+                        backgroundColor: `${colors.primary}10`
+                      }}
+                    >
+                      {tableImageUrl ? (
+                        <Image
+                          source={{ uri: tableImageUrl }}
+                          style={{ width: '100%', height: '100%' }}
+                          resizeMode='contain'
+                        />
+                      ) : (
+                        <View className='flex-1 items-center justify-center'>
+                          <Ionicons name='restaurant-outline' size={48} color={colors.primary} />
+                        </View>
+                      )}
                     </View>
-                  </View>
-                </TouchableOpacity>
-              )
-            })}
+
+                    <View className='p-3'>
+                      <View className='flex-row items-center'>
+                        <Ionicons name='people-outline' size={14} color={colors.textSecondary} />
+                        <Text className='text-xs ml-1' style={{ color: colors.textSecondary }}>
+                          {table.numberOfSeats} ghế
+                        </Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                )
+              })}
           </View>
         )}
       </ScrollView>

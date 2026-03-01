@@ -86,7 +86,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
-    console.log('logout')
     set({ tokens: null, profile: null })
     // Remove tokens from SecureStore
     await removeSecureItem(STORAGE_KEYS.AUTH.TOKENS)

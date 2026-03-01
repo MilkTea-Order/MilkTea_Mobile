@@ -1,5 +1,4 @@
 import type { DinnerTable } from '@/features/order/types/table.type'
-import { ORDER_FLOW_MODE, OrderFlowMode } from '@/shared/constants/other'
 import { create } from 'zustand'
 
 export type OrderLine = {
@@ -17,32 +16,34 @@ const calculateTotalPrice = (items: OrderLine[]): number => {
   return items.reduce((total, item) => total + item.price * item.quantity, 0)
 }
 
+const calculateTotalQuantity = (items: OrderLine[]): number => {
+  return items.reduce((total, item) => total + item.quantity, 0)
+}
+
 type OrderState = {
+  table: DinnerTable | null
   items: OrderLine[]
   totalPrice: number
-  table: DinnerTable | null
-  mode: OrderFlowMode
-  targetOrderId: number | null
-  editingOrderDetailId: number | null
+  totalQuantity: number
+
+  // items actions
   add: (orderLine: OrderLine) => void
   increment: (menuId: number, sizeId: number) => void
   decrement: (menuId: number, sizeId: number) => void
   removeItem: (menuId: number, sizeId: number) => void
+
   setLineNote: (menuId: number, sizeId: number, note: string | null) => void
   setTable: (table: DinnerTable | null) => void
-  setMode: (mode: OrderFlowMode) => void
-  setTargetOrderId: (orderId: number | null) => void
-  setEditingOrderDetailId: (orderDetailId: number | null) => void
+  // clear store
   clear: () => void
+  clearCart: () => void
 }
 
 export const useOrderStore = create<OrderState>((set) => ({
   items: [],
   totalPrice: 0,
+  totalQuantity: 0,
   table: null,
-  mode: ORDER_FLOW_MODE.CREATE,
-  targetOrderId: null,
-  editingOrderDetailId: null,
 
   add: (orderLine) => {
     set((state) => {
@@ -65,7 +66,8 @@ export const useOrderStore = create<OrderState>((set) => ({
 
       return {
         items: nextItems,
-        totalPrice: calculateTotalPrice(nextItems)
+        totalPrice: calculateTotalPrice(nextItems),
+        totalQuantity: calculateTotalQuantity(nextItems)
       }
     })
   },
@@ -80,7 +82,8 @@ export const useOrderStore = create<OrderState>((set) => ({
 
       return {
         items: nextItems,
-        totalPrice: calculateTotalPrice(nextItems)
+        totalPrice: calculateTotalPrice(nextItems),
+        totalQuantity: calculateTotalQuantity(nextItems)
       }
     })
   },
@@ -93,7 +96,8 @@ export const useOrderStore = create<OrderState>((set) => ({
 
       return {
         items: nextItems,
-        totalPrice: calculateTotalPrice(nextItems)
+        totalPrice: calculateTotalPrice(nextItems),
+        totalQuantity: calculateTotalQuantity(nextItems)
       }
     })
   },
@@ -104,7 +108,8 @@ export const useOrderStore = create<OrderState>((set) => ({
 
       return {
         items: nextItems,
-        totalPrice: calculateTotalPrice(nextItems)
+        totalPrice: calculateTotalPrice(nextItems),
+        totalQuantity: calculateTotalQuantity(nextItems)
       }
     })
   },
@@ -119,26 +124,26 @@ export const useOrderStore = create<OrderState>((set) => ({
 
       return {
         items: nextItems,
-        totalPrice: calculateTotalPrice(nextItems)
+        totalPrice: calculateTotalPrice(nextItems),
+        totalQuantity: calculateTotalQuantity(nextItems)
       }
     })
   },
 
   setTable: (table) => set({ table }),
 
-  setMode: (mode) => set({ mode }),
-
-  setTargetOrderId: (orderId) => set({ targetOrderId: orderId }),
-
-  setEditingOrderDetailId: (orderDetailId) => set({ editingOrderDetailId: orderDetailId }),
-
   clear: () =>
     set({
       items: [],
       totalPrice: 0,
-      table: null,
-      mode: ORDER_FLOW_MODE.CREATE,
-      targetOrderId: null,
-      editingOrderDetailId: null
+      totalQuantity: 0,
+      table: null
+    }),
+
+  clearCart: () =>
+    set({
+      items: [],
+      totalPrice: 0,
+      totalQuantity: 0
     })
 }))

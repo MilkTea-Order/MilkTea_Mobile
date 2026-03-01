@@ -23,6 +23,8 @@ type Props = {
   formatCurrency: (amount: number) => string
   activeSize: { menuId: number; sizeId: number } | null
   onChangeActiveSize: (next: { menuId: number; sizeId: number } | null) => void
+  isActive?: boolean
+  onPressCard?: () => void
 }
 
 export default function MenuItemCardV2({
@@ -32,7 +34,9 @@ export default function MenuItemCardV2({
   onRemove,
   formatCurrency,
   activeSize,
-  onChangeActiveSize
+  onChangeActiveSize,
+  isActive,
+  onPressCard
 }: Props) {
   const { data: sizes, isLoading } = useMenuSizes(menu.id)
   const orderItems = useOrderStore((s) => s.items)
@@ -48,15 +52,6 @@ export default function MenuItemCardV2({
     onChangeActiveSize({ menuId: menu.id, sizeId: size.id })
 
     if (changed && quantity === 0) {
-      // onAdd({
-      //   menuId: menu.id,
-      //   menuName: menu.name,
-      //   menuImage: menu.image ?? null,
-      //   sizeId: size.id,
-      //   sizeName: size.name,
-      //   price: size.price?.price ?? 0,
-      //   quantity: 1
-      // })
       handleIncrement(size)
     }
   }
@@ -89,102 +84,105 @@ export default function MenuItemCardV2({
       className='rounded-2xl mb-3 border overflow-hidden'
       style={{
         backgroundColor: colors.card,
-        borderColor: colors.border,
+        borderColor: isActive ? colors.primary : colors.border,
+        borderWidth: isActive ? 2 : 1,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.07,
-        shadowRadius: 8,
-        elevation: 2,
+        shadowOpacity: isActive ? 0.15 : 0.07,
+        shadowRadius: isActive ? 12 : 8,
+        elevation: isActive ? 4 : 2,
         width: CARD_WIDTH
       }}
     >
       {/* Image Header */}
-      <View style={{ width: '100%', height: 140, backgroundColor: `${colors.primary}10`, position: 'relative' }}>
-        {menu.image ? (
-          <Image source={{ uri: menu.image }} style={{ width: '100%', height: '100%' }} resizeMode='cover' />
-        ) : (
-          <View className='flex-1 items-center justify-center'>
-            <Ionicons name='restaurant-outline' size={48} color={colors.primary} />
-          </View>
-        )}
-        {expandedBadgeSizeId && sizes && sizes.length > 0 && (
-          <View className='absolute bottom-2 right-2'>
-            <View
-              className='flex-row items-center rounded-full'
-              style={{
-                backgroundColor: colors.primary,
-                paddingHorizontal: 8,
-                paddingVertical: 4,
-                gap: 8
-              }}
-            >
-              {/* Decrement */}
-              <TouchableOpacity
-                onPress={() => {
-                  const size = sizes.find((s) => s.id === expandedBadgeSizeId)
-                  if (size) handleDecrement(size)
-                }}
-                className='rounded-full'
-                style={{
-                  width: 24,
-                  height: 24,
-                  backgroundColor: 'rgba(255,255,255,0.3)',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                activeOpacity={0.8}
-              >
-                <Ionicons name='remove' size={14} color='white' />
-              </TouchableOpacity>
-              {/* Quantity */}
-              <Text className='text-sm font-bold text-white min-w-[24px] text-center'>
-                {getQuantityReactive(menu.id, expandedBadgeSizeId)}
-              </Text>
-              {/* Increment */}
-              <TouchableOpacity
-                onPress={() => {
-                  const size = sizes.find((s) => s.id === expandedBadgeSizeId)
-                  if (size) handleIncrement(size)
-                }}
-                className='rounded-full'
-                style={{
-                  width: 24,
-                  height: 24,
-                  backgroundColor: 'rgba(255,255,255,0.3)',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                activeOpacity={0.8}
-              >
-                <Ionicons name='add' size={14} color='white' />
-              </TouchableOpacity>
-              {/* View Detail Button */}
-              <TouchableOpacity
-                onPress={() =>
-                  router.push({
-                    pathname: '/(protected)/order/item-detail',
-                    params: { menuId: String(menu.id), sizeId: String(expandedBadgeSizeId) }
-                  })
-                }
-                style={{
-                  width: 28,
-                  height: 28,
-                  backgroundColor: 'rgba(255,255,255,0.22)',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 14,
-                  borderWidth: 1,
-                  borderColor: 'rgba(255,255,255,0.35)'
-                }}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                activeOpacity={0.8}
-              >
-                <Ionicons name='information-circle-outline' size={16} color='white' />
-              </TouchableOpacity>
+      <TouchableOpacity activeOpacity={0.9} onPress={onPressCard} disabled={!onPressCard} style={{ width: '100%' }}>
+        <View style={{ width: '100%', height: 140, backgroundColor: `${colors.primary}10`, position: 'relative' }}>
+          {menu.image ? (
+            <Image source={{ uri: menu.image }} style={{ width: '100%', height: '100%' }} resizeMode='cover' />
+          ) : (
+            <View className='flex-1 items-center justify-center'>
+              <Ionicons name='restaurant-outline' size={48} color={colors.primary} />
             </View>
-          </View>
-        )}
-      </View>
+          )}
+          {expandedBadgeSizeId && sizes && sizes.length > 0 && (
+            <View className='absolute bottom-2 right-2'>
+              <View
+                className='flex-row items-center rounded-full'
+                style={{
+                  backgroundColor: colors.primary,
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  gap: 8
+                }}
+              >
+                {/* Decrement */}
+                <TouchableOpacity
+                  onPress={() => {
+                    const size = sizes.find((s) => s.id === expandedBadgeSizeId)
+                    if (size) handleDecrement(size)
+                  }}
+                  className='rounded-full'
+                  style={{
+                    width: 24,
+                    height: 24,
+                    backgroundColor: 'rgba(255,255,255,0.3)',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name='remove' size={14} color='white' />
+                </TouchableOpacity>
+                {/* Quantity */}
+                <Text className='text-sm font-bold text-white min-w-[24px] text-center'>
+                  {getQuantityReactive(menu.id, expandedBadgeSizeId)}
+                </Text>
+                {/* Increment */}
+                <TouchableOpacity
+                  onPress={() => {
+                    const size = sizes.find((s) => s.id === expandedBadgeSizeId)
+                    if (size) handleIncrement(size)
+                  }}
+                  className='rounded-full'
+                  style={{
+                    width: 24,
+                    height: 24,
+                    backgroundColor: 'rgba(255,255,255,0.3)',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name='add' size={14} color='white' />
+                </TouchableOpacity>
+                {/* View Detail Button */}
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: '/(protected)/order/item-detail',
+                      params: { menuId: String(menu.id), sizeId: String(expandedBadgeSizeId) }
+                    })
+                  }
+                  style={{
+                    width: 28,
+                    height: 28,
+                    backgroundColor: 'rgba(255,255,255,0.22)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 14,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255,255,255,0.35)'
+                  }}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name='information-circle-outline' size={16} color='white' />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
 
       {/* Size Row */}
       {isLoading ? (

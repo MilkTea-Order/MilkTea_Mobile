@@ -142,7 +142,7 @@ export default function HomeScreen() {
       ) : (
         <FlatList
           data={orders}
-          keyExtractor={(item) => item.orderID.toString()}
+          keyExtractor={(item) => item.id.toString()}
           numColumns={3}
           style={{ backgroundColor: colors.background }}
           contentContainerStyle={{
@@ -170,7 +170,7 @@ export default function HomeScreen() {
                 statusColors={status}
                 effectiveTheme={effectiveTheme}
                 onPressDetail={() => {
-                  router.push(`/(protected)/order/detail?orderId=${item.orderID}` as any)
+                  router.push(`/(protected)/order/detail?orderId=${item.id}` as any)
                 }}
               />
             </View>

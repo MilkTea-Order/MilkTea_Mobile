@@ -149,9 +149,9 @@ export function TransferTableModal({
                 <Ionicons name='close' size={24} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
-            <Text className='text-xs mt-2' style={{ color: colors.textSecondary }}>
+            {/* <Text className='text-xs mt-2' style={{ color: colors.textSecondary }}>
               {config.subtitle}
-            </Text>
+            </Text> */}
           </View>
 
           {/* Content */}

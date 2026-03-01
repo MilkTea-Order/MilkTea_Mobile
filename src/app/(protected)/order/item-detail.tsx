@@ -1,7 +1,7 @@
 import { Header } from '@/components/layouts/Header'
 import { useUpdateOrderItem } from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
-import { ORDER_FLOW_MODE } from '@/shared/constants/other'
+import { ORDER_FLOW_MODE, OrderFlowMode } from '@/shared/constants/other'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons } from '@expo/vector-icons'
@@ -19,18 +19,20 @@ export default function OrderItemDetailScreen() {
   const router = useRouter()
   const { colors } = useTheme()
 
-  const { menuId, sizeId } = useLocalSearchParams<{
+  const { menuId, sizeId, mode, orderId, orderDetailId } = useLocalSearchParams<{
     menuId?: string
     sizeId?: string
+    mode?: OrderFlowMode
+    orderId?: string
+    orderDetailId?: string
   }>()
 
   const menuIdNumber = useMemo(() => Number(menuId), [menuId])
   const sizeIdNumber = useMemo(() => Number(sizeId), [sizeId])
-
-  const mode = useOrderStore((s) => s.mode)
-  const isUpdateMode = mode === ORDER_FLOW_MODE.UPDATE_ITEMS
-  const orderIdNumber = useOrderStore((s) => s.targetOrderId) ?? NaN
-  const orderDetailIdNumber = useOrderStore((s) => s.editingOrderDetailId) ?? NaN
+  const modeValue = mode ?? ORDER_FLOW_MODE.CREATE
+  const isUpdateMode = modeValue === ORDER_FLOW_MODE.UPDATE_ITEMS
+  const orderIdNumber = useMemo(() => (orderId ? Number(orderId) : NaN), [orderId])
+  const orderDetailIdNumber = useMemo(() => (orderDetailId ? Number(orderDetailId) : NaN), [orderDetailId])
 
   const orderItems = useOrderStore((s) => s.items)
   const increment = useOrderStore((s) => s.increment)

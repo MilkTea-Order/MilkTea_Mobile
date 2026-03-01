@@ -1,14 +1,14 @@
 import { Header } from '@/components/layouts/Header'
 import MenuGroupNavV2 from '@/components/molecules/MenuGroupNavV2'
 import MenuItemCardV2 from '@/components/molecules/MenuItemCardV2'
-import { useMenuGroups, useMenusByGroup } from '@/features/order/hooks/useMenu'
+import { useMenuGroups, useMenusByGroupAndName } from '@/features/order/hooks/useMenu'
 import { useOrderStore } from '@/features/order/store/order.store'
 import { MenuGroup } from '@/features/order/types/menu.type'
-import { ORDER_FLOW_MODE } from '@/shared/constants/other'
+import { ORDER_FLOW_MODE, OrderFlowMode } from '@/shared/constants/other'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons } from '@expo/vector-icons'
-import { useFocusEffect, useRouter } from 'expo-router'
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
 import {
   ActivityIndicator,
@@ -21,18 +21,25 @@ import {
   TouchableOpacity,
   View
 } from 'react-native'
-import { useDebounce } from 'use-debounce'
 
 export default function SelectMenuScreen() {
   const router = useRouter()
   const { colors } = useTheme()
 
+  const { mode, orderId } = useLocalSearchParams<{
+    mode?: OrderFlowMode
+    orderId?: string
+  }>()
+
+  const modeValue = mode ?? ORDER_FLOW_MODE.CREATE
+
   const [selectedGroup, setSelectedGroup] = useState<MenuGroup | null>(null)
   const [activeSize, setActiveSize] = useState<{ menuId: number; sizeId: number } | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [debouncedSearch] = useDebounce(searchQuery, 400)
+  const [activeMenuId, setActiveMenuId] = useState<number | null>(null)
 
-  const normalizedSearch = debouncedSearch.trim().length >= 2 ? debouncedSearch.trim() : ''
+  // Search Menu by name
+  const [searchQuery, setSearchQuery] = useState('')
+  const [submittedSearch, setSubmittedSearch] = useState('')
 
   // Store
   const orderItems = useOrderStore((s) => s.items)
@@ -41,7 +48,8 @@ export default function SelectMenuScreen() {
   const removeItem = useOrderStore((s) => s.removeItem)
   const totalPrice = useOrderStore((s) => s.totalPrice)
   const clearOrder = useOrderStore((s) => s.clear)
-  const mode = useOrderStore((s) => s.mode)
+  const clearCart = useOrderStore((s) => s.clearCart)
+  const selectedTable = useOrderStore((s) => s.table)
 
   const { data: menuGroups } = useMenuGroups()
   const {
@@ -49,10 +57,9 @@ export default function SelectMenuScreen() {
     isLoading: isLoadingMenus,
     isRefetching: isRefetchingMenus,
     refetch: refetchMenus
-  } = useMenusByGroup(selectedGroup?.id ?? undefined, normalizedSearch)
+  } = useMenusByGroupAndName(selectedGroup?.id, submittedSearch)
 
-  const selectedTable = useOrderStore((s) => s.table)
-
+  // If hadn't selected table, redirect to select table screen
   useFocusEffect(
     useCallback(() => {
       if (!selectedTable) {
@@ -61,25 +68,64 @@ export default function SelectMenuScreen() {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router])
   )
+
+  // Clear active size when unmount
   useFocusEffect(
     useCallback(() => {
       return () => {
         setActiveSize(null)
+        setActiveMenuId(null)
       }
     }, [])
   )
 
+  useFocusEffect(
+    useCallback(() => {
+      if (modeValue === ORDER_FLOW_MODE.ADD_ITEMS && !Number.isFinite(Number(orderId))) {
+        clearOrder()
+        Alert.alert('Lỗi', 'Không tìm thấy đơn hàng.')
+        router.dismissAll()
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [orderId, modeValue])
+  )
+
+  // Clear active size when change group
   useEffect(() => {
     setActiveSize(null)
+    setActiveMenuId(null)
   }, [selectedGroup?.id])
 
+  // Handle back button
   const handleBack = () => {
-    if (mode === ORDER_FLOW_MODE.ADD_ITEMS) {
-      clearOrder()
-    }
+    clearOrder()
     router.back()
   }
 
+  // Handle change table
+  const handleChangeTable = () => {
+    router.replace('/(protected)/order/select-table')
+  }
+
+  // Handle clear cart
+  const handleClearCart = () => {
+    Alert.alert('Xác nhận', 'Bạn có muốn xóa toàn bộ giỏ hàng?', [
+      { text: 'Huỷ', style: 'cancel' },
+      {
+        text: 'Xóa tất cả',
+        style: 'destructive',
+        onPress: () => {
+          clearCart()
+          setActiveSize(null)
+          setActiveMenuId(null)
+        }
+      }
+    ])
+  }
+
+  const hasItemsInCart = orderItems.length > 0
+
+  // Handle toggle group
   const handleToggleGroup = (group: MenuGroup) => {
     if (selectedGroup?.id === group.id) {
       setSelectedGroup(null)
@@ -88,6 +134,20 @@ export default function SelectMenuScreen() {
     }
   }
 
+  // Handle search
+  const handleSearch = () => {
+    const trimmed = searchQuery.trim()
+    setSubmittedSearch(trimmed.length >= 2 ? trimmed : '')
+    Keyboard.dismiss()
+  }
+
+  // Handle clear search
+  const handleClearSearch = () => {
+    setSearchQuery('')
+    setSubmittedSearch('')
+  }
+
+  // Handle decrement item
   const handleDecrement = (menuId: number, sizeId: number) => {
     const item = orderItems.find((x) => x.menuId === menuId && x.sizeId === sizeId)
     if (!item) return
@@ -111,6 +171,7 @@ export default function SelectMenuScreen() {
     orderDecrement(menuId, sizeId)
   }
 
+  // If hadn't selected table, show loading
   if (!selectedTable) {
     return (
       <View className='flex-1' style={{ backgroundColor: colors.background }}>
@@ -124,7 +185,28 @@ export default function SelectMenuScreen() {
 
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
-      <Header title={`Chọn món •  ${selectedTable?.name ?? ''}`} onBack={handleBack}>
+      <Header
+        title={`${selectedTable?.name ?? ''}`}
+        onBack={handleBack}
+        rightContent={
+          <View className='flex-row items-center gap-1'>
+            {modeValue === ORDER_FLOW_MODE.CREATE && (
+              <TouchableOpacity
+                onPress={handleChangeTable}
+                className='bg-white/20 rounded-full p-2'
+                activeOpacity={0.7}
+              >
+                <Ionicons name='swap-horizontal' size={18} color='white' />
+              </TouchableOpacity>
+            )}
+            {hasItemsInCart && (
+              <TouchableOpacity onPress={handleClearCart} className='bg-white/20 rounded-full p-2' activeOpacity={0.7}>
+                <Ionicons name='trash-outline' size={18} color='white' />
+              </TouchableOpacity>
+            )}
+          </View>
+        }
+      >
         <View
           className='flex-row items-center px-4 rounded-2xl mx-3 mb-3'
           style={{
@@ -139,13 +221,13 @@ export default function SelectMenuScreen() {
             elevation: 3
           }}
         >
-          {/* <Ionicons name='search' size={20} color={colors.primary} /> */}
-
           <TextInput
-            placeholder='Tìm kiếm món ăn...'
+            placeholder='Tìm kiếm món ăn'
             placeholderTextColor={colors.textSecondary}
             value={searchQuery}
             onChangeText={setSearchQuery}
+            onSubmitEditing={handleSearch}
+            returnKeyType='search'
             className='flex-1 ml-3 text-base'
             style={{
               color: colors.text,
@@ -154,11 +236,13 @@ export default function SelectMenuScreen() {
             }}
           />
 
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')} style={{ justifyContent: 'center' }}>
-              <Ionicons name='close-circle-sharp' size={24} color={colors.primary} />
-            </TouchableOpacity>
-          )}
+          {searchQuery.length > 0 ? (
+            <View className='flex-row items-center gap-2'>
+              <TouchableOpacity onPress={handleClearSearch} style={{ justifyContent: 'center' }}>
+                <Ionicons name='close-circle-sharp' size={24} color={colors.primary} />
+              </TouchableOpacity>
+            </View>
+          ) : null}
         </View>
       </Header>
 
@@ -182,7 +266,7 @@ export default function SelectMenuScreen() {
       )}
 
       {/* Menu Items */}
-      {!(selectedGroup?.id != null || normalizedSearch.length > 0) ? (
+      {!(selectedGroup?.id != null || submittedSearch.length > 0) ? (
         <Pressable style={{ flex: 1 }} onPress={Keyboard.dismiss}>
           <View className='items-center py-10 px-6 flex-1'>
             <Ionicons name='options-outline' size={28} color={colors.textSecondary} />
@@ -242,6 +326,18 @@ export default function SelectMenuScreen() {
                 formatCurrency={formatCurrencyVND}
                 activeSize={activeSize}
                 onChangeActiveSize={setActiveSize}
+                isActive={activeMenuId === menu.id}
+                onPressCard={() => {
+                  setActiveMenuId(menu.id)
+
+                  // const firstSizeWithQuantity = menu.size?.find((size) => {
+                  //   return orderItems.some((item) => item.sizeId === size.id && item.quantity > 0)
+                  // })
+
+                  // if (firstSizeWithQuantity) {
+                  //   setActiveSize({ menuId: menu.id, sizeId: firstSizeWithQuantity.id })
+                  // }
+                }}
               />
             </View>
           )}
@@ -262,7 +358,13 @@ export default function SelectMenuScreen() {
         >
           <TouchableOpacity
             onPress={() => {
-              router.push('/(protected)/order/review-cart')
+              router.push({
+                pathname: '/(protected)/order/review-cart',
+                params: {
+                  mode: modeValue,
+                  orderId: String(orderId)
+                }
+              })
             }}
             className='rounded-2xl py-4 flex-row items-center justify-between p-5'
             style={{ backgroundColor: colors.primary }}
@@ -271,7 +373,7 @@ export default function SelectMenuScreen() {
             <View className='flex-row items-center justify-between'>
               <Ionicons name='cart-outline' size={24} color='white' />
               <Text className='text-white text-center text-lg font-bold ml-2'>
-                Giỏ hàng • {orderItems.reduce((sum, item) => sum + item.quantity, 0)}món
+                Giỏ hàng • {orderItems.reduce((sum, item) => sum + item.quantity, 0)} món
               </Text>
             </View>
             <Text className='text-white text-center text-lg font-bold ml-2'> {formatCurrencyVND(totalPrice)}</Text>
@@ -281,25 +383,3 @@ export default function SelectMenuScreen() {
     </View>
   )
 }
-
-//   <View className='flex-row flex-wrap' style={{ marginHorizontal: -4 }}>
-//     {menus.map((menu) => (
-//       <View key={menu.id} style={{ marginHorizontal: 4, marginBottom: 8 }}>
-//         <MenuItemCardV2
-//           menu={menu}
-//           colors={{
-//             card: colors.card,
-//             border: colors.border,
-//             text: colors.text,
-//             textSecondary: colors.textSecondary,
-//             primary: colors.primary
-//           }}
-//           onAdd={orderAdd}
-//           onRemove={handleDecrement}
-//           formatCurrency={formatCurrencyVND}
-//           activeSize={activeSize}
-//           onChangeActiveSize={setActiveSize}
-//         />
-//       </View>
-//     ))}
-//   </View>

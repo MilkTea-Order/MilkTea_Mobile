@@ -3,15 +3,15 @@ import { useAuthStore } from '@/features/auth/store/auth.store'
 import { useAddOrderItems, useCreateOrder } from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
 import { parseOrderError } from '@/features/order/utils/parseOrderError'
-import { ORDER_FLOW_MODE } from '@/shared/constants/other'
+import { ORDER_FLOW_MODE, OrderFlowMode } from '@/shared/constants/other'
 import { STATUS } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { ApiErrorResponse } from '@/shared/types/api.type'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { isApiError } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
-import { useFocusEffect, useRouter } from 'expo-router'
-import React, { useCallback, useState } from 'react'
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
+import React, { useCallback, useMemo, useState } from 'react'
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { Toast } from 'react-native-toast-notifications'
 
@@ -19,6 +19,16 @@ export default function ReviewCartScreen() {
   const router = useRouter()
   const { colors } = useTheme()
 
+  const { mode, orderId } = useLocalSearchParams<{
+    mode?: OrderFlowMode
+    orderId?: string
+  }>()
+
+  const modeValue = mode ?? ORDER_FLOW_MODE.CREATE
+  const isAddItemsMode = modeValue === ORDER_FLOW_MODE.ADD_ITEMS
+  const targetOrderId = useMemo(() => (orderId ? Number(orderId) : NaN), [orderId])
+
+  console.log('targetOrderId', targetOrderId, mode)
   const authProfile = useAuthStore((s) => s.profile)
 
   const orderItems = useOrderStore((s) => s.items)
@@ -27,8 +37,6 @@ export default function ReviewCartScreen() {
   const removeItem = useOrderStore((s) => s.removeItem)
   const clearOrder = useOrderStore((s) => s.clear)
   const totalPrice = useOrderStore((s) => s.totalPrice)
-  const mode = useOrderStore((s) => s.mode)
-  const targetOrderId = useOrderStore((s) => s.targetOrderId)
 
   // const selectedTable = useOrderStore.getState().table
   const selectedTable = useOrderStore((s) => s.table)
@@ -98,12 +106,11 @@ export default function ReviewCartScreen() {
 
     setItemErrors({})
 
-    if (mode === ORDER_FLOW_MODE.ADD_ITEMS) {
+    if (isAddItemsMode) {
       if (!targetOrderId) {
         Alert.alert('Lỗi', 'Không tìm thấy OrderID.')
         return
       }
-
       addItemsMutation.mutate({
         items: orderItems.map((item) => ({
           menuID: item.menuId,
@@ -408,7 +415,7 @@ export default function ReviewCartScreen() {
             onPress={() => {
               Alert.alert(
                 'Xác nhận',
-                mode === ORDER_FLOW_MODE.CREATE
+                modeValue === ORDER_FLOW_MODE.CREATE
                   ? 'Bạn chắc chắn muốn tạo đơn hàng này?'
                   : 'Bạn chắc chắn muốn cập nhật đơn hàng này?',
                 [
@@ -424,7 +431,7 @@ export default function ReviewCartScreen() {
               <>
                 <Ionicons name='checkmark-circle-outline' size={24} color='white' />
                 <Text className='text-white text-center text-lg font-bold ml-2'>
-                  {mode === ORDER_FLOW_MODE.CREATE ? 'Tạo đơn hàng' : 'Cập nhật đơn hàng'}
+                  {modeValue === ORDER_FLOW_MODE.CREATE ? 'Tạo đơn hàng' : 'Cập nhật đơn hàng'}
                 </Text>
               </>
             )}

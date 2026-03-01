@@ -32,9 +32,8 @@ export function Header({ title, subtitle, onBack, rightContent, children, showBa
     <LinearGradient
       colors={gradients.header as any}
       style={{
-        paddingTop: insets.top + 12,
-        paddingBottom: 16,
-        paddingHorizontal: 20
+        paddingTop: insets.top + 8,
+        paddingHorizontal: 16
       }}
     >
       <View className='flex-row items-center justify-between'>
@@ -42,7 +41,7 @@ export function Header({ title, subtitle, onBack, rightContent, children, showBa
           {showBackButton && (
             <TouchableOpacity
               onPress={handleBack}
-              className='bg-white/20 rounded-full p-2.5 mr-3'
+              className='bg-white/20 rounded-full p-2 mr-2'
               style={{
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
@@ -52,11 +51,11 @@ export function Header({ title, subtitle, onBack, rightContent, children, showBa
               }}
               activeOpacity={0.7}
             >
-              <Ionicons name='arrow-back' size={22} color='white' />
+              <Ionicons name='arrow-back' size={20} color='white' />
             </TouchableOpacity>
           )}
           <View className='flex-1'>
-            <Text className='text-white text-2xl font-bold' numberOfLines={1}>
+            <Text className='text-white text-xl font-bold' numberOfLines={1}>
               {title}
             </Text>
             {subtitle && (
@@ -66,7 +65,7 @@ export function Header({ title, subtitle, onBack, rightContent, children, showBa
             )}
           </View>
         </View>
-        {rightContent && <View className='ml-3'>{rightContent}</View>}
+        {rightContent && <View className='ml-2'>{rightContent}</View>}
       </View>
       {children && <View className='mt-2'>{children}</View>}
     </LinearGradient>

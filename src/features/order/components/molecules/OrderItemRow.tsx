@@ -27,13 +27,12 @@ export function OrderItemRow({ item, onCancel, onUpdate, isCancelling, canAction
             {item.menu.name ?? `Món #${item.menu.id}`}
           </Text>
 
-          {item.menu.unit?.name && (
-            <Text
-              className='text-xs px-2 py-1 rounded ml-2'
-              style={{ backgroundColor: `${colors.primary}15`, color: colors.primary }}
-            >
-              {item.menu.unit.name}
-            </Text>
+          {item.size?.name && (
+            <View className='px-2 py-1 rounded  ml-2' style={{ backgroundColor: colors.border }}>
+              <Text className='text-xs font-semibold' style={{ color: colors.textSecondary }}>
+                Size: {item.size.name}
+              </Text>
+            </View>
           )}
         </View>
 
@@ -49,13 +48,13 @@ export function OrderItemRow({ item, onCancel, onUpdate, isCancelling, canAction
               {item.quantity}
             </Text>
           </View>
-
-          {item.size?.name && (
-            <View className='px-2 py-1 rounded' style={{ backgroundColor: colors.border }}>
-              <Text className='text-xs font-semibold' style={{ color: colors.textSecondary }}>
-                Size: {item.size.name}
-              </Text>
-            </View>
+          {item.menu.unit?.name && (
+            <Text
+              className='text-xs px-2 py-1 rounded'
+              style={{ backgroundColor: `${colors.primary}15`, color: colors.primary }}
+            >
+              {item.menu.unit.name}
+            </Text>
           )}
         </View>
 

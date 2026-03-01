@@ -3,7 +3,7 @@ import { Menu } from './menu.type'
 import { DinnerTable } from './table.type'
 
 export interface Order {
-  orderID: number
+  id: number
   orderDate: string
   orderBy: number
   createdDate: string
