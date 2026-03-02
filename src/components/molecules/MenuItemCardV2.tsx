@@ -63,6 +63,7 @@ export default function MenuItemCardV2({
       menuImage: menu.image ?? null,
       sizeId: size.id,
       sizeName: size.name,
+      sizeRank: size.rankIndex,
       price: size.price?.price ?? 0,
       quantity: 1
     })

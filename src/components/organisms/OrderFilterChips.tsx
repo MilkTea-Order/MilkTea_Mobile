@@ -32,10 +32,13 @@ export const OrderFilterChips = ({ selected, onChange, colors }: Props) => {
   )
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingRight: 8 }}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ gap: 10, paddingRight: 8, marginBottom: 15 }}
+    >
       {options.map((opt) => {
         const isActive = selected === opt.value
-
         return (
           <TouchableOpacity
             key={String(opt.value)}

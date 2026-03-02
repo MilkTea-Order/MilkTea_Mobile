@@ -147,6 +147,12 @@ export default function SelectMenuScreen() {
     setSubmittedSearch('')
   }
 
+  const handleChangeActiveSize = (menu: { menuId: number; sizeId: number } | null) => {
+    if (menu) {
+      setActiveMenuId(menu.menuId)
+    }
+    setActiveSize(menu)
+  }
   // Handle decrement item
   const handleDecrement = (menuId: number, sizeId: number) => {
     const item = orderItems.find((x) => x.menuId === menuId && x.sizeId === sizeId)
@@ -325,18 +331,16 @@ export default function SelectMenuScreen() {
                 onRemove={handleDecrement}
                 formatCurrency={formatCurrencyVND}
                 activeSize={activeSize}
-                onChangeActiveSize={setActiveSize}
+                onChangeActiveSize={handleChangeActiveSize}
                 isActive={activeMenuId === menu.id}
                 onPressCard={() => {
                   setActiveMenuId(menu.id)
-
-                  // const firstSizeWithQuantity = menu.size?.find((size) => {
-                  //   return orderItems.some((item) => item.sizeId === size.id && item.quantity > 0)
-                  // })
-
-                  // if (firstSizeWithQuantity) {
-                  //   setActiveSize({ menuId: menu.id, sizeId: firstSizeWithQuantity.id })
-                  // }
+                  const item = orderItems.find((item) => item.menuId === menu.id)
+                  if (item) {
+                    setActiveSize(item)
+                  } else {
+                    setActiveSize(null)
+                  }
                 }}
               />
             </View>

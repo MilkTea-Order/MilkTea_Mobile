@@ -121,6 +121,7 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
                           menuImage: menu.image ?? null,
                           sizeId: size.id,
                           sizeName: size.name,
+                          sizeRank: size.rankIndex,
                           price: size.price?.price ?? 0,
                           quantity: 1
                         })
@@ -141,6 +142,7 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
                         menuImage: menu.image ?? null,
                         sizeId: size.id,
                         sizeName: size.name,
+                        sizeRank: size.rankIndex,
                         price: size.price?.price ?? 0,
                         quantity: 1
                       })

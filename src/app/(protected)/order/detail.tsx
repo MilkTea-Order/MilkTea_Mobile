@@ -194,6 +194,7 @@ export default function OrderDetailScreen() {
               menuImage: null,
               sizeId: Number(detail.size?.id ?? 0),
               sizeName: detail.size?.name ?? '',
+              sizeRank: detail.size.rankIndex,
               price: Number(detail.price ?? 0),
               quantity: Number(detail.quantity ?? 1),
               note: detail.note ?? null

@@ -87,6 +87,7 @@ export const CartBar: React.FC<Props> = ({
                     menuImage: item.menuImage ?? null,
                     sizeId: item.sizeId,
                     sizeName: item.sizeName,
+                    sizeRank: item.sizeRank,
                     price: item.price,
                     quantity: 1,
                     note: item.note ?? null

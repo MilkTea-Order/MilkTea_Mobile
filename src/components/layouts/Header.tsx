@@ -33,6 +33,7 @@ export function Header({ title, subtitle, onBack, rightContent, children, showBa
       colors={gradients.header as any}
       style={{
         paddingTop: insets.top + 8,
+        paddingBottom: 2,
         paddingHorizontal: 16
       }}
     >

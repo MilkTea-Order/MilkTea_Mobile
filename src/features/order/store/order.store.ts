@@ -7,6 +7,7 @@ export type OrderLine = {
   menuImage: string | null
   sizeId: number
   sizeName: string
+  sizeRank: number | null
   price: number
   quantity: number
   note?: string | null
@@ -61,7 +62,19 @@ export const useOrderStore = create<OrderState>((set) => ({
           note: orderLine.note ?? nextItems[existingIndex].note
         }
       } else {
-        nextItems = [...state.items, orderLine]
+        nextItems = [...state.items, orderLine].sort((a, b) => {
+          // menuId tăng dần (cùng menu nằm cạnh nhau)
+          if (a.menuId !== b.menuId) return a.menuId - b.menuId
+
+          // cùng menuId: sizeRank giảm dần
+          // null/undefined cho xuống cuối
+          const ar = a.sizeRank ?? -Infinity
+          const br = b.sizeRank ?? -Infinity
+
+          // nếu muốn null xuống cuối -> dùng -Infinity như trên là ok (vì sort giảm dần)
+          // br - ar => giảm dần
+          return ar - br
+        })
       }
 
       return {
