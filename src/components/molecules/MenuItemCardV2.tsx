@@ -97,12 +97,20 @@ export default function MenuItemCardV2({
     >
       {/* Image Header */}
       <TouchableOpacity activeOpacity={0.9} onPress={onPressCard} disabled={!onPressCard} style={{ width: '100%' }}>
-        <View style={{ width: '100%', height: 140, backgroundColor: `${colors.primary}10`, position: 'relative' }}>
+        <View
+          style={{
+            width: '100%',
+            height: 110,
+            backgroundColor: `${colors.primary}15`,
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
           {menu.image ? (
             <Image source={{ uri: menu.image }} style={{ width: '100%', height: '100%' }} resizeMode='cover' />
           ) : (
             <View className='flex-1 items-center justify-center'>
-              <Ionicons name='restaurant-outline' size={48} color={colors.primary} />
+              <Ionicons name='restaurant-outline' size={40} color={colors.primary} />
             </View>
           )}
           {expandedBadgeSizeId && sizes && sizes.length > 0 && (
@@ -191,7 +199,7 @@ export default function MenuItemCardV2({
           <ActivityIndicator color={colors.primary} size='small' />
         </View>
       ) : sizes && sizes.length > 0 ? (
-        <View className='px-3 pt-3 pb-2'>
+        <View className='px-2 pt-2 pb-1'>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className='flex-row' style={{ gap: 8 }}>
               {sizes.map((size) => {
@@ -243,7 +251,7 @@ export default function MenuItemCardV2({
       ) : null}
 
       {/* Name */}
-      <View className='px-3 pb-3'>
+      <View className='px-2 pb-2'>
         <Text className='text-base font-bold' style={{ color: colors.text }} numberOfLines={2}>
           {menu.name}
         </Text>

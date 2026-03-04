@@ -1,4 +1,5 @@
 import { ERROR_CODE } from '@/shared/constants/errorCode'
+import { PaymentMethod } from '@/shared/constants/other'
 import { STATUS } from '@/shared/constants/status'
 import type { ApiErrorResponse } from '@/shared/types/api.type'
 import { extractErrorDetails } from '@/shared/utils/formErrors'
@@ -15,7 +16,7 @@ import { tableKeys } from './useTable'
 export const orderKeys = {
   all: ['orders'] as const,
   lists: () => [...orderKeys.all, 'list'] as const,
-  list: (filter: OrderFilter) => [...orderKeys.lists(), filter] as const,
+  list: (filter: OrderFilter) => [...orderKeys.lists(), ...Object.values(filter)] as const,
   detail: (orderId: number, isCancelled?: boolean) => [...orderKeys.all, 'detail', orderId, isCancelled] as const
 }
 
@@ -71,7 +72,7 @@ export function useCreateOrder() {
     onSuccess: async (data) => {
       Toast.show('Tạo đơn hàng thành công!', { type: 'success' })
       queryClient.setQueriesData(
-        { queryKey: orderKeys.list(STATUS.ORDER.UNPAID), exact: false },
+        { queryKey: orderKeys.list({ statusId: STATUS.ORDER.UNPAID } as OrderFilter), exact: false },
         (old: Order[] | undefined) => {
           const prev = old ?? []
 
@@ -115,6 +116,67 @@ export function useCancelOrderItems(
         Alert.alert('Lỗi', error.message)
         return
       }
+      options?.onError?.(error)
+    }
+  })
+}
+
+export function usePayment(
+  orderId: number,
+  options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }
+) {
+  const queryClient = useQueryClient()
+  const router = useRouter()
+
+  return useMutation({
+    mutationKey: [...orderKeys.all, 'payment', orderId] as const,
+    mutationFn: async (paymentMethod: PaymentMethod) => {
+      const res = await orderApi.payment(orderId, paymentMethod)
+      return res.data
+    },
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({
+        queryKey: orderKeys.list({ statusId: STATUS.ORDER.NO_COLLECTED, dayAgo: 0 } as OrderFilter)
+      })
+      await queryClient.invalidateQueries({
+        queryKey: orderKeys.list({ statusId: STATUS.ORDER.UNPAID, dayAgo: 0 } as OrderFilter)
+      })
+
+      Toast.show('Thanh toán thành công')
+      router.replace({
+        pathname: '/(protected)/(tabs)',
+        params: {
+          filter: STATUS.ORDER.NO_COLLECTED
+        }
+      })
+
+      options?.onSuccess?.(data)
+      return data
+    },
+    onError: (error: any) => {
+      const details = extractErrorDetails(error, 'order')
+
+      const e0042 = details.find((e) => e.code === ERROR_CODE.E0042)
+      if (e0042) {
+        Alert.alert('Lỗi', e0042.message ?? 'Không thể thanh toán ở trạng thái hiện tại')
+        return
+      }
+
+      const e0001Or0036 = details.find((e) => [ERROR_CODE.E0001, ERROR_CODE.E0036].includes(e.code as any))
+      if (e0001Or0036) {
+        Alert.alert('Lỗi', e0001Or0036.message ?? 'Đơn hàng không tồn tại', [
+          { text: 'OK', onPress: () => router.replace('/(protected)/(tabs)') }
+        ])
+        return
+      }
+
+      const e9999 = details.find((e) => e.code === ERROR_CODE.E9999)
+      if (e9999) {
+        Alert.alert('Lỗi', e9999.message ?? 'Đã xảy ra lỗi hệ thống')
+        return
+      }
+
+      Alert.alert('Lỗi', 'Không thể thanh toán. Vui lòng thử lại')
       options?.onError?.(error)
     }
   })

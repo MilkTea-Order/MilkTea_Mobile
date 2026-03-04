@@ -28,7 +28,6 @@ export default function ReviewCartScreen() {
   const isAddItemsMode = modeValue === ORDER_FLOW_MODE.ADD_ITEMS
   const targetOrderId = useMemo(() => (orderId ? Number(orderId) : NaN), [orderId])
 
-  console.log('targetOrderId', targetOrderId, mode)
   const authProfile = useAuthStore((s) => s.profile)
 
   const orderItems = useOrderStore((s) => s.items)

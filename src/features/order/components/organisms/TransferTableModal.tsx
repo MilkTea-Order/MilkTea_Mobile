@@ -1,7 +1,8 @@
 import { useEmptyTables } from '@/features/order/hooks/useTable'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useState } from 'react'
-import { ActivityIndicator, FlatList, Modal, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, FlatList, Image, Modal, Text, TouchableOpacity, View } from 'react-native'
+import { DinnerTable } from '../../types/table.type'
 
 export type TableModalMode = 'transfer' | 'merge'
 
@@ -69,8 +70,10 @@ export function TransferTableModal({
     onClose()
   }
 
-  const renderTableItem = ({ item: table }: { item: { id: number; name: string; numberOfSeats: number } }) => {
+  const renderTableItem = ({ item: table }: { item: DinnerTable }) => {
     const isSelected = selectedTableId === table.id
+    const tableImage = mode === 'merge' ? table.usingImg : table.emptyImg
+
     return (
       <TouchableOpacity
         onPress={() => setSelectedTableId(table.id)}
@@ -81,16 +84,20 @@ export function TransferTableModal({
         }}
         activeOpacity={0.7}
       >
-        <View
-          className='w-12 h-12 rounded-lg items-center justify-center'
-          style={{ backgroundColor: isSelected ? colors.primary : `${colors.primary}20` }}
-        >
-          <Ionicons
-            name={mode === 'merge' ? 'people-outline' : 'restaurant-outline'}
-            size={24}
-            color={isSelected ? 'white' : colors.primary}
-          />
-        </View>
+        {tableImage ? (
+          <Image source={{ uri: tableImage }} className='w-12 h-12 rounded-lg' resizeMode='cover' />
+        ) : (
+          <View
+            className='w-12 h-12 rounded-lg items-center justify-center'
+            style={{ backgroundColor: isSelected ? colors.primary : `${colors.primary}20` }}
+          >
+            <Ionicons
+              name={mode === 'merge' ? 'people-outline' : 'restaurant-outline'}
+              size={24}
+              color={isSelected ? 'white' : colors.primary}
+            />
+          </View>
+        )}
 
         <View className='flex-1 ml-4'>
           <Text className='font-bold text-base' style={{ color: colors.text }}>

@@ -10,13 +10,6 @@ export const menuApi = {
   },
 
   getMenus(groupId?: number, name?: string): Promise<AxiosResponse<ApiResponse<Menu[]>>> {
-    // const params: Record<string, any> = {}
-    // if (name && name.trim()) {
-    //   params.menuName = name.trim()
-    // }
-    // if (groupId) {
-    //   params.groupID = groupId
-    // }
     return http.get<ApiResponse<Menu[]>>(`${URL.MENUS_AVAILABLE_BASE}`, {
       params: {
         ...(groupId != null && { groupID: groupId }),

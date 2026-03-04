@@ -18,3 +18,5 @@ export const ORDER_FLOW_MODE = {
 } as const
 
 export type OrderFlowMode = (typeof ORDER_FLOW_MODE)[keyof typeof ORDER_FLOW_MODE]
+
+export type PaymentMethod = 'CASH' | 'BANK' | 'SHOPEE' | 'GRAB'

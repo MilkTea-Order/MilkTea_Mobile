@@ -1,3 +1,4 @@
+import { PaymentMethod } from '@/shared/constants/other'
 import { OrderStatus } from '@/shared/constants/status'
 import { URL } from '@/shared/constants/urls'
 import { ApiResponse } from '@/shared/types/api.type'
@@ -5,13 +6,19 @@ import http from '@/shared/utils/http'
 import { AxiosResponse } from 'axios'
 import { CreateOrderItemPayload, CreateOrderPayload, Order } from '../types/order.type'
 
-export type OrderFilter = OrderStatus
+export type OrderFilter = {
+  statusId: OrderStatus
+  dayAgo?: number
+}
 
 export type OrderDetailApiResponse = ApiResponse<Order>
 
 export const orderApi = {
   getOrders(filter: OrderFilter): Promise<AxiosResponse<ApiResponse<Order[]>>> {
-    const params = { StatusID: filter }
+    const params: { StatusID: OrderStatus; dayAgo?: number } = {
+      StatusID: filter.statusId,
+      dayAgo: filter.dayAgo ?? 0
+    }
     return http.get<ApiResponse<Order[]>>(URL.ORDERS, { params })
   },
 
@@ -57,5 +64,9 @@ export const orderApi = {
 
   mergeTable(orderId: number, targetTableID: number): Promise<AxiosResponse<ApiResponse<object>>> {
     return http.patch<ApiResponse<object>>(`${URL.ORDERS}/${orderId}/merge-table`, { targetTableID })
+  },
+
+  payment(orderId: number, paymentMethod: PaymentMethod): Promise<AxiosResponse<ApiResponse<object>>> {
+    return http.post<ApiResponse<object>>(`${URL.ORDERS}/${orderId}/payment`, { paymentMethod })
   }
 }

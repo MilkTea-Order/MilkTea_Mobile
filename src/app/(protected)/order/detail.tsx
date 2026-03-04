@@ -2,17 +2,19 @@ import { Header } from '@/components/layouts/Header'
 import { OrderNotFoundState } from '@/features/order/components/molecules/OrderNotFoundState'
 import { OrderActionChips } from '@/features/order/components/organisms/OrderActionChips'
 import { OrderItemsSection } from '@/features/order/components/organisms/OrderItemsSection'
+import { PaymentMethodModal } from '@/features/order/components/organisms/PaymentMethodModal'
 import { TransferTableModal } from '@/features/order/components/organisms/TransferTableModal'
 import {
   useCancelOrder,
   useCancelOrderItems,
   useChangeTable,
   useMergeTable,
-  useOrderDetail
+  useOrderDetail,
+  usePayment
 } from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
 import { OrderDetail } from '@/features/order/types/order.type'
-import { ORDER_FLOW_MODE } from '@/shared/constants/other'
+import { ORDER_FLOW_MODE, PaymentMethod } from '@/shared/constants/other'
 import { ORDER_STATUS_LABEL, STATUS, type OrderStatus } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrency } from '@/shared/utils/utils'
@@ -29,9 +31,8 @@ export default function OrderDetailScreen() {
   const { order, isLoading, isRefetching, refetch } = useOrderDetail(orderIdNumber, filterMode === 'cancelled')
   const [cancellingItemId, setCancellingItemId] = useState<number | null>(null)
   const [showTransferModal, setShowTransferModal] = useState(false)
-  const [isTransferring, setIsTransferring] = useState(false)
   const [showMergeModal, setShowMergeModal] = useState(false)
-  const [isMerging, setIsMerging] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
 
   const cancelMutation = useCancelOrderItems(orderIdNumber!, {
     onSuccess: () => {
@@ -47,24 +48,33 @@ export default function OrderDetailScreen() {
   const changeTableMutation = useChangeTable(orderIdNumber!, {
     onSuccess: () => {
       setShowTransferModal(false)
-      setIsTransferring(false)
     },
     onError: () => {
       setShowTransferModal(false)
-      setIsTransferring(false)
     }
   })
 
   const mergeTableMutation = useMergeTable(orderIdNumber!, {
     onSuccess: () => {
       setShowMergeModal(false)
-      setIsMerging(false)
     },
     onError: () => {
       setShowMergeModal(false)
-      setIsMerging(false)
     }
   })
+
+  const paymentMutation = usePayment(orderIdNumber!, {
+    onSuccess: () => {
+      setShowPaymentModal(false)
+    },
+    onError: () => {
+      setShowPaymentModal(false)
+    }
+  })
+
+  const handlePayment = (paymentMethod: PaymentMethod) => {
+    paymentMutation.mutate(paymentMethod)
+  }
 
   const handleCancelItem = (item: OrderDetail) => {
     if (!item) return
@@ -84,12 +94,10 @@ export default function OrderDetailScreen() {
   const handleFilterChange = (value: 'placed' | 'cancelled') => setFilterMode(value)
 
   const handleTransferTable = (tableId: number) => {
-    setIsTransferring(true)
     changeTableMutation.mutate(tableId)
   }
 
   const handleMergeTable = (tableId: number) => {
-    setIsMerging(true)
     mergeTableMutation.mutate(tableId)
   }
 
@@ -146,9 +154,7 @@ export default function OrderDetailScreen() {
                 label: 'Thanh toán',
                 icon: 'card-outline',
                 variant: 'primary',
-                onPress: () => {
-                  // TODO: wire payment flow
-                }
+                onPress: () => setShowPaymentModal(true)
               },
               {
                 id: 'huy-ban',
@@ -235,7 +241,7 @@ export default function OrderDetailScreen() {
         visible={showTransferModal}
         mode='transfer'
         currentTableId={Number(order?.dinnerTable?.id ?? 0)}
-        isSubmitting={isTransferring}
+        isSubmitting={changeTableMutation.isPending}
         onSelect={handleTransferTable}
         onClose={() => setShowTransferModal(false)}
         colors={colors}
@@ -244,9 +250,17 @@ export default function OrderDetailScreen() {
         visible={showMergeModal}
         mode='merge'
         currentTableId={Number(order?.dinnerTable?.id ?? 0)}
-        isSubmitting={isMerging}
+        isSubmitting={mergeTableMutation.isPending}
         onSelect={handleMergeTable}
         onClose={() => setShowMergeModal(false)}
+        colors={colors}
+      />
+      <PaymentMethodModal
+        visible={showPaymentModal}
+        totalAmount={order?.totalAmount ?? 0}
+        isSubmitting={paymentMutation.isPending}
+        onSelect={handlePayment}
+        onClose={() => setShowPaymentModal(false)}
         colors={colors}
       />
     </View>

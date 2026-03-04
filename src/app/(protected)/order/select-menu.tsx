@@ -98,8 +98,27 @@ export default function SelectMenuScreen() {
 
   // Handle back button
   const handleBack = () => {
-    clearOrder()
-    router.back()
+    if (hasItemsInCart) {
+      Alert.alert(
+        'Xác nhận',
+        'Việc trở lại sẽ xoá giỏ hàng hiện tại của bạn, Bạn có muốn thực hiện tiếp hành động này không? ',
+        [
+          { text: 'Huỷ', style: 'cancel' },
+          {
+            text: 'Xác nhận',
+            style: 'destructive',
+            onPress: () => {
+              clearOrder()
+              // router.back()
+              router.dismissAll()
+            }
+          }
+        ]
+      )
+    } else {
+      clearOrder()
+      router.dismissAll()
+    }
   }
 
   // Handle change table
@@ -136,8 +155,7 @@ export default function SelectMenuScreen() {
 
   // Handle search
   const handleSearch = () => {
-    const trimmed = searchQuery.trim()
-    setSubmittedSearch(trimmed.length >= 2 ? trimmed : '')
+    setSubmittedSearch(searchQuery.trim())
     Keyboard.dismiss()
   }
 
@@ -280,7 +298,7 @@ export default function SelectMenuScreen() {
               Chọn tiêu chí tìm kiếm
             </Text>
             <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
-              Hãy chọn một nhóm món ở phía trên hoặc nhập ít nhất 2 ký tự để tìm theo tên.
+              Hãy chọn một nhóm món ở phía trên hoặc tìm kiếm theo tên món bạn muốn.
             </Text>
           </View>
         </Pressable>
