@@ -7,13 +7,7 @@ import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons } from '@expo/vector-icons'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useMemo, useState } from 'react'
-import { ActivityIndicator, Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { Toast } from 'react-native-toast-notifications'
-
-type InitialItemSnapshot = {
-  quantity: number
-  note: string | null
-}
+import { ActivityIndicator, Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 export default function OrderItemDetailScreen() {
   const router = useRouter()
@@ -27,34 +21,52 @@ export default function OrderItemDetailScreen() {
     orderDetailId?: string
   }>()
 
-  const menuIdNumber = useMemo(() => Number(menuId), [menuId])
-  const sizeIdNumber = useMemo(() => Number(sizeId), [sizeId])
+  const menuIdNumber = Number(menuId)
+  const sizeIdNumber = Number(sizeId)
+
   const modeValue = mode ?? ORDER_FLOW_MODE.CREATE
   const isUpdateMode = modeValue === ORDER_FLOW_MODE.UPDATE_ITEMS
-  const orderIdNumber = useMemo(() => (orderId ? Number(orderId) : NaN), [orderId])
-  const orderDetailIdNumber = useMemo(() => (orderDetailId ? Number(orderDetailId) : NaN), [orderDetailId])
 
-  const orderItems = useOrderStore((s) => s.items)
+  const orderIdNumber = Number(orderId)
+  const orderDetailIdNumber = Number(orderDetailId)
+
+  const hasValidUpdateIds = isUpdateMode && Number.isFinite(orderIdNumber) && Number.isFinite(orderDetailIdNumber)
+
+  // ===== STORE =====
   const increment = useOrderStore((s) => s.increment)
   const decrement = useOrderStore((s) => s.decrement)
   const removeItem = useOrderStore((s) => s.removeItem)
   const setLineNote = useOrderStore((s) => s.setLineNote)
 
+  // ===== ITEM =====
   const menuItem = useMemo(() => {
+    const items = useOrderStore.getState().items
     if (!Number.isFinite(menuIdNumber) || !Number.isFinite(sizeIdNumber)) return null
-    return orderItems.find((x) => x.menuId === menuIdNumber && x.sizeId === sizeIdNumber) ?? null
-  }, [orderItems, menuIdNumber, sizeIdNumber])
+    return items.find((x) => x.menuId === menuIdNumber && x.sizeId === sizeIdNumber) ?? null
+  }, [menuIdNumber, sizeIdNumber])
 
-  const [initialItem, setInitialItem] = useState<InitialItemSnapshot | null>(null)
+  // ===== LOCAL STATE =====
   const [noteDraft, setNoteDraft] = useState('')
+  const [quantityDraft, setQuantityDraft] = useState<number | null>(null)
 
-  if (menuItem && !initialItem) {
-    setInitialItem({
-      quantity: menuItem.quantity,
-      note: menuItem.note ?? null
-    })
-    setNoteDraft(menuItem.note ?? '')
-  }
+  console.log('item-detail')
+  useFocusEffect(
+    useCallback(() => {
+      if (!menuItem) {
+        Alert.alert('Lỗi', 'Món không tồn tại trong giỏ hàng', [
+          {
+            text: 'OK',
+            onPress: () => router.replace('/(protected)/(tabs)')
+          }
+        ])
+        return
+      }
+      setNoteDraft(menuItem.note ?? '')
+      setQuantityDraft(menuItem.quantity)
+    }, [menuItem, router])
+  )
+
+  const displayQuantity = quantityDraft ?? menuItem?.quantity ?? 1
 
   const normalizedNote = useMemo(() => {
     const t = noteDraft.trim()
@@ -62,34 +74,24 @@ export default function OrderItemDetailScreen() {
   }, [noteDraft])
 
   const hasChanged = useMemo(() => {
-    if (!menuItem || !initialItem) return false
-    return menuItem.quantity !== initialItem.quantity || normalizedNote !== initialItem.note
-  }, [menuItem, initialItem, normalizedNote])
-
-  const hasValidUpdateIds = isUpdateMode && Number.isFinite(orderIdNumber) && Number.isFinite(orderDetailIdNumber)
+    if (!menuItem) return false
+    return displayQuantity !== menuItem.quantity || normalizedNote !== menuItem.note
+  }, [menuItem, displayQuantity, normalizedNote])
 
   const updateMutation = useUpdateOrderItem(orderIdNumber, orderDetailIdNumber, {
     onSuccess: () => {
-      Toast.show('Cập nhật món thành công', { type: 'success' })
-      useOrderStore.getState().clear()
       router.back()
+      useOrderStore.getState().clear()
+      return
     }
   })
 
   const isSaving = isUpdateMode && updateMutation.isPending
-  useFocusEffect(
-    useCallback(() => {
-      const item = useOrderStore.getState().items.find((x) => x.menuId === menuIdNumber && x.sizeId === sizeIdNumber)
-
-      if (!item) {
-        Alert.alert('Lỗi', 'Món không còn trong giỏ hàng', [{ text: 'OK', onPress: () => router.back() }])
-      }
-    }, [menuIdNumber, sizeIdNumber, router])
-  )
 
   if (!menuItem) return null
 
   // ===== HANDLERS =====
+
   const handleBack = () => {
     if (isUpdateMode) {
       useOrderStore.getState().clear()
@@ -100,34 +102,45 @@ export default function OrderItemDetailScreen() {
   const handleDecrement = () => {
     if (isSaving) return
 
-    if (menuItem.quantity === 1) {
-      Alert.alert('Xác nhận', 'Bạn có muốn xóa món này khỏi đơn hàng?', [
-        { text: 'Huỷ', style: 'cancel' },
-        {
-          text: 'Xóa',
-          style: 'destructive',
-          onPress: () => {
-            if (isUpdateMode) {
-              if (!hasValidUpdateIds) {
-                Alert.alert('Lỗi', 'Thiếu thông tin cập nhật.')
-                return
+    if (displayQuantity === 1) {
+      Alert.alert(
+        'Xác nhận',
+        `Bạn muốn ${
+          isUpdateMode ? `huỷ món ${menuItem.menuName} khỏi đơn hàng` : `xoá món ${menuItem.menuName} khỏi giỏ hàng`
+        } ?`,
+        [
+          { text: 'Không', style: 'cancel' },
+          {
+            text: isUpdateMode ? 'Huỷ món' : 'Xoá món',
+            style: 'destructive',
+            onPress: () => {
+              if (isUpdateMode) {
+                if (!hasValidUpdateIds) {
+                  Alert.alert('Lỗi', 'Thiếu thông tin cập nhật.')
+                  return
+                }
+
+                updateMutation.mutate({
+                  quantity: 0,
+                  note: normalizedNote
+                })
+              } else {
+                removeItem(menuItem.menuId, menuItem.sizeId)
+                router.back()
               }
-              updateMutation.mutate({
-                quantity: 0,
-                note: normalizedNote
-              })
-            } else {
-              removeItem(menuItem.menuId, menuItem.sizeId)
-              router.back()
             }
           }
-        }
-      ])
+        ]
+      )
       return
     }
 
-    // Nếu quantity > 1, giảm bình thường
-    decrement(menuItem.menuId, menuItem.sizeId)
+    setQuantityDraft(displayQuantity - 1)
+  }
+
+  const handleIncrement = () => {
+    if (isSaving) return
+    setQuantityDraft(displayQuantity + 1)
   }
 
   const handleSubmit = () => {
@@ -139,20 +152,35 @@ export default function OrderItemDetailScreen() {
         return
       }
 
-      Alert.alert('Xác nhận', 'Cập nhật món này?', [
-        { text: 'Huỷ', style: 'destructive' },
+      Alert.alert('Xác nhận', 'Bạn muốn cập nhật thông tin món này?', [
+        { text: 'Không', style: 'cancel' },
         {
           text: 'Cập nhật',
-          style: 'default',
+          style: 'destructive',
           onPress: () => {
             updateMutation.mutate({
-              quantity: menuItem.quantity,
+              quantity: displayQuantity,
               note: normalizedNote
             })
           }
         }
       ])
       return
+    }
+
+    const currentQuantity = menuItem.quantity
+    const newQuantity = displayQuantity
+
+    if (newQuantity > currentQuantity) {
+      const diff = newQuantity - currentQuantity
+      for (let i = 0; i < diff; i++) {
+        increment(menuItem.menuId, menuItem.sizeId)
+      }
+    } else if (newQuantity < currentQuantity) {
+      const diff = currentQuantity - newQuantity
+      for (let i = 0; i < diff; i++) {
+        decrement(menuItem.menuId, menuItem.sizeId)
+      }
     }
 
     setLineNote(menuItem.menuId, menuItem.sizeId, normalizedNote)
@@ -165,12 +193,8 @@ export default function OrderItemDetailScreen() {
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
       <Header title='Chi tiết món' onBack={handleBack} />
 
-      <ScrollView
-        className='flex-1'
-        style={{ backgroundColor: colors.background }}
-        contentContainerStyle={{ padding: 16, paddingBottom: 28 }}
-      >
-        {/* Item info */}
+      <ScrollView className='flex-1' contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
+        {/* ITEM */}
         <View
           className='rounded-2xl p-4 border mb-4'
           style={{ backgroundColor: colors.card, borderColor: colors.border }}
@@ -178,9 +202,21 @@ export default function OrderItemDetailScreen() {
           <View className='flex-row items-center'>
             <View
               className='rounded-2xl items-center justify-center mr-12'
-              style={{ width: 72, height: 72, backgroundColor: `${colors.primary}10` }}
+              style={{
+                width: 72,
+                height: 72,
+                backgroundColor: `${colors.primary}10`
+              }}
             >
-              <Ionicons name='restaurant-outline' size={36} color={colors.primary} />
+              {menuItem.menuImage ? (
+                <Image
+                  source={{ uri: menuItem.menuImage }}
+                  style={{ width: '100%', height: '100%' }}
+                  resizeMode='contain'
+                />
+              ) : (
+                <Ionicons name='restaurant-outline' size={36} color={colors.primary} />
+              )}
             </View>
 
             <View className='flex-1'>
@@ -188,6 +224,7 @@ export default function OrderItemDetailScreen() {
                 <Text className='text-lg font-bold mr-3' style={{ color: colors.text }} numberOfLines={2}>
                   {menuItem.menuName}
                 </Text>
+
                 <View className='px-2 py-1 rounded' style={{ backgroundColor: `${colors.primary}15` }}>
                   <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
                     {menuItem.sizeName}
@@ -202,7 +239,7 @@ export default function OrderItemDetailScreen() {
           </View>
         </View>
 
-        {/* Quantity */}
+        {/* QUANTITY */}
         <View
           className='rounded-2xl p-4 border mb-4'
           style={{ backgroundColor: colors.card, borderColor: colors.border }}
@@ -214,7 +251,12 @@ export default function OrderItemDetailScreen() {
           <View className='flex-row items-center justify-between'>
             <View
               className='flex-row items-center rounded-full'
-              style={{ borderWidth: 1.5, borderColor: colors.primary, paddingHorizontal: 10, paddingVertical: 6 }}
+              style={{
+                borderWidth: 1.5,
+                borderColor: colors.primary,
+                paddingHorizontal: 10,
+                paddingVertical: 6
+              }}
             >
               <TouchableOpacity
                 onPress={handleDecrement}
@@ -227,17 +269,16 @@ export default function OrderItemDetailScreen() {
                   justifyContent: 'center',
                   opacity: isSaving ? 0.4 : 1
                 }}
-                activeOpacity={0.8}
               >
                 <Ionicons name='remove' size={18} color={colors.primary} />
               </TouchableOpacity>
 
               <Text className='text-base font-bold min-w-[36px] text-center' style={{ color: colors.text }}>
-                {menuItem.quantity}
+                {displayQuantity}
               </Text>
 
               <TouchableOpacity
-                onPress={() => increment(menuItem.menuId, menuItem.sizeId)}
+                onPress={handleIncrement}
                 disabled={isSaving}
                 className='rounded-full'
                 style={{
@@ -247,7 +288,6 @@ export default function OrderItemDetailScreen() {
                   justifyContent: 'center',
                   opacity: isSaving ? 0.4 : 1
                 }}
-                activeOpacity={0.8}
               >
                 <Ionicons name='add' size={18} color={colors.primary} />
               </TouchableOpacity>
@@ -257,18 +297,20 @@ export default function OrderItemDetailScreen() {
               <Text className='text-xs' style={{ color: colors.textSecondary }}>
                 Thành tiền
               </Text>
+
               <Text className='text-lg font-bold' style={{ color: colors.primary }}>
-                {formatCurrencyVND(menuItem.price * menuItem.quantity)}
+                {formatCurrencyVND(menuItem.price * displayQuantity)}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Note + Submit */}
+        {/* NOTE */}
         <View className='rounded-2xl p-4 border' style={{ backgroundColor: colors.card, borderColor: colors.border }}>
           <Text className='text-base font-bold mb-3' style={{ color: colors.text }}>
             Ghi chú
           </Text>
+
           <TextInput
             value={noteDraft}
             onChangeText={setNoteDraft}
@@ -284,13 +326,16 @@ export default function OrderItemDetailScreen() {
               paddingHorizontal: 12,
               paddingVertical: 10,
               color: colors.text,
-              backgroundColor: colors.background,
-              opacity: isSaving ? 0.7 : 1
+              backgroundColor: colors.background
             }}
           />
+
           <TouchableOpacity
             className='rounded-2xl py-4 mt-4 flex-row items-center justify-center'
-            style={{ backgroundColor: colors.primary, opacity: disableSubmit ? 0.5 : 1 }}
+            style={{
+              backgroundColor: colors.primary,
+              opacity: disableSubmit ? 0.5 : 1
+            }}
             activeOpacity={0.85}
             onPress={handleSubmit}
             disabled={disableSubmit}
@@ -298,7 +343,7 @@ export default function OrderItemDetailScreen() {
             {isSaving ? (
               <ActivityIndicator />
             ) : (
-              <Text className='text-white text-center text-base font-bold'>{isUpdateMode ? 'Cập nhật' : 'Lưu'}</Text>
+              <Text className='text-white text-base font-bold'>{isUpdateMode ? 'Cập nhật' : 'Lưu'}</Text>
             )}
           </TouchableOpacity>
         </View>

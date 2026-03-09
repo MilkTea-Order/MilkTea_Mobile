@@ -61,7 +61,6 @@ export function TransferTableModal({
   const handleConfirm = () => {
     if (selectedTableId) {
       onSelect(selectedTableId)
-      setSelectedTableId(null)
     }
   }
 

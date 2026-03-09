@@ -17,7 +17,7 @@ interface OrderItemsSectionProps {
   onCancelItem?: (item: OrderDetail) => void
   onUpdateItem?: (orderDetailId: number) => void
   cancellingItemId?: number | null
-  filterMode?: 'placed' | 'cancelled'
+  filterMode: 'placed' | 'cancelled'
   onFilterChange?: (value: 'placed' | 'cancelled') => void
   onAddItems?: () => void
   colors: {
@@ -124,7 +124,7 @@ export function OrderItemsSection({
             />
           )}
           ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: colors.border }} />}
-          ListEmptyComponent={<OrderItemsEmptyState colors={colors} />}
+          ListEmptyComponent={<OrderItemsEmptyState filterMode={filterMode} colors={colors} />}
         />
       )}
     </View>

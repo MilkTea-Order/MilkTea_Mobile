@@ -1,14 +1,8 @@
 import { getErrorMessage } from '@/shared/resources/errorMessages'
 import { isErrorResponse } from '@/shared/types/api.type'
-import { ErrorCode, ErrorDomain } from '../constants/errorCode'
+import { ErrorCode, ErrorDomain } from './../constants/errorCode'
 
 export interface FieldError {
-  field: string
-  message: string
-}
-
-export interface ErrorDetail {
-  code: string | ErrorCode
   field: string
   message: string
 }
@@ -31,6 +25,13 @@ export function extractFieldErrors(
   return extractErrorDetails(error, domain, fieldMapping).map(({ field, message }) => ({ field, message }))
 }
 
+export interface ErrorDetail {
+  code: string | ErrorCode
+  field: string
+  message: string
+  meta?: object
+}
+
 export function extractErrorDetails(
   error: any,
   domain: ErrorDomain = 'common',
@@ -40,7 +41,6 @@ export function extractErrorDetails(
   const details: ErrorDetail[] = []
   if (!isErrorResponse(errorResponse)) return details
   const errorData = errorResponse.data ?? {}
-
   const mapFieldName = (apiFieldNameRaw: string): string => {
     const raw = String(apiFieldNameRaw)
     if (!fieldMapping) return raw
@@ -64,17 +64,40 @@ export function extractErrorDetails(
     return []
   }
 
-  Object.keys(errorData).forEach((errorCode) => {
-    const fieldValue = errorData[errorCode]
-    const fieldNames = toFieldNames(fieldValue)
+  // Object.keys(errorData).forEach((errorCode) => {
+  //   const fieldValue = errorData[errorCode]
+  //   const fieldNames = toFieldNames(fieldValue)
 
-    fieldNames.forEach((raw) => {
-      const normalizedForMessage = String(raw).toLowerCase()
-      const errorMessage = getErrorMessage(errorCode, domain, normalizedForMessage)
-      const targetField = mapFieldName(String(raw))
-      details.push({ code: errorCode, field: targetField, message: errorMessage })
+  //   fieldNames.forEach((raw) => {
+  //     const normalizedForMessage = String(raw).toLowerCase()
+  //     const errorMessage = getErrorMessage(errorCode, domain, normalizedForMessage)
+  //     const targetField = mapFieldName(String(raw))
+  //     details.push({ code: errorCode, field: targetField, message: errorMessage })
+  //   })
+  // })
+  const meta = errorData.meta as unknown as Record<string, object> | undefined
+  Object.keys(errorData)
+    .filter((key) => key !== 'meta')
+    .forEach((errorCode) => {
+      const fieldValue = errorData[errorCode]
+      const fieldNames = toFieldNames(fieldValue)
+      console.log(fieldNames)
+
+      fieldNames.forEach((raw) => {
+        const normalizedForMessage = String(raw).toLowerCase()
+        const errorMessage = getErrorMessage(errorCode, domain, normalizedForMessage)
+        const targetField = mapFieldName(String(raw))
+
+        const detail: ErrorDetail = {
+          code: errorCode,
+          field: targetField,
+          message: errorMessage,
+          meta: meta?.[errorCode]
+        }
+
+        details.push(detail)
+      })
     })
-  })
 
   return details
 }

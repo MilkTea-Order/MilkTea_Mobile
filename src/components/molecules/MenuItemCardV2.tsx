@@ -107,7 +107,7 @@ export default function MenuItemCardV2({
           }}
         >
           {menu.image ? (
-            <Image source={{ uri: menu.image }} style={{ width: '100%', height: '100%' }} resizeMode='cover' />
+            <Image source={{ uri: menu.image }} style={{ width: '100%', height: '100%' }} resizeMode='contain' />
           ) : (
             <View className='flex-1 items-center justify-center'>
               <Ionicons name='restaurant-outline' size={40} color={colors.primary} />
@@ -205,19 +205,36 @@ export default function MenuItemCardV2({
               {sizes.map((size) => {
                 const quantity = getQuantityReactive(menu.id, size.id)
                 const isSelected = activeSize?.menuId === menu.id && activeSize?.sizeId === size.id
+                const getSizeStyle = () => {
+                  if (isSelected) {
+                    return {
+                      backgroundColor: colors.primary,
+                      borderColor: colors.primary
+                    }
+                  }
+                  if (quantity > 0) {
+                    return {
+                      backgroundColor: `${colors.primary}20`,
+                      borderColor: colors.primary
+                    }
+                  }
+                  return {
+                    backgroundColor: `${colors.primary}10`,
+                    borderColor: 'transparent'
+                  }
+                }
+
+                const sizeStyle = getSizeStyle()
+
                 return (
                   <TouchableOpacity
                     key={size.id}
                     onPress={() => handleSizePress(size)}
                     className='px-3 py-2 rounded-lg'
                     style={{
-                      backgroundColor: isSelected
-                        ? `${colors.primary}30`
-                        : quantity > 0
-                          ? `${colors.primary}20`
-                          : `${colors.primary}10`,
+                      backgroundColor: sizeStyle.backgroundColor,
                       borderWidth: isSelected || quantity > 0 ? 1.5 : 1,
-                      borderColor: isSelected || quantity > 0 ? colors.primary : 'transparent'
+                      borderColor: sizeStyle.borderColor
                     }}
                     activeOpacity={0.7}
                   >
@@ -225,20 +242,33 @@ export default function MenuItemCardV2({
                     <View className='flex-row items-center mb-1' style={{ gap: 6 }}>
                       <Text
                         className='text-sm font-bold'
-                        style={{ color: isSelected || quantity > 0 ? colors.primary : colors.text }}
+                        style={{ color: isSelected ? '#fff' : quantity > 0 ? colors.primary : colors.text }}
                       >
                         {size.name}
                       </Text>
                       {quantity > 0 && (
-                        <View className='rounded-full px-1.5 py-0.5' style={{ backgroundColor: colors.primary }}>
-                          <Text className='text-xs font-bold text-white'>{quantity}</Text>
+                        <View
+                          className='rounded-full px-1.5 py-0.5'
+                          style={{
+                            backgroundColor: isSelected ? 'rgba(255,255,255,0.3)' : colors.primary
+                          }}
+                        >
+                          <Text className='text-xs font-bold' style={{ color: isSelected ? '#fff' : '#fff' }}>
+                            {quantity}
+                          </Text>
                         </View>
                       )}
                     </View>
                     {/* Price */}
                     <Text
                       className='text-xs font-bold'
-                      style={{ color: isSelected || quantity > 0 ? colors.primary : colors.textSecondary }}
+                      style={{
+                        color: isSelected
+                          ? 'rgba(255,255,255,0.9)'
+                          : quantity > 0
+                            ? colors.primary
+                            : colors.textSecondary
+                      }}
                     >
                       {formatCurrency(size.price?.price ?? 0)}
                     </Text>

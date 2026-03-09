@@ -8,6 +8,7 @@ import {
   useCancelOrder,
   useCancelOrderItems,
   useChangeTable,
+  useCollectedOrder,
   useMergeTable,
   useOrderDetail,
   usePayment
@@ -43,6 +44,8 @@ export default function OrderDetailScreen() {
     }
   })
 
+  const collectedMutation = useCollectedOrder(orderIdNumber!)
+
   const cancelOrderMutation = useCancelOrder()
 
   const changeTableMutation = useChangeTable(orderIdNumber!, {
@@ -76,29 +79,57 @@ export default function OrderDetailScreen() {
     paymentMutation.mutate(paymentMethod)
   }
 
+  const handleCollectedOrder = () => {
+    collectedMutation.mutate()
+  }
+
   const handleCancelItem = (item: OrderDetail) => {
     if (!item) return
-    Alert.alert('Xác nhận', `Bạn có chắc muốn hủy món ${item.menu.name} với size ${item.size.name} này?`, [
-      { text: 'Không', style: 'cancel' },
-      {
-        text: 'Hủy món',
-        style: 'destructive',
-        onPress: () => {
-          setCancellingItemId(item.id)
-          cancelMutation.mutate(item.id)
+    Alert.alert(
+      'Xác nhận',
+      order?.orderDetails.length === 1
+        ? `Bạn muốn huỷ món "${item.menu.name} (${item.size.name})"?\n\nĐây là món cuối cùng. Huỷ món này sẽ huỷ luôn đơn hàng.`
+        : `Bạn muốn huỷ món "${item.menu.name} (${item.size.name})"?`,
+      [
+        { text: 'Không', style: 'cancel' },
+        {
+          text: 'Hủy món',
+          style: 'destructive',
+          onPress: () => {
+            setCancellingItemId(item.id)
+            cancelMutation.mutate(item.id)
+          }
         }
-      }
-    ])
+      ]
+    )
   }
 
   const handleFilterChange = (value: 'placed' | 'cancelled') => setFilterMode(value)
 
   const handleTransferTable = (tableId: number) => {
-    changeTableMutation.mutate(tableId)
+    Alert.alert('Xác nhận', `Bạn muốn chuyền Bàn ${order?.dinnerTable.id} sang Bàn ${tableId}?`, [
+      {
+        text: 'Xác nhận',
+        style: 'destructive',
+        onPress: () => {
+          changeTableMutation.mutate(tableId)
+        }
+      },
+      { text: 'Không', style: 'cancel' }
+    ])
   }
 
   const handleMergeTable = (tableId: number) => {
-    mergeTableMutation.mutate(tableId)
+    Alert.alert('Xác nhận', `Bạn muốn gộp Bàn ${tableId} vào ${order?.dinnerTable.name}?`, [
+      {
+        text: 'Xác nhận',
+        style: 'destructive',
+        onPress: () => {
+          mergeTableMutation.mutate(tableId)
+        }
+      },
+      { text: 'Không', style: 'cancel' }
+    ])
   }
 
   if (!order && !isLoading) {
@@ -140,6 +171,7 @@ export default function OrderDetailScreen() {
                 label: 'Chuyển bàn',
                 icon: 'swap-horizontal-outline',
                 variant: 'info',
+                visible: order?.status.id === Number(STATUS.ORDER.UNPAID),
                 onPress: () => setShowTransferModal(true)
               },
               {
@@ -147,6 +179,7 @@ export default function OrderDetailScreen() {
                 label: 'Gộp bàn',
                 icon: 'git-merge-outline',
                 variant: 'warning',
+                visible: order?.status.id === Number(STATUS.ORDER.UNPAID),
                 onPress: () => setShowMergeModal(true)
               },
               {
@@ -154,6 +187,7 @@ export default function OrderDetailScreen() {
                 label: 'Thanh toán',
                 icon: 'card-outline',
                 variant: 'primary',
+                visible: order?.status.id === Number(STATUS.ORDER.UNPAID),
                 onPress: () => setShowPaymentModal(true)
               },
               {
@@ -161,6 +195,7 @@ export default function OrderDetailScreen() {
                 label: 'Hủy bàn',
                 icon: 'close-circle-outline',
                 variant: 'danger',
+                visible: order?.status.id === Number(STATUS.ORDER.UNPAID),
                 onPress: () => {
                   Alert.alert('Xác nhận', 'Bạn có chắc muốn hủy toàn bộ đơn hàng này?', [
                     { text: 'Không', style: 'cancel' },
@@ -173,6 +208,14 @@ export default function OrderDetailScreen() {
                     }
                   ])
                 }
+              },
+              {
+                id: 'thu-tien',
+                label: 'Thu tiền',
+                icon: 'cash-outline',
+                variant: 'primary',
+                visible: order?.status.id === Number(STATUS.ORDER.NO_COLLECTED),
+                onPress: handleCollectedOrder
               }
             ]}
             colors={colors}

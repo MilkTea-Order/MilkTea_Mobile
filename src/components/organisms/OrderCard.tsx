@@ -6,7 +6,7 @@ import { formatCurrencyVND } from '@/shared/utils/currency'
 import { formatDateTime } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { Image, Text, TouchableOpacity, View } from 'react-native'
 
 type Props = {
   order: Order
@@ -27,6 +27,8 @@ export const OrderCard = ({
   onPressPayment,
   onPressTransferTable
 }: Props) => {
+  const imgTable =
+    order.status.id === Number(STATUS.ORDER.UNPAID) ? order.dinnerTable.usingImg : order.dinnerTable.emptyImg
   return (
     <TouchableOpacity
       className='rounded-2xl overflow-hidden'
@@ -52,12 +54,8 @@ export const OrderCard = ({
         }}
         className='relative'
       >
-        {order.dinnerTable?.usingImg ? (
-          <Image
-            source={{ uri: order.dinnerTable.usingImg }}
-            style={{ width: '100%', height: '100%' }}
-            resizeMode='contain'
-          />
+        {imgTable ? (
+          <Image source={{ uri: imgTable }} style={{ width: '100%', height: '100%' }} resizeMode='contain' />
         ) : (
           <View className='w-full h-full items-center justify-center bg-gray-50'>
             <Ionicons name='restaurant-outline' size={24} color={colors.primary} />
@@ -80,16 +78,12 @@ export const OrderCard = ({
           {formatCurrencyVND(order?.totalAmount ?? 0)}
         </Text>
 
-        {/* Action Buttons - Horizontal Scroll */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ flexDirection: 'row', gap: 6, paddingRight: 4 }}
-        >
+        {/* Action Buttons - Icon */}
+        <View className='flex-row items-center justify-between gap-3 mt-2'>
           {onPressPayment && order.status.id === parseInt(STATUS.ORDER.UNPAID, 10) && (
             <TouchableOpacity
               onPress={onPressPayment}
-              className='flex-row items-center rounded-full px-3 py-1.5'
+              className='rounded-full p-2'
               style={{
                 backgroundColor: colors.primary,
                 shadowColor: '#000',
@@ -100,16 +94,13 @@ export const OrderCard = ({
               }}
               activeOpacity={0.7}
             >
-              <Ionicons name='card-outline' size={12} color='white' />
-              <Text className='text-[8px] font-bold ml-1.5' style={{ color: 'white' }}>
-                Thanh toán
-              </Text>
+              <Ionicons name='card-outline' size={16} color='white' />
             </TouchableOpacity>
           )}
           {onPressTransferTable && order.status.id === parseInt(STATUS.ORDER.UNPAID, 10) && (
             <TouchableOpacity
               onPress={onPressTransferTable}
-              className='flex-row items-center rounded-full px-3 py-1.5'
+              className='rounded-full p-2'
               style={{
                 backgroundColor: 'rgba(59, 130, 246, 0.15)',
                 borderWidth: 1.5,
@@ -117,13 +108,10 @@ export const OrderCard = ({
               }}
               activeOpacity={0.7}
             >
-              <Ionicons name='swap-horizontal-outline' size={12} color='#3b82f6' />
-              <Text className='text-[8px] font-bold ml-1.5' style={{ color: '#3b82f6' }}>
-                Chuyển bàn
-              </Text>
+              <Ionicons name='swap-horizontal-outline' size={16} color='#3b82f6' />
             </TouchableOpacity>
           )}
-        </ScrollView>
+        </View>
       </View>
     </TouchableOpacity>
   )

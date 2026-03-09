@@ -1,3 +1,4 @@
+import withFloatingButton from '@/components/hoc/withFloatingButton'
 import { Header } from '@/components/layouts/Header'
 import { DateFilterPicker } from '@/components/organisms/DateFilterPicker'
 import { OrderCard } from '@/components/organisms/OrderCard'
@@ -11,49 +12,38 @@ import { useMe } from '@/features/user/hooks/useUser'
 import { PaymentMethod } from '@/shared/constants/other'
 import { ORDER_STATUS_LABEL, STATUS, type OrderStatus } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
+import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons } from '@expo/vector-icons'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { router, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
 
 export default function HomeScreen() {
   const { colors, status, effectiveTheme } = useTheme()
-  const [selectedFilter, setSelectedFilter] = useState<OrderStatus>(STATUS.ORDER.UNPAID)
-  const [dayAgo, setDayAgo] = useState(0)
+
+  const [orderFilter, setOrderFilter] = useState<OrderFilter>({ statusId: STATUS.ORDER.UNPAID, dayAgo: null })
   const [refreshing, setRefreshing] = useState(false)
   const [showTransferModal, setShowTransferModal] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  const [currentTableId, setCurrentTableId] = useState<number | null>(null)
+  // const [currentTableId, setCurrentTableId] = useState<number | null>(null)
 
   const router = useRouter()
   const params = useLocalSearchParams<{ filter?: OrderStatus }>()
 
-  // Tạo filter object cho API
-  const orderFilter: OrderFilter = useMemo(
-    () => ({
-      statusId: selectedFilter,
-      dayAgo: dayAgo
-    }),
-    [selectedFilter, dayAgo]
-  )
-
-  // console.log('key', orderKeys.list(orderFilter))
   const { data: meData, isPending: isLoadingUser } = useMe()
   const { orders, isLoading: isLoadingOrders, isRefetching, refetch } = useOrders(orderFilter)
 
-  // Mutations for transfer and merge table
+  // Mutation
   const changeTableMutation = useChangeTable(selectedOrder?.orderID!, {
     onSuccess: () => {
       setShowTransferModal(false)
-
       setSelectedOrder(null)
       refetch()
     },
     onError: () => {
       setShowTransferModal(false)
-
       setSelectedOrder(null)
     }
   })
@@ -71,19 +61,9 @@ export default function HomeScreen() {
   useEffect(() => {
     if (params.filter) {
       const filterValue = params.filter
-      if (
-        filterValue === STATUS.ORDER.UNPAID ||
-        filterValue === STATUS.ORDER.PAID ||
-        filterValue === STATUS.ORDER.CANCELED ||
-        filterValue === STATUS.ORDER.NO_COLLECTED
-      ) {
-        setSelectedFilter(filterValue as OrderStatus)
-        setDayAgo(0)
-      } else {
-        setSelectedFilter(STATUS.ORDER.UNPAID)
+      if ([STATUS.ORDER.NO_COLLECTED, STATUS.ORDER.CANCELED, STATUS.ORDER.PAID].includes(filterValue as any)) {
+        setOrderFilter({ dayAgo: 0, statusId: filterValue })
       }
-    } else {
-      setSelectedFilter(STATUS.ORDER.UNPAID)
     }
   }, [params.filter])
 
@@ -93,8 +73,11 @@ export default function HomeScreen() {
   }, [refetch])
 
   const handleChangeStatus = (status: OrderStatus) => {
-    setSelectedFilter(status)
-    setDayAgo(0)
+    if ([STATUS.ORDER.NO_COLLECTED, STATUS.ORDER.CANCELED, STATUS.ORDER.PAID].includes(status as any)) {
+      setOrderFilter({ dayAgo: 0, statusId: status })
+    } else {
+      setOrderFilter({ dayAgo: null, statusId: status })
+    }
   }
 
   // Handle payment action
@@ -106,40 +89,39 @@ export default function HomeScreen() {
   // Handle transfer table action - open modal
   const handleTransferTable = (order: Order) => {
     setSelectedOrder(order)
-    setCurrentTableId(order.dinnerTable.id)
     setShowTransferModal(true)
   }
 
   // Handle transfer table from modal
   const handleTransferTableSubmit = (tableId: number) => {
-    changeTableMutation.mutate(tableId)
+    Alert.alert('Xác nhận', `Bạn muốn chuyền Bàn ${selectedOrder?.dinnerTable.id} sang Bàn ${tableId}?`, [
+      {
+        text: 'Xác nhận',
+        style: 'destructive',
+        onPress: () => {
+          changeTableMutation.mutate(tableId)
+        }
+      },
+      { text: 'Không', style: 'cancel' }
+    ])
   }
 
   const handlePaymnetSubmit = (paymentMethod: PaymentMethod) => {
-    paymentMutation.mutate(paymentMethod)
+    Alert.alert(
+      'Xác nhận',
+      `Bạn có muốn thanh toán Bàn ${selectedOrder?.dinnerTable.id} với tổng tiền ${formatCurrencyVND(selectedOrder?.totalAmount ?? 0)}?`,
+      [
+        {
+          text: 'Xác nhận',
+          style: 'destructive',
+          onPress: () => {
+            paymentMutation.mutate(paymentMethod)
+          }
+        },
+        { text: 'Không', style: 'cancel' }
+      ]
+    )
   }
-
-  const isInitialLoad = isLoadingOrders && orders.length === 0
-
-  const ListHeader = useMemo(
-    () => (
-      <View className='flex-row items-center justify-between mb-2'>
-        <Text className='text-lg font-bold' style={{ color: colors.text }}>
-          Tổng cộng: {orders.length} bàn
-        </Text>
-
-        <View className='flex-row items-center gap-2'>
-          {selectedFilter !== STATUS.ORDER.UNPAID ? (
-            <DateFilterPicker value={dayAgo} onChange={setDayAgo} todayOnly={false} colors={colors} />
-          ) : (
-            <DateFilterPicker value={dayAgo} onChange={setDayAgo} todayOnly={true} colors={colors} />
-          )}
-          {/* {isRefetching && <ActivityIndicator size='small' color={colors.primary} />} */}
-        </View>
-      </View>
-    ),
-    [colors, orders.length, selectedFilter, dayAgo]
-  )
 
   const EmptyComponent = useMemo(() => {
     const showLoading = isLoadingOrders || (isRefetching && orders.length === 0)
@@ -169,11 +151,11 @@ export default function HomeScreen() {
           Chưa có đơn hàng
         </Text>
         <Text className='text-sm mt-2 text-center px-8' style={{ color: colors.textSecondary }}>
-          Không có đơn hàng {ORDER_STATUS_LABEL[selectedFilter as OrderStatus].toLowerCase()} nào
+          Không có đơn hàng {ORDER_STATUS_LABEL[orderFilter.statusId].toLowerCase()} nào
         </Text>
       </View>
     )
-  }, [colors.primary, colors.text, colors.textSecondary, isLoadingOrders, isRefetching, orders.length, selectedFilter])
+  }, [colors.primary, colors.text, colors.textSecondary, isLoadingOrders, isRefetching, orders.length, orderFilter])
 
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
@@ -197,94 +179,34 @@ export default function HomeScreen() {
           </TouchableOpacity>
         }
       >
-        <OrderFilterChips selected={selectedFilter} onChange={handleChangeStatus} colors={colors} />
+        <OrderFilterChips selected={orderFilter.statusId} onChange={handleChangeStatus} colors={colors} />
       </Header>
-
-      {/* Orders List - only mount when first load done to avoid list jump */}
-      {isInitialLoad ? (
-        <View className='flex-1 items-center justify-center py-20'>
-          <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
-            <Ionicons name='time-outline' size={48} color={colors.primary} />
-          </View>
-          <Text className='text-lg font-semibold mt-2' style={{ color: colors.text }}>
-            Đang tải đơn hàng...
-          </Text>
-          <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
-            Vui lòng đợi trong giây lát
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={orders}
-          keyExtractor={(item) => item.orderID.toString()}
-          numColumns={3}
-          style={{ backgroundColor: colors.background }}
-          contentContainerStyle={{
-            padding: 16,
-            paddingBottom: 100
-          }}
-          columnWrapperStyle={{
-            gap: 12,
-            marginBottom: 8
-          }}
-          ListHeaderComponent={ListHeader}
-          ListEmptyComponent={EmptyComponent}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
-          renderItem={({ item }) => (
-            <View
-              style={{
-                flexBasis: '31%',
-                maxWidth: '31%',
-                marginBottom: 8
-              }}
-            >
-              <OrderCard
-                order={item}
-                colors={colors}
-                statusColors={status}
-                effectiveTheme={effectiveTheme}
-                onPressDetail={() => {
-                  router.push(`/(protected)/order/detail?orderId=${item.orderID}` as any)
-                }}
-                onPressPayment={() => handlePayment(item)}
-                onPressTransferTable={() => handleTransferTable(item)}
-              />
-            </View>
-          )}
-          showsVerticalScrollIndicator={false}
-          scrollEventThrottle={16}
-          removeClippedSubviews={false}
-        />
-      )}
-
-      {/* Button Create Order */}
-      <TouchableOpacity
-        onPress={() => router.push('/(protected)/order/select-menu' as any)}
-        className='absolute bottom-6 right-6 rounded-full p-7'
-        style={{
-          backgroundColor: colors.primary,
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.4,
-          shadowRadius: 12,
-          elevation: 8
-        }}
-        activeOpacity={0.8}
-      >
-        <Ionicons name='add' size={28} color='white' />
-      </TouchableOpacity>
+      <ContentWithFab
+        orders={orders}
+        colors={colors}
+        status={status}
+        effectiveTheme={effectiveTheme}
+        orderFilter={orderFilter}
+        setOrderFilter={setOrderFilter}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        handlePayment={handlePayment}
+        handleTransferTable={handleTransferTable}
+        router={router}
+        EmptyComponent={EmptyComponent}
+      />
 
       {/* Transfer Table Modal */}
       <TransferTableModal
         visible={showTransferModal}
         mode='transfer'
-        currentTableId={currentTableId ?? undefined}
+        currentTableId={selectedOrder?.dinnerTable.id ?? undefined}
         isSubmitting={changeTableMutation.isPending}
         onSelect={handleTransferTableSubmit}
         onClose={() => {
           setShowTransferModal(false)
           setSelectedOrder(null)
-          setCurrentTableId(null)
+          // setCurrentTableId(null)
         }}
         colors={colors}
       />
@@ -302,3 +224,96 @@ export default function HomeScreen() {
     </View>
   )
 }
+
+function ContentComponent(props: {
+  orders: Order[]
+  colors: any
+  status: any
+  effectiveTheme: any
+  orderFilter: OrderFilter
+  setOrderFilter: any
+  refreshing: boolean
+  onRefresh: () => void
+  handlePayment: (order: Order) => void
+  handleTransferTable: (order: Order) => void
+  router: any
+  EmptyComponent: any
+}) {
+  const {
+    orders,
+    colors,
+    status,
+    effectiveTheme,
+    orderFilter,
+    setOrderFilter,
+    refreshing,
+    onRefresh,
+    handlePayment,
+    handleTransferTable,
+    router,
+    EmptyComponent
+  } = props
+
+  return (
+    <>
+      <View className='flex-row items-center justify-between m-3 mb-0'>
+        <Text className='text-lg font-bold' style={{ color: colors.text }}>
+          Tổng cộng: {orders?.length ?? 0} bàn
+        </Text>
+
+        <View className='flex-row items-center gap-2'>
+          {orderFilter.statusId !== STATUS.ORDER.UNPAID && (
+            <DateFilterPicker
+              value={orderFilter.dayAgo!}
+              onChange={(dayAgo: number) => setOrderFilter((prev: any) => ({ ...prev, dayAgo }))}
+              todayOnly={false}
+              colors={colors}
+            />
+          )}
+        </View>
+      </View>
+
+      <FlatList
+        data={orders}
+        keyExtractor={(item) => item.orderID.toString()}
+        numColumns={3}
+        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        columnWrapperStyle={{ gap: 12, marginBottom: 8 }}
+        ListEmptyComponent={EmptyComponent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+        renderItem={({ item }) => (
+          <View style={{ flexBasis: '31%', maxWidth: '31%', marginBottom: 8 }}>
+            <OrderCard
+              order={item}
+              colors={colors}
+              statusColors={status}
+              effectiveTheme={effectiveTheme}
+              onPressDetail={() => router.push(`/(protected)/order/detail?orderId=${item.orderID}` as any)}
+              onPressPayment={() => handlePayment(item)}
+              onPressTransferTable={() => handleTransferTable(item)}
+            />
+          </View>
+        )}
+        showsVerticalScrollIndicator={false}
+      />
+    </>
+  )
+}
+
+const ContentWithFab = withFloatingButton(ContentComponent, () => (
+  <TouchableOpacity
+    activeOpacity={0.8}
+    onPress={() => router.push('/(protected)/order/select-menu')}
+    className='rounded-full p-7'
+    style={{
+      backgroundColor: '#FB923C',
+      shadowColor: '#FB923C',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 12,
+      elevation: 8
+    }}
+  >
+    <Ionicons name='add' size={28} color='white' />
+  </TouchableOpacity>
+))

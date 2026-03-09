@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
-import { ScrollView, Text, TouchableOpacity } from 'react-native'
+import { Text, TouchableOpacity, View } from 'react-native'
 
 type ActionChip = {
   id: string
@@ -8,6 +8,7 @@ type ActionChip = {
   icon: keyof typeof Ionicons.glyphMap
   variant?: 'primary' | 'danger' | 'info' | 'warning' | 'default'
   onPress: () => void
+  visible?: boolean
 }
 
 interface OrderActionChipsProps {
@@ -21,9 +22,11 @@ interface OrderActionChipsProps {
 }
 
 export function OrderActionChips({ actions, colors }: OrderActionChipsProps) {
+  const visibleActions = actions.filter((action) => action.visible !== false)
+
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingRight: 8 }}>
-      {actions.map((action) => {
+    <View className='flex-row flex-wrap justify-between gap-[10px]'>
+      {visibleActions.map((action) => {
         const isPrimary = action.variant === 'primary'
         const isDanger = action.variant === 'danger'
         const isInfo = action.variant === 'info'
@@ -35,42 +38,43 @@ export function OrderActionChips({ actions, colors }: OrderActionChipsProps) {
           <TouchableOpacity
             key={action.id}
             onPress={action.onPress}
-            className='flex-row items-center rounded-full px-5 py-2.5'
+            className='flex-row items-center justify-center rounded-xl px-4 py-3'
             style={{
+              width: '48%',
               backgroundColor: isPrimary
                 ? colors.primary
                 : isDanger
-                  ? 'rgba(239, 68, 68, 0.2)'
+                  ? 'rgba(239, 68, 68, 0.15)'
                   : isInfo
-                    ? 'rgba(59, 130, 246, 0.2)'
+                    ? 'rgba(59, 130, 246, 0.15)'
                     : isWarning
-                      ? 'rgba(245, 158, 11, 0.2)'
-                      : 'rgba(255,255,255,0.2)',
+                      ? 'rgba(245, 158, 11, 0.15)'
+                      : 'rgba(255,255,255,0.15)',
               borderWidth: isPrimary ? 0 : 1.5,
               borderColor: isDanger
-                ? 'rgba(239, 68, 68, 0.5)'
+                ? 'rgba(239, 68, 68, 0.4)'
                 : isInfo
-                  ? 'rgba(59, 130, 246, 0.5)'
+                  ? 'rgba(59, 130, 246, 0.4)'
                   : isWarning
-                    ? 'rgba(245, 158, 11, 0.5)'
-                    : 'rgba(255,255,255,0.4)',
+                    ? 'rgba(245, 158, 11, 0.4)'
+                    : 'rgba(255,255,255,0.3)',
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: isPrimary ? 0.2 : 0.08,
+              shadowOpacity: isPrimary ? 0.25 : 0.1,
               shadowRadius: 4,
-              elevation: isPrimary ? 4 : 2
+              elevation: isPrimary ? 5 : 3
             }}
             activeOpacity={0.7}
           >
             <Ionicons
               name={action.icon}
-              size={18}
+              size={20}
               color={
                 isPrimary ? 'white' : isDanger ? colors.error : isInfo ? infoColor : isWarning ? warningColor : 'white'
               }
             />
             <Text
-              className='ml-2 font-bold'
+              className='ml-2 font-bold text-sm'
               style={{
                 color: isPrimary
                   ? 'white'
@@ -88,6 +92,6 @@ export function OrderActionChips({ actions, colors }: OrderActionChipsProps) {
           </TouchableOpacity>
         )
       })}
-    </ScrollView>
+    </View>
   )
 }

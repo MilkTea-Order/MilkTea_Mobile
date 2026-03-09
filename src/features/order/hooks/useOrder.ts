@@ -16,7 +16,7 @@ import { tableKeys } from './useTable'
 export const orderKeys = {
   all: ['orders'] as const,
   lists: () => [...orderKeys.all, 'list'] as const,
-  list: (filter: OrderFilter) => [...orderKeys.lists(), ...Object.values(filter)] as const,
+  list: (filter: OrderFilter) => [...orderKeys.lists(), filter] as const,
   detail: (orderId: number, isCancelled?: boolean) => [...orderKeys.all, 'detail', orderId, isCancelled] as const
 }
 
@@ -28,6 +28,7 @@ export function useOrders(filter: OrderFilter) {
       return response.data.data ?? []
     },
     staleTime: 30 * 1000
+    // placeholderData: keepPreviousData
   })
 
   return {
@@ -70,12 +71,10 @@ export function useCreateOrder() {
       return res.data
     },
     onSuccess: async (data) => {
-      Toast.show('Tạo đơn hàng thành công!', { type: 'success' })
       queryClient.setQueriesData(
         { queryKey: orderKeys.list({ statusId: STATUS.ORDER.UNPAID } as OrderFilter), exact: false },
         (old: Order[] | undefined) => {
           const prev = old ?? []
-
           const withoutDup = prev.filter((o) => o.orderID !== data.data.orderID)
           return [data.data, ...withoutDup]
         }
@@ -98,7 +97,6 @@ export function useCancelOrderItems(
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
       await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
-      Alert.alert('Thành công', 'Hủy món thành công')
       options?.onSuccess?.(data)
       return data
     },
@@ -136,10 +134,10 @@ export function usePayment(
     },
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({
-        queryKey: orderKeys.list({ statusId: STATUS.ORDER.NO_COLLECTED, dayAgo: 0 } as OrderFilter)
+        queryKey: orderKeys.list({ statusId: STATUS.ORDER.NO_COLLECTED } as OrderFilter)
       })
       await queryClient.invalidateQueries({
-        queryKey: orderKeys.list({ statusId: STATUS.ORDER.UNPAID, dayAgo: 0 } as OrderFilter)
+        queryKey: orderKeys.list({ statusId: STATUS.ORDER.UNPAID } as OrderFilter)
       })
 
       Toast.show('Thanh toán thành công')
@@ -178,6 +176,80 @@ export function usePayment(
 
       Alert.alert('Lỗi', 'Không thể thanh toán. Vui lòng thử lại')
       options?.onError?.(error)
+    }
+  })
+}
+
+export function useCollectedOrder(
+  orderId: number,
+  options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }
+) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: [...orderKeys.all, 'collected-order', orderId] as const,
+    mutationFn: async () => {
+      const res = await orderApi.collectedOrder(orderId)
+      return res.data
+    },
+    onSuccess: async (data) => {
+      // await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
+      await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      Toast.show('Thu tiền thành công', {
+        type: 'success',
+        placement: 'top'
+      })
+      router.replace({
+        pathname: '/(protected)/(tabs)',
+        params: {
+          filter: STATUS.ORDER.PAID
+        }
+      })
+      options?.onSuccess?.(data)
+      return data
+    },
+    onError: (error: any) => {
+      options?.onError?.(error)
+      const details = extractErrorDetails(error, 'order')
+      const e0042 = details.find((e) => e.code === ERROR_CODE.E0042)
+      if (e0042) {
+        Alert.alert('Lỗi', e0042.message ?? 'Không thể thu tiền ở trạng thái hiện tại')
+        return
+      }
+      const e0001Or0036 = details.find((e) => [ERROR_CODE.E0001, ERROR_CODE.E0036].includes(e.code as any))
+      if (e0001Or0036) {
+        Alert.alert('Lỗi', e0001Or0036.message ?? 'Đơn hàng không tồn tại', [
+          { text: 'OK', onPress: () => router.replace('/(protected)/(tabs)') }
+        ])
+        return
+      }
+      const e0041 = details.find((e) => e.code === ERROR_CODE.E0041)
+      if (e0041) {
+        console.log(e0041)
+        const materialMessages = Array.isArray(e0041.meta)
+          ? (e0041.meta as {
+              materialName: string
+              requiredQuantity: number
+              availableQuantity: number
+            }[])
+          : []
+        const finalMessage = `${e0041.message}\n${materialMessages.map((m) => `${m.materialName} (cần ${m.requiredQuantity}, còn ${m.availableQuantity})`).join('\n')}`
+
+        Alert.alert('Lỗi', finalMessage, [
+          {
+            text: 'OK',
+            onPress: () => {
+              router.dismissAll()
+            }
+          }
+        ])
+        return
+      }
+      const e9999 = details.find((e) => e.code === ERROR_CODE.E9999)
+      if (e9999) {
+        Alert.alert('Lỗi', e9999.message ?? 'Đã xảy ra lỗi hệ thống')
+        return
+      }
+      Alert.alert('Lỗi', 'Không thể thu tiền. Vui lòng thử lại')
     }
   })
 }
@@ -259,7 +331,6 @@ export function useUpdateOrderItem(
     },
     onError: (error: any) => {
       const details = extractErrorDetails(error, 'order')
-
       const byField = (field: string) => details.find((e) => e.field?.toLowerCase() === field.toLowerCase())
 
       const orderIdError = byField('orderid')
@@ -335,7 +406,7 @@ export function useMergeTable(
       await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
       await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
       // await queryClient.invalidateQueries({ queryKey: tableKeys.listEmpty(true) })
-      Alert.alert('Thành công', 'Gộp bàn thành công')
+      // Alert.alert('Thành công', 'Gộp bàn thành công')
       options?.onSuccess?.(data)
     },
     onError: (error: any) => {
@@ -379,7 +450,7 @@ export function useChangeTable(
       await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
       await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
       await queryClient.invalidateQueries({ queryKey: tableKeys.listEmpty(true) })
-      Alert.alert('Thành công', 'Chuyển bàn thành công')
+      // Alert.alert('Thành công', 'Chuyển bàn thành công')
       options?.onSuccess?.(data)
     },
     onError: (error: any) => {

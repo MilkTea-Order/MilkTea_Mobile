@@ -13,7 +13,6 @@ import { Ionicons } from '@expo/vector-icons'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useMemo, useState } from 'react'
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
-import { Toast } from 'react-native-toast-notifications'
 
 export default function ReviewCartScreen() {
   const router = useRouter()
@@ -46,7 +45,7 @@ export default function ReviewCartScreen() {
 
   const addItemsMutation = useAddOrderItems(targetOrderId ?? 0, {
     onSuccess: () => {
-      Toast.show('Thêm món thành công', { type: 'success' })
+      // Toast.show('Thêm món thành công', { type: 'success' })
       router.dismissAll()
       clearOrder()
     },
@@ -82,8 +81,8 @@ export default function ReviewCartScreen() {
 
     // Nếu quantity = 1, hiển thị confirm dialog
     if (item.quantity === 1) {
-      Alert.alert('Xác nhận', 'Bạn có muốn xóa món này khỏi giỏ hàng?', [
-        { text: 'Huỷ', style: 'cancel' },
+      Alert.alert('Xác nhận', 'Bạn muốn xóa món này khỏi giỏ hàng?', [
+        { text: 'Không', style: 'cancel' },
         {
           text: 'Xóa',
           style: 'destructive',
@@ -170,7 +169,7 @@ export default function ReviewCartScreen() {
 
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
-      <Header title={`Các món đã đặt •  ${selectedTable?.name ?? ''}`} onBack={handleBack} />
+      <Header title={`${selectedTable?.name ?? ''} • Các món đã chọn `} onBack={handleBack} />
 
       <ScrollView
         className='flex-1'
@@ -228,11 +227,11 @@ export default function ReviewCartScreen() {
                       className='rounded-xl mr-3 overflow-hidden items-center justify-center'
                       style={{ width: 52, height: 52, backgroundColor: `${colors.primary}10` }}
                     >
-                      {(item as any).MenuImage ? (
+                      {item.menuImage ? (
                         <Image
-                          source={{ uri: (item as any).MenuImage }}
+                          source={{ uri: item.menuImage }}
                           style={{ width: '100%', height: '100%' }}
-                          resizeMode='cover'
+                          resizeMode='contain'
                         />
                       ) : (
                         <Ionicons name='restaurant-outline' size={28} color={colors.primary} />
@@ -368,7 +367,7 @@ export default function ReviewCartScreen() {
                   Tổng số lượng
                 </Text>
                 <Text className='text-base font-semibold' style={{ color: colors.text }}>
-                  {orderItems.reduce((sum, item) => sum + item.quantity, 0)} Món
+                  {orderItems.reduce((sum, item) => sum + item.quantity, 0)}
                 </Text>
               </View>
 
@@ -415,10 +414,10 @@ export default function ReviewCartScreen() {
               Alert.alert(
                 'Xác nhận',
                 modeValue === ORDER_FLOW_MODE.CREATE
-                  ? 'Bạn chắc chắn muốn tạo đơn hàng này?'
-                  : 'Bạn chắc chắn muốn cập nhật đơn hàng này?',
+                  ? 'Bạn muốn tạo đơn hàng này?'
+                  : 'Bạn muốn thêm món vào đơn hàng này?',
                 [
-                  { text: 'Huỷ', style: 'destructive' },
+                  { text: 'Không', style: 'destructive' },
                   { text: 'Đồng ý', onPress: handleSubmit }
                 ]
               )
@@ -430,7 +429,7 @@ export default function ReviewCartScreen() {
               <>
                 <Ionicons name='checkmark-circle-outline' size={24} color='white' />
                 <Text className='text-white text-center text-lg font-bold ml-2'>
-                  {modeValue === ORDER_FLOW_MODE.CREATE ? 'Tạo đơn hàng' : 'Cập nhật đơn hàng'}
+                  {modeValue === ORDER_FLOW_MODE.CREATE ? 'Tạo đơn hàng' : 'Thêm món'}
                 </Text>
               </>
             )}

@@ -72,7 +72,7 @@ export function PaymentMethodModal({
   const handleConfirm = () => {
     if (selectedMethod) {
       onSelect(selectedMethod as PaymentMethod)
-      setSelectedMethod(null)
+      // setSelectedMethod(null)
     }
   }
 

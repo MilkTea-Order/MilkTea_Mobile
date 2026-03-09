@@ -7,9 +7,9 @@ import { MenuGroup } from '@/features/order/types/menu.type'
 import { ORDER_FLOW_MODE, OrderFlowMode } from '@/shared/constants/other'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   Alert,
@@ -36,7 +36,7 @@ export default function SelectMenuScreen() {
   const [selectedGroup, setSelectedGroup] = useState<MenuGroup | null>(null)
   const [activeSize, setActiveSize] = useState<{ menuId: number; sizeId: number } | null>(null)
   const [activeMenuId, setActiveMenuId] = useState<number | null>(null)
-
+  const searchInputRef = useRef<TextInput | null>(null)
   // Search Menu by name
   const [searchQuery, setSearchQuery] = useState('')
   const [submittedSearch, setSubmittedSearch] = useState('')
@@ -99,22 +99,18 @@ export default function SelectMenuScreen() {
   // Handle back button
   const handleBack = () => {
     if (hasItemsInCart) {
-      Alert.alert(
-        'Xác nhận',
-        'Việc trở lại sẽ xoá giỏ hàng hiện tại của bạn, Bạn có muốn thực hiện tiếp hành động này không? ',
-        [
-          { text: 'Huỷ', style: 'cancel' },
-          {
-            text: 'Xác nhận',
-            style: 'destructive',
-            onPress: () => {
-              clearOrder()
-              // router.back()
-              router.dismissAll()
-            }
+      Alert.alert('Xác nhận', 'Quay lại sẽ xoá giỏ hàng hiện tại. Tiếp tục?', [
+        { text: 'Huỷ', style: 'cancel' },
+        {
+          text: 'Xác nhận',
+          style: 'destructive',
+          onPress: () => {
+            clearOrder()
+            // router.back()
+            router.dismissAll()
           }
-        ]
-      )
+        }
+      ])
     } else {
       clearOrder()
       router.dismissAll()
@@ -123,7 +119,12 @@ export default function SelectMenuScreen() {
 
   // Handle change table
   const handleChangeTable = () => {
-    router.replace('/(protected)/order/select-table')
+    router.replace({
+      pathname: '/(protected)/order/select-table',
+      params: {
+        isChangeTable: 'true'
+      }
+    })
   }
 
   // Handle clear cart
@@ -220,12 +221,16 @@ export default function SelectMenuScreen() {
                 className='bg-white/20 rounded-full p-2'
                 activeOpacity={0.7}
               >
-                <Ionicons name='swap-horizontal' size={18} color='white' />
+                <Ionicons name='swap-horizontal' size={20} color='white' />
               </TouchableOpacity>
             )}
             {hasItemsInCart && (
-              <TouchableOpacity onPress={handleClearCart} className='bg-white/20 rounded-full p-2' activeOpacity={0.7}>
-                <Ionicons name='trash-outline' size={18} color='white' />
+              <TouchableOpacity
+                onPress={handleClearCart}
+                className='bg-white/20 rounded-full p-2 ml-5'
+                activeOpacity={0.7}
+              >
+                <MaterialCommunityIcons name='cart-remove' size={20} color='white' />
               </TouchableOpacity>
             )}
           </View>
@@ -245,9 +250,13 @@ export default function SelectMenuScreen() {
             elevation: 3
           }}
         >
+          <TouchableOpacity onPress={() => searchInputRef.current?.focus()}>
+            <Ionicons name='search' size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
           <TextInput
+            ref={searchInputRef}
             placeholder='Tìm kiếm món ăn'
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.textSecondary + '99'}
             value={searchQuery}
             onChangeText={setSearchQuery}
             onSubmitEditing={handleSearch}
@@ -388,14 +397,14 @@ export default function SelectMenuScreen() {
                 }
               })
             }}
-            className='rounded-2xl py-4 flex-row items-center justify-between p-5'
+            className='rounded-2xl py-4 flex-row items-center justify-between p-5 mb-4'
             style={{ backgroundColor: colors.primary }}
             activeOpacity={0.8}
           >
             <View className='flex-row items-center justify-between'>
-              <Ionicons name='cart-outline' size={24} color='white' />
+              <Ionicons name='cart' size={24} color='white' />
               <Text className='text-white text-center text-lg font-bold ml-2'>
-                Giỏ hàng • {orderItems.reduce((sum, item) => sum + item.quantity, 0)} món
+                Giỏ hàng • Số lượng: {orderItems.reduce((sum, item) => sum + item.quantity, 0)}
               </Text>
             </View>
             <Text className='text-white text-center text-lg font-bold ml-2'> {formatCurrencyVND(totalPrice)}</Text>

@@ -4,7 +4,7 @@ import { useOrderStore } from '@/features/order/store/order.store'
 import type { DinnerTable } from '@/features/order/types/table.type'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useState } from 'react'
 import { ActivityIndicator, Image, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
@@ -15,6 +15,7 @@ export default function SelectTableScreen() {
   const { data: availableTables, isLoading, isRefetching, refetch } = useEmptyTables()
   const setTable = useOrderStore((s) => s.setTable)
   const selectedTable = useOrderStore((s) => s.table)
+  const { isChangeTable } = useLocalSearchParams<{ isChangeTable: string }>()
   // const clearOrder = useOrderStore((s) => s.clear)
 
   const onRefresh = useCallback(() => {
@@ -59,7 +60,7 @@ export default function SelectTableScreen() {
         <View className='flex-row items-center justify-between mb-4'>
           <View>
             <Text className='text-xl font-bold' style={{ color: colors.text }}>
-              Chọn bàn để bắt đầu tạo đơn
+              Chọn bàn {isChangeTable === 'true' ? 'để chuyển' : 'để bắt đầu tạo đơn'}
             </Text>
           </View>
         </View>

@@ -8,18 +8,14 @@ import { CreateOrderItemPayload, CreateOrderPayload, Order } from '../types/orde
 
 export type OrderFilter = {
   statusId: OrderStatus
-  dayAgo?: number
+  dayAgo: number | null
 }
 
 export type OrderDetailApiResponse = ApiResponse<Order>
 
 export const orderApi = {
   getOrders(filter: OrderFilter): Promise<AxiosResponse<ApiResponse<Order[]>>> {
-    const params: { StatusID: OrderStatus; dayAgo?: number } = {
-      StatusID: filter.statusId,
-      dayAgo: filter.dayAgo ?? 0
-    }
-    return http.get<ApiResponse<Order[]>>(URL.ORDERS, { params })
+    return http.get<ApiResponse<Order[]>>(URL.ORDERS, { params: filter })
   },
 
   getOrderDetail(orderId: number, isCancelled: boolean = false): Promise<AxiosResponse<OrderDetailApiResponse>> {
@@ -68,5 +64,8 @@ export const orderApi = {
 
   payment(orderId: number, paymentMethod: PaymentMethod): Promise<AxiosResponse<ApiResponse<object>>> {
     return http.post<ApiResponse<object>>(`${URL.ORDERS}/${orderId}/payment`, { paymentMethod })
+  },
+  collectedOrder(orderId: number): Promise<AxiosResponse<ApiResponse<object>>> {
+    return http.post<ApiResponse<object>>(`${URL.ORDERS}/${orderId}/collected`)
   }
 }
