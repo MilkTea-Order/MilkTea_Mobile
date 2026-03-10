@@ -85,7 +85,7 @@ export function OrderItemsSection({
             )}
           </View>
 
-          {onAddItems && (
+          {onAddItems && canActionButton && (
             <TouchableOpacity
               onPress={onAddItems}
               className='rounded-full p-2'

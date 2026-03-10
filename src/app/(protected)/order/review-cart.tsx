@@ -390,7 +390,7 @@ export default function ReviewCartScreen() {
       {/* Create Order Button */}
       {orderItems.length > 0 && (
         <View
-          className='border-t-2 px-5 py-4'
+          className='border-t-2 px-5 py-4 mb-5'
           style={{
             backgroundColor: colors.card,
             borderTopColor: colors.border,

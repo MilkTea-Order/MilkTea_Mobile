@@ -27,7 +27,7 @@ export const ORDER_STATUS_OPTIONS = [
   { value: STATUS.ORDER.UNPAID, label: 'Chưa thanh toán', icon: 'receipt-outline' },
   { value: STATUS.ORDER.NO_COLLECTED, label: 'Đã thanh toán', icon: 'hourglass-outline' },
   { value: STATUS.ORDER.PAID, label: 'Đã thu tiền', icon: 'checkmark-circle-outline' },
-  { value: STATUS.ORDER.CANCELED, label: 'Hủy', icon: 'close-circle-outline' }
+  { value: STATUS.ORDER.CANCELED, label: 'Đã hủy', icon: 'close-circle-outline' }
 ] as const
 
 export const ORDER_STATUS_LABEL = ORDER_STATUS_OPTIONS.reduce(

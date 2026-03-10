@@ -129,7 +129,7 @@ export default function SelectMenuScreen() {
 
   // Handle clear cart
   const handleClearCart = () => {
-    Alert.alert('Xác nhận', 'Bạn có muốn xóa toàn bộ giỏ hàng?', [
+    Alert.alert('Xác nhận', 'Bạn muốn xóa toàn bộ giỏ hàng?', [
       { text: 'Huỷ', style: 'cancel' },
       {
         text: 'Xóa tất cả',

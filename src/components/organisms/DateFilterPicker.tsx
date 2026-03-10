@@ -69,7 +69,7 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, todayOnly 
             onChangeText={handleInputChange}
             onSubmitEditing={handleInputSubmit}
             placeholder='0'
-            placeholderTextColor='black'
+            placeholderTextColor='white'
             keyboardType='numbers-and-punctuation'
             returnKeyType='done'
             className='w-9 h-[26px] rounded-md border text-center text-xs font-semibold px-0.5'

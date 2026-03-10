@@ -133,6 +133,7 @@ export function usePayment(
       return res.data
     },
     onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
       await queryClient.invalidateQueries({
         queryKey: orderKeys.list({ statusId: STATUS.ORDER.NO_COLLECTED } as OrderFilter)
       })
@@ -192,7 +193,7 @@ export function useCollectedOrder(
       return res.data
     },
     onSuccess: async (data) => {
-      // await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
+      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
       await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
       Toast.show('Thu tiền thành công', {
         type: 'success',
@@ -266,18 +267,6 @@ export function useCancelOrder(options?: { onSuccess?: (data: any) => void; onEr
     },
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
-      Alert.alert('Thành công', 'Hủy đơn hàng thành công', [
-        {
-          text: 'OK',
-          onPress: () =>
-            router.replace({
-              pathname: '/(protected)/(tabs)',
-              params: {
-                filter: STATUS.ORDER.CANCELED
-              }
-            })
-        }
-      ])
       options?.onSuccess?.(data)
       return data
     },

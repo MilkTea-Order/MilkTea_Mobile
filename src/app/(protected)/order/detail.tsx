@@ -18,6 +18,7 @@ import { OrderDetail } from '@/features/order/types/order.type'
 import { ORDER_FLOW_MODE, PaymentMethod } from '@/shared/constants/other'
 import { ORDER_STATUS_LABEL, STATUS, type OrderStatus } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
+import { formatCurrencyVND } from '@/shared/utils/currency'
 import { formatCurrency } from '@/shared/utils/utils'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -76,11 +77,37 @@ export default function OrderDetailScreen() {
   })
 
   const handlePayment = (paymentMethod: PaymentMethod) => {
-    paymentMutation.mutate(paymentMethod)
+    Alert.alert(
+      'Xác nhận',
+      `Bạn có muốn thanh toán ${order?.dinnerTable.name} (${formatCurrencyVND(order?.totalAmount ?? 0)})?`,
+      [
+        {
+          text: 'Xác nhận',
+          style: 'destructive',
+          onPress: () => {
+            paymentMutation.mutate(paymentMethod)
+          }
+        },
+        { text: 'Không', style: 'cancel' }
+      ]
+    )
   }
 
   const handleCollectedOrder = () => {
-    collectedMutation.mutate()
+    Alert.alert(
+      'Xác nhận',
+      `Bạn đã thu tiền ${order?.dinnerTable.name} (${formatCurrencyVND(order?.totalAmount ?? 0)})?`,
+      [
+        {
+          text: 'Xác nhận',
+          style: 'destructive',
+          onPress: () => {
+            collectedMutation.mutate()
+          }
+        },
+        { text: 'Không', style: 'cancel' }
+      ]
+    )
   }
 
   const handleCancelItem = (item: OrderDetail) => {
@@ -107,7 +134,7 @@ export default function OrderDetailScreen() {
   const handleFilterChange = (value: 'placed' | 'cancelled') => setFilterMode(value)
 
   const handleTransferTable = (tableId: number) => {
-    Alert.alert('Xác nhận', `Bạn muốn chuyền Bàn ${order?.dinnerTable.id} sang Bàn ${tableId}?`, [
+    Alert.alert('Xác nhận', `Bạn muốn chuyền ${order?.dinnerTable.name} sang Bàn ${tableId}?`, [
       {
         text: 'Xác nhận',
         style: 'destructive',
@@ -142,7 +169,7 @@ export default function OrderDetailScreen() {
   }
 
   const orderStatus = String(order?.status.id ?? '') as OrderStatus
-  const statusName = isLoading ? 'Đang tải...' : (order?.status?.name ?? ORDER_STATUS_LABEL[orderStatus] ?? '')
+  const statusName = isLoading ? 'Đang tải...' : (ORDER_STATUS_LABEL[orderStatus] ?? '')
   const totalQty = order?.orderDetails?.reduce((sum, d) => sum + (d.quantity ?? 0), 0) ?? 0
 
   return (
@@ -197,7 +224,7 @@ export default function OrderDetailScreen() {
                 variant: 'danger',
                 visible: order?.status.id === Number(STATUS.ORDER.UNPAID),
                 onPress: () => {
-                  Alert.alert('Xác nhận', 'Bạn có chắc muốn hủy toàn bộ đơn hàng này?', [
+                  Alert.alert('Xác nhận', 'Bạn muốn hủy toàn bộ đơn hàng này?', [
                     { text: 'Không', style: 'cancel' },
                     {
                       text: 'Hủy đơn',
@@ -211,7 +238,7 @@ export default function OrderDetailScreen() {
               },
               {
                 id: 'thu-tien',
-                label: 'Thu tiền',
+                label: 'Đã thu tiền',
                 icon: 'cash-outline',
                 variant: 'primary',
                 visible: order?.status.id === Number(STATUS.ORDER.NO_COLLECTED),
