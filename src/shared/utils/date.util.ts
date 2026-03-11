@@ -22,9 +22,6 @@ const normalizeFormat = (format: string): string =>
 /**
  * Parse a date string into a Dayjs object using strict format validation.
  *
- * ⚠️ This function parses a DATE-ONLY value (no timezone applied).
- * Use this for birthday, form dates, etc.
- *
  * @param dateStr - Date string to parse (e.g. "31/12/2025")
  * @param format - Expected input format (default: "DD/MM/YYYY")
  * @returns Dayjs instance if valid, otherwise null
@@ -57,9 +54,6 @@ export const formatDisplayDate = (date?: Dayjs | null, format: string = 'DD/MM/Y
  *
  * Examples:
  * - 2025-01-01
- *
- * ⚠️ Use this ONLY when the business rule requires UTC-based date calculation.
- * ❌ Do NOT use for birthday or user-selected calendar dates.
  *
  * @param date - Dayjs instance
  * @returns ISO 8601 date-only string (UTC-based)
@@ -104,4 +98,41 @@ export const generateMonths = (): { value: number; label: string }[] => {
     value: i,
     label: `Tháng ${i + 1}`
   }))
+}
+
+/**
+ * Get today's date range based on local timezone
+ * and convert to UTC ISO strings for backend query.
+ */
+export const getTodayDateRange = (): { fromDate: string; toDate: string } => {
+  const now = dayjs()
+
+  const fromDate = now.startOf('day').utc()
+  const toDate = now.endOf('day').utc()
+  // const toDate = now.add(1, 'day').startOf('day').utc()
+  return {
+    fromDate: fromDate.toISOString(),
+    toDate: toDate.toISOString()
+  }
+}
+
+/**
+ * Convert a Date object to ISO string (UTC).
+ *
+ * @param date - Date object
+ * @returns ISO string
+ */
+export const toISOString = (date: Date): string => {
+  return dayjs(date).toISOString()
+}
+
+/**
+ * Check if a date string is today (local time).
+ *
+ * @param dateString - ISO date string
+ * @returns true if the date is today
+ */
+export const isToday = (dateString: string | null): boolean => {
+  if (!dateString) return false
+  return dayjs(dateString).isSame(dayjs(), 'day')
 }

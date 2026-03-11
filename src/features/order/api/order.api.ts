@@ -8,7 +8,8 @@ import { CreateOrderItemPayload, CreateOrderPayload, Order } from '../types/orde
 
 export type OrderFilter = {
   statusId: OrderStatus
-  dayAgo: number | null
+  fromDate?: string | null // ISO string UTC
+  toDate?: string | null // ISO string UTC
 }
 
 export type OrderDetailApiResponse = ApiResponse<Order>

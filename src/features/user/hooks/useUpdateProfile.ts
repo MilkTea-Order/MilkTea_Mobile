@@ -1,6 +1,5 @@
 import { extractFieldErrors } from '@/shared/utils/formErrors'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Toast } from 'react-native-toast-notifications'
 import { userApi } from '../apis/user.api'
 import { UpdateProfilePayload } from '../types/user.type'
 import { userKeys } from './useUser'
@@ -14,8 +13,6 @@ export function useUpdateProfile() {
       return response.data
     },
     onSuccess: () => {
-      const message = 'Cập nhật thông tin thành công!'
-      Toast.show(message, { type: 'success' })
       queryClient.invalidateQueries({ queryKey: userKeys.me() })
     },
     onError: (error: any) => {

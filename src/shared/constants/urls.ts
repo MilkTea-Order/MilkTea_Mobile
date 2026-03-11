@@ -1,4 +1,4 @@
-export const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://api.example.com'
+export const BASE_URL = process.env.EXPO_PUBLIC_API_URL
 
 export const URL = {
   LOGIN: 'auth/login',

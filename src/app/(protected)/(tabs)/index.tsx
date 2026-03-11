@@ -13,24 +13,26 @@ import { PaymentMethod } from '@/shared/constants/other'
 import { ORDER_STATUS_LABEL, STATUS, type OrderStatus } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
+import { getTodayDateRange } from '@/shared/utils/date.util'
 import { Ionicons } from '@expo/vector-icons'
 import { router, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, FlatList, Image, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
 
 export default function HomeScreen() {
   const { colors, status, effectiveTheme } = useTheme()
+  const router = useRouter()
+  const params = useLocalSearchParams<{ filter?: OrderStatus }>()
 
-  const [orderFilter, setOrderFilter] = useState<OrderFilter>({ statusId: STATUS.ORDER.UNPAID, dayAgo: null })
   const [refreshing, setRefreshing] = useState(false)
   const [showTransferModal, setShowTransferModal] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
-
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  // const [currentTableId, setCurrentTableId] = useState<number | null>(null)
-
-  const router = useRouter()
-  const params = useLocalSearchParams<{ filter?: OrderStatus }>()
+  const [orderFilter, setOrderFilter] = useState<OrderFilter>({
+    statusId: STATUS.ORDER.UNPAID,
+    fromDate: null,
+    toDate: null
+  })
 
   const { data: meData, isPending: isLoadingUser } = useMe()
   const { orders, isLoading: isLoadingOrders, isRefetching, refetch } = useOrders(orderFilter)
@@ -59,11 +61,24 @@ export default function HomeScreen() {
   })
 
   useEffect(() => {
-    if (params.filter) {
-      const filterValue = params.filter
-      if ([STATUS.ORDER.NO_COLLECTED, STATUS.ORDER.CANCELED, STATUS.ORDER.PAID].includes(filterValue as any)) {
-        setOrderFilter({ dayAgo: 0, statusId: filterValue })
-      }
+    if (!params.filter) return
+
+    const filterValue = params.filter
+
+    if ([STATUS.ORDER.NO_COLLECTED, STATUS.ORDER.CANCELED, STATUS.ORDER.PAID].includes(filterValue as any)) {
+      const { fromDate, toDate } = getTodayDateRange()
+
+      setOrderFilter({
+        statusId: filterValue,
+        fromDate,
+        toDate
+      })
+    } else {
+      setOrderFilter({
+        statusId: filterValue,
+        fromDate: null,
+        toDate: null
+      })
     }
   }, [params.filter])
 
@@ -74,9 +89,14 @@ export default function HomeScreen() {
 
   const handleChangeStatus = (status: OrderStatus) => {
     if ([STATUS.ORDER.NO_COLLECTED, STATUS.ORDER.CANCELED, STATUS.ORDER.PAID].includes(status as any)) {
-      setOrderFilter({ dayAgo: 0, statusId: status })
+      const { fromDate, toDate } = getTodayDateRange()
+      setOrderFilter({
+        fromDate,
+        toDate,
+        statusId: status
+      })
     } else {
-      setOrderFilter({ dayAgo: null, statusId: status })
+      setOrderFilter({ fromDate: null, toDate: null, statusId: status })
     }
   }
 
@@ -166,7 +186,7 @@ export default function HomeScreen() {
         rightContent={
           <TouchableOpacity
             onPress={() => router.push('/(protected)/(tabs)/profile')}
-            className='bg-white/20 rounded-full p-3'
+            className='bg-white/20 rounded-full p-2'
             style={{
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 2 },
@@ -175,7 +195,11 @@ export default function HomeScreen() {
             }}
             activeOpacity={0.7}
           >
-            <Ionicons name='person-circle-outline' size={28} color='white' />
+            {meData?.data.avatar ? (
+              <Image source={{ uri: meData?.data.avatar }} className='w-8 h-8 rounded-full' resizeMode='contain' />
+            ) : (
+              <Ionicons name='person-circle-outline' size={32} color='white' />
+            )}
           </TouchableOpacity>
         }
       >
@@ -256,17 +280,21 @@ function ContentComponent(props: {
 
   return (
     <>
-      <View className='flex-row items-center justify-between m-3 mb-0'>
+      <View className='flex m-3 mb-0 gap-2'>
         <Text className='text-lg font-bold' style={{ color: colors.text }}>
           Tổng cộng: {orders?.length ?? 0} bàn
         </Text>
-
-        <View className='flex-row items-center gap-2'>
+        <View className='flex-col items-start gap-2'>
           {orderFilter.statusId !== STATUS.ORDER.UNPAID && (
             <DateFilterPicker
-              value={orderFilter.dayAgo!}
-              onChange={(dayAgo: number) => setOrderFilter((prev: any) => ({ ...prev, dayAgo }))}
-              todayOnly={false}
+              value={{ fromDate: orderFilter.fromDate ?? null, toDate: orderFilter.toDate ?? null }}
+              onChange={(range: { fromDate: string | null; toDate: string | null }) =>
+                setOrderFilter((prev: any) => ({
+                  ...prev,
+                  fromDate: range.fromDate,
+                  toDate: range.toDate
+                }))
+              }
               colors={colors}
             />
           )}

@@ -9,7 +9,8 @@ export const STORAGE_KEYS = {
   // Settings keys
   SETTINGS: {
     THEME_MODE: 'settings_theme_mode',
-    LANGUAGE: 'settings_language'
+    LANGUAGE: 'settings_language',
+    API_BASE_URL: 'settings_api_base_url'
   },
   // Onboarding keys
   ONBOARDING: {

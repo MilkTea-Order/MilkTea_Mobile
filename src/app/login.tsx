@@ -1,6 +1,7 @@
 import { AppLogo } from '@/components/molecules/AppLogo'
 import { LoginForm } from '@/components/organisms/LoginForm'
 import { useTheme } from '@/shared/hooks/useTheme'
+import { useApiConfigStore } from '@/shared/store/apiConfigStore'
 import React from 'react'
 import { Text, View } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from 'react-native-keyboard-controller'
@@ -9,9 +10,11 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 export default function LoginScreen() {
   const { colors } = useTheme()
   const { isVisible } = useKeyboardState()
+  const clearApi = useApiConfigStore((s) => s.clearApiBaseUrl)
 
   const handleForgotPassword = () => {
     // TODO: Navigate to forgot password screen
+    clearApi()
   }
 
   return (

@@ -23,6 +23,7 @@ export interface User {
   bankAccountName?: string
   bankAccountNumber?: string
   bankQRCode?: string
+  avatar?: string
   createdDate?: string
   lastUpdatedDate: string
 }
@@ -39,6 +40,7 @@ export type ChangePasswordApiResponse = ApiResponse<{ status: boolean }>
 
 export interface UpdateProfileBody {
   fullName: string
+  avatar?: string
   genderID: number
   birthDay: string
   identityCode: string

@@ -1,8 +1,9 @@
 import { useAuthStore } from '@/features/auth/store/auth.store'
-import { BASE_URL, URL } from '@/shared/constants/urls'
+import { URL } from '@/shared/constants/urls'
 import { ApiResponse, isErrorResponse } from '@/shared/types/api.type'
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, HttpStatusCode } from 'axios'
 import { Toast } from 'react-native-toast-notifications'
+import { useApiConfigStore } from '../store/apiConfigStore'
 import { isAxiosExpiredTokenError, isAxiosUnauthorizedError } from './utils'
 
 class Http {
@@ -11,13 +12,16 @@ class Http {
 
   constructor() {
     this.instance = axios.create({
-      baseURL: BASE_URL,
+      // baseURL: useApiConfigStore.getState().resolveApiBaseUrl() as string,
       timeout: 20 * 1000,
       headers: { 'Content-Type': 'application/json' }
     })
 
     this.instance.interceptors.request.use(
       (config) => {
+        if (!config.baseURL) {
+          config.baseURL = useApiConfigStore.getState().resolveApiBaseUrl() ?? ''
+        }
         const { tokens } = useAuthStore.getState()
 
         if (tokens?.accessToken) {
@@ -130,30 +134,18 @@ class Http {
 }
 
 const http = new Http().instance
-export default http
 
-// if (isUnauthorizedError(responseData)) {
-//   // Xử lí liên quan tới token hết hạn
-//   console.log('Unauthorized error', responseData)
-//   if (
-//     isExpiredTokenError(response) &&
-//     config.url !== URL.REFRESH_TOKEN &&
-//     !config.url?.endsWith(URL.REFRESH_TOKEN) &&
-//     !config._retry
-//   ) {
-//     console.log('AccessToken expired, trying to refresh token')
-//     config._retry = true
-//     this.refreshTokenRequest = this.refreshTokenRequest ?? this.handleRefreshToken()
-//     return this.refreshTokenRequest.then((access_token) => {
-//       return this.instance({
-//         ...config,
-//         headers: {
-//           ...config.headers,
-//           Authorization: `Bearer ${access_token}`
-//         }
-//       })
-//     })
-//   }
-//   // Token không đúng, không truyền, refresh token cũng hết hạn hay đã bị thu hồi
-//   await logout()
-// }
+http.defaults.baseURL = useApiConfigStore.getState().resolveApiBaseUrl() ?? ''
+
+let currentBaseURL = http.defaults.baseURL
+
+useApiConfigStore.subscribe((state) => {
+  const newBaseURL = state.apiBaseUrl ?? ''
+
+  if (newBaseURL !== currentBaseURL) {
+    http.defaults.baseURL = newBaseURL
+    currentBaseURL = newBaseURL
+  }
+})
+
+export default http

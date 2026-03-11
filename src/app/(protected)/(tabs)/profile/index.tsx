@@ -1,12 +1,14 @@
 import { ThemeSelector } from '@/components/molecules/ThemeSelector'
 import { useLogout } from '@/features/auth/hooks/useAuth'
+import { useUpdateProfile } from '@/features/user/hooks/useUpdateProfile'
 import { useMe } from '@/features/user/hooks/useUser'
 import { useTheme } from '@/shared/hooks/useTheme'
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useFocusEffect, useRouter } from 'expo-router'
 import React, { useCallback, useRef } from 'react'
-import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function ProfileScreen() {
@@ -23,6 +25,46 @@ export default function ProfileScreen() {
       scrollViewRef.current?.scrollTo({ y: 0, animated: false })
     }, [])
   )
+
+  const updateProfileMutation = useUpdateProfile()
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8
+    })
+
+    if (result.canceled || !result.assets[0]) return
+
+    const asset = result.assets[0]
+
+    const allowedTypes = ['image/jpeg', 'image/png']
+    if (!allowedTypes.includes(asset.mimeType || '')) {
+      Alert.alert('Lỗi', 'Chỉ được chọn ảnh JPG, JPEG hoặc PNG')
+      return
+    }
+
+    const MAX_SIZE = 5 * 1024 * 1024
+    if ((asset.fileSize || 0) > MAX_SIZE) {
+      Alert.alert('Lỗi', 'Ảnh phải nhỏ hơn 5MB')
+      return
+    }
+
+    try {
+      const formData = new FormData()
+      formData.append('avatar', {
+        uri: asset.uri,
+        type: asset.mimeType || 'image/jpeg',
+        name: asset.fileName || 'avatar.jpg'
+      } as any)
+      await updateProfileMutation.mutateAsync(formData)
+    } catch (error) {
+      console.error(error)
+      Alert.alert('Lỗi', 'Không thể cập nhật ảnh đại diện')
+    }
+  }
 
   const handleLogout = () => {
     Alert.alert('Đăng xuất', 'Bạn có chắc chắn muốn đăng xuất?', [
@@ -55,24 +97,15 @@ export default function ProfileScreen() {
       icon: 'lock-closed-outline',
       label: 'Đổi mật khẩu',
       onPress: () => router.push('/(protected)/(tabs)/profile/change-password')
+    },
+    {
+      icon: 'settings-outline',
+      label: 'Cấu hình',
+      onPress: () => router.push('/(protected)/(tabs)/profile/settings')
     }
-    // {
-    //   icon: 'notifications-outline',
-    //   label: 'Thông báo',
-    //   onPress: () => Alert.alert('Thông báo', 'Tính năng đang phát triển')
-    // },
-    // {
-    //   icon: 'help-circle-outline',
-    //   label: 'Trợ giúp',
-    //   onPress: () => Alert.alert('Trợ giúp', 'Tính năng đang phát triển')
-    // },
-    // {
-    //   icon: 'information-circle-outline',
-    //   label: 'Về ứng dụng',
-    //   onPress: () =>
-    //     Alert.alert('Về ứng dụng', 'Milk Tea Shop\nVersion 1.0.0\n\nỨng dụng quản lý đơn hàng quán trà sữa')
-    // }
+    //
   ]
+
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
       {/* Header */}
@@ -109,17 +142,47 @@ export default function ProfileScreen() {
               borderColor: colors.border
             }}
           >
+            {/* <Text>{user?.avatar}</Text> */}
             <View className='items-center mb-6'>
-              <View
-                className='rounded-full p-1 mb-4'
-                style={{
-                  backgroundColor: `${colors.primary}15`
-                }}
-              >
-                <LinearGradient colors={gradients.header as any} className='rounded-full p-3'>
-                  <Ionicons name='person' size={64} color='white' />
-                </LinearGradient>
+              {/* Avatar Container */}
+              <View className='relative mb-4'>
+                <View
+                  className='rounded-full p-1'
+                  style={{
+                    backgroundColor: `${colors.primary}15`
+                  }}
+                >
+                  {user?.avatar ? (
+                    <Image source={{ uri: user.avatar }} className='w-24 h-24 rounded-full' resizeMode='contain' />
+                  ) : (
+                    <LinearGradient
+                      colors={gradients.header as any}
+                      className='w-24 h-24 rounded-full items-center justify-center'
+                    >
+                      <Ionicons name='person' size={48} color='white' />
+                    </LinearGradient>
+                  )}
+                </View>
+
+                {/* Edit Avatar Button */}
+                <TouchableOpacity
+                  onPress={pickImage}
+                  disabled={updateProfileMutation.isPending}
+                  className='absolute bottom-0 right-0 w-10 h-10 rounded-full items-center justify-center'
+                  style={{
+                    backgroundColor: colors.primary,
+                    borderWidth: 3,
+                    borderColor: colors.card
+                  }}
+                >
+                  {updateProfileMutation.isPending ? (
+                    <ActivityIndicator />
+                  ) : (
+                    <MaterialCommunityIcons name='account-edit-outline' size={24} color='white' />
+                  )}
+                </TouchableOpacity>
               </View>
+
               <Text className='text-2xl font-bold mb-1' style={{ color: colors.text }}>
                 {isLoadingUser ? 'Đang tải...' : user?.fullName || 'Nhân viên'}
               </Text>

@@ -6,6 +6,7 @@ import { extractErrorDetails } from '@/shared/utils/formErrors'
 import { isApiError } from '@/shared/utils/utils'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { router, useRouter } from 'expo-router'
+import { useMemo } from 'react'
 import { Alert } from 'react-native'
 import { Toast } from 'react-native-toast-notifications'
 import { orderApi, OrderFilter } from '../api/order.api'
@@ -21,10 +22,19 @@ export const orderKeys = {
 }
 
 export function useOrders(filter: OrderFilter) {
+  // Clean filter - only include fromDate and toDate if they are not null
+  const cleanedFilter = useMemo(() => {
+    return {
+      statusId: filter.statusId,
+      fromDate: filter.fromDate ?? undefined,
+      toDate: filter.toDate ?? undefined
+    }
+  }, [filter.statusId, filter.fromDate, filter.toDate])
+
   const query = useQuery({
     queryKey: orderKeys.list(filter),
     queryFn: async () => {
-      const response = await orderApi.getOrders(filter)
+      const response = await orderApi.getOrders(cleanedFilter)
       return response.data.data ?? []
     },
     staleTime: 30 * 1000
@@ -195,10 +205,10 @@ export function useCollectedOrder(
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
       await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
-      Toast.show('Thu tiền thành công', {
-        type: 'success',
-        placement: 'top'
-      })
+      // Toast.show('Thu tiền thành công', {
+      //   type: 'success',
+      //   placement: 'top'
+      // })
       router.replace({
         pathname: '/(protected)/(tabs)',
         params: {
@@ -267,6 +277,12 @@ export function useCancelOrder(options?: { onSuccess?: (data: any) => void; onEr
     },
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      router.replace({
+        pathname: '/(protected)/(tabs)',
+        params: {
+          filter: STATUS.ORDER.CANCELED
+        }
+      })
       options?.onSuccess?.(data)
       return data
     },

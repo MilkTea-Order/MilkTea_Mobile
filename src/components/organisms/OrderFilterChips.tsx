@@ -5,8 +5,8 @@ import {
   type OrderStatus
 } from '@/shared/constants/status'
 import { Ionicons } from '@expo/vector-icons'
-import React, { useMemo } from 'react'
-import { ScrollView, Text, TouchableOpacity } from 'react-native'
+import React, { useEffect, useMemo, useRef } from 'react'
+import { FlatList, Text, TouchableOpacity } from 'react-native'
 
 type Props = {
   selected: OrderStatus
@@ -14,14 +14,10 @@ type Props = {
   colors: any
 }
 
-type ChipOption = {
-  value: OrderStatus
-  label: string
-  icon: keyof typeof Ionicons.glyphMap
-}
-
 export const OrderFilterChips = ({ selected, onChange, colors }: Props) => {
-  const options: ChipOption[] = useMemo(
+  const listRef = useRef<FlatList>(null)
+
+  const options = useMemo(
     () =>
       ORDER_STATUS_OPTIONS.map((o) => ({
         value: o.value as OrderStatus,
@@ -31,18 +27,31 @@ export const OrderFilterChips = ({ selected, onChange, colors }: Props) => {
     []
   )
 
+  useEffect(() => {
+    const index = options.findIndex((o) => o.value === selected)
+    if (index !== -1) {
+      listRef.current?.scrollToIndex({
+        index,
+        viewPosition: 0.5,
+        animated: true
+      })
+    }
+  }, [selected, options])
+
   return (
-    <ScrollView
+    <FlatList
+      ref={listRef}
+      data={options}
       horizontal
       showsHorizontalScrollIndicator={false}
+      keyExtractor={(item) => String(item.value)}
       contentContainerStyle={{ gap: 10, paddingRight: 8, marginBottom: 15 }}
-    >
-      {options.map((opt) => {
-        const isActive = selected === opt.value
+      renderItem={({ item }) => {
+        const isActive = selected === item.value
+
         return (
           <TouchableOpacity
-            key={String(opt.value)}
-            onPress={() => onChange(opt.value)}
+            onPress={() => onChange(item.value)}
             className='flex-row items-center rounded-full px-5 py-2.5'
             style={{
               backgroundColor: isActive ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.2)',
@@ -56,13 +65,26 @@ export const OrderFilterChips = ({ selected, onChange, colors }: Props) => {
             }}
             activeOpacity={0.7}
           >
-            <Ionicons name={opt.icon} size={18} color={isActive ? colors.primary : 'white'} />
+            <Ionicons name={item.icon} size={18} color={isActive ? colors.primary : 'white'} />
+
             <Text className='ml-2 font-bold' style={{ color: isActive ? colors.primary : 'white' }}>
-              {opt.label}
+              {item.label}
             </Text>
           </TouchableOpacity>
         )
-      })}
-    </ScrollView>
+      }}
+      onScrollToIndexFailed={() => {
+        setTimeout(() => {
+          const index = options.findIndex((o) => o.value === selected)
+          if (index !== -1) {
+            listRef.current?.scrollToIndex({
+              index,
+              viewPosition: 0.5,
+              animated: true
+            })
+          }
+        }, 100)
+      }}
+    />
   )
 }
