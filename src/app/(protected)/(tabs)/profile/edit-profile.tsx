@@ -53,7 +53,6 @@ export default function EditProfileScreen() {
       </LinearGradient>
 
       {/* Form */}
-      {/* <EditProfileForm userProfile={userProfile} onSuccess={handleSuccess} /> */}
       <EditProfileForm userProfile={userProfile} />
     </View>
   )

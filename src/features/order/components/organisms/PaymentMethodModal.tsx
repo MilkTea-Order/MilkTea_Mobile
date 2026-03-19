@@ -21,7 +21,7 @@ const PAYMENT_METHODS: PaymentMethodOption[] = [
   },
   {
     id: 'BANK',
-    label: 'Ngân hàng',
+    label: 'Chuyển khoản',
     icon: 'card-outline',
     iconColor: '#3b82f6',
     bgColor: '#3b82f620'

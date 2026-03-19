@@ -8,7 +8,7 @@ import editProfileSchema, { EditProfileSchema } from '@/features/user/schema/edi
 import { User } from '@/features/user/types/user.type'
 import { GENDER_OPTIONS } from '@/shared/constants/other'
 import { useTheme } from '@/shared/hooks/useTheme'
-import { isChangedNumber, isChangedText, isRNFile } from '@/shared/utils/utils'
+import { isChangedNumber, isChangedText, isImageAsset, isRNFile } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Formik } from 'formik'
@@ -86,61 +86,70 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
       } else if (typeof err?.path === 'string' && typeof err?.message === 'string') {
         formErrors[err.path] = err.message
       }
+      console.log('formErrors:', formErrors)
       return formErrors
     }
   }
 
-  const handleSubmit = async (values: EditProfileSchema, setFieldError: (field: string, message: string) => void) => {
-    try {
-      const formData = new FormData()
-      if (isChangedText(values.fullName, initialValues.fullName)) {
-        formData.append('fullName', values.fullName ?? '')
-      }
-      if (isChangedNumber(values.genderID, initialValues.genderID)) {
-        formData.append('genderID', String(values.genderID ?? ''))
-      }
-      if (isChangedText(values.birthDay, initialValues.birthDay)) {
-        formData.append('birthDay', values.birthDay ?? '')
-      }
-      if (isChangedText(values.identityCode, initialValues.identityCode)) {
-        formData.append('identityCode', values.identityCode ?? '')
-      }
-      if (isChangedText(values.email, initialValues.email)) {
-        formData.append('email', values.email ?? '')
-      }
-      if (isChangedText(values.cellPhone, initialValues.cellPhone)) {
-        formData.append('cellPhone', values.cellPhone ?? '')
-      }
-      if (isChangedText(values.address ?? '', initialValues.address ?? '')) {
-        formData.append('address', values.address ?? '')
-      }
-      const bankNameChanged = isChangedText(values.bankName ?? '', initialValues.bankName ?? '')
-      const bankAccountNameChanged = isChangedText(values.bankAccountName ?? '', initialValues.bankAccountName ?? '')
-      const bankAccountNumberChanged = isChangedText(
-        values.bankAccountNumber ?? '',
-        initialValues.bankAccountNumber ?? ''
-      )
-      const bankQRCodeChanged = isRNFile(values.bankQRCode)
-      const bankInfoChanged = bankNameChanged || bankAccountNameChanged || bankAccountNumberChanged || bankQRCodeChanged
-
-      if (bankInfoChanged) {
-        formData.append('bankName', values.bankName ?? '')
-        formData.append('bankAccountName', values.bankAccountName ?? '')
-        formData.append('bankAccountNumber', values.bankAccountNumber ?? '')
-        if (bankQRCodeChanged && values.bankQRCode && isRNFile(values.bankQRCode)) {
-          formData.append('bankQRCode', {
-            uri: values.bankQRCode.uri,
-            name: values.bankQRCode.name,
-            type: values.bankQRCode.type
-          } as any)
-        }
-      }
-
-      await updateProfileMutation.mutateAsync(formData)
-      onSuccess?.()
-    } catch (error: any) {
-      handleUpdateProfileFormErrors(error, setFieldError)
+  const handleSubmit = async (
+    values: EditProfileSchema,
+    setFieldError: (field: string, message: string) => void,
+    resetForm: (nextState?: any) => void,
+    setFieldTouched: (field: string, touched?: boolean, shouldValidate?: boolean) => void
+  ) => {
+    const formData = new FormData()
+    if (isChangedText(values.fullName, initialValues.fullName)) {
+      formData.append('fullName', values.fullName ?? '')
     }
+    if (isChangedNumber(values.genderID, initialValues.genderID)) {
+      formData.append('genderID', String(values.genderID ?? ''))
+    }
+    if (isChangedText(values.birthDay, initialValues.birthDay)) {
+      formData.append('birthDay', values.birthDay ?? '')
+    }
+    if (isChangedText(values.identityCode, initialValues.identityCode)) {
+      formData.append('identityCode', values.identityCode ?? '')
+    }
+    if (isChangedText(values.email, initialValues.email)) {
+      formData.append('email', values.email ?? '')
+    }
+    if (isChangedText(values.cellPhone, initialValues.cellPhone)) {
+      formData.append('cellPhone', values.cellPhone ?? '')
+    }
+    if (isChangedText(values.address ?? '', initialValues.address ?? '')) {
+      formData.append('address', values.address ?? '')
+    }
+    const bankNameChanged = isChangedText(values.bankName ?? '', initialValues.bankName ?? '')
+    const bankAccountNameChanged = isChangedText(values.bankAccountName ?? '', initialValues.bankAccountName ?? '')
+    const bankAccountNumberChanged = isChangedText(
+      values.bankAccountNumber ?? '',
+      initialValues.bankAccountNumber ?? ''
+    )
+    const bankQRCodeChanged = typeof values.bankQRCode === 'object' && values.bankQRCode !== null
+    const bankInfoChanged = bankNameChanged || bankAccountNameChanged || bankAccountNumberChanged || bankQRCodeChanged
+
+    if (bankInfoChanged) {
+      formData.append('bankName', values.bankName ?? '')
+      formData.append('bankAccountName', values.bankAccountName ?? '')
+      formData.append('bankAccountNumber', values.bankAccountNumber ?? '')
+      if (bankQRCodeChanged && values.bankQRCode && isImageAsset(values.bankQRCode)) {
+        formData.append('bankQRCode', {
+          uri: values.bankQRCode.uri,
+          name: values.bankQRCode.fileName ?? 'qrCode.png',
+          type: values.bankQRCode.mimeType
+        } as any)
+      }
+    }
+    updateProfileMutation.mutate(formData, {
+      onSuccess: () => {
+        resetForm({ values })
+        onSuccess?.()
+      },
+      onError: (error) => {
+        resetForm({ values })
+        handleUpdateProfileFormErrors(error, setFieldError, setFieldTouched)
+      }
+    })
   }
 
   return (
@@ -151,7 +160,9 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
         validateOnMount={false}
         validateOnBlur
         validateOnChange={false}
-        onSubmit={(values, { setFieldError }) => handleSubmit(values, setFieldError)}
+        onSubmit={(values, { setFieldError, resetForm, setFieldTouched }) =>
+          handleSubmit(values, setFieldError, resetForm, setFieldTouched)
+        }
       >
         {({
           handleChange,

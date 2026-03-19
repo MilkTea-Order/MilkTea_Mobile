@@ -81,7 +81,6 @@ export function extractErrorDetails(
     .forEach((errorCode) => {
       const fieldValue = errorData[errorCode]
       const fieldNames = toFieldNames(fieldValue)
-      console.log(fieldNames)
 
       fieldNames.forEach((raw) => {
         const normalizedForMessage = String(raw).toLowerCase()

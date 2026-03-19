@@ -129,7 +129,7 @@ export default function HomeScreen() {
   const handlePaymnetSubmit = (paymentMethod: PaymentMethod) => {
     Alert.alert(
       'Xác nhận',
-      `Bạn có muốn thanh toán ${selectedOrder?.dinnerTable.name} với tổng tiền ${formatCurrencyVND(selectedOrder?.totalAmount ?? 0)}?`,
+      `Bạn muốn thanh toán ${selectedOrder?.dinnerTable.name} (${formatCurrencyVND(selectedOrder?.totalAmount ?? 0)})?`,
       [
         {
           text: 'Xác nhận',

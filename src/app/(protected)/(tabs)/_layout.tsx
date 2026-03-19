@@ -35,15 +35,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name='index'
         options={{
-          title: 'Trang chủ',
+          title: 'Quản lý',
           tabBarIcon: ({ color, size }) => <Ionicons name='home' size={size} color={color} />
         }}
       />
       <Tabs.Screen
-        name='explore'
+        name='report'
         options={{
-          title: 'Khám phá',
-          tabBarIcon: ({ color, size }) => <Ionicons name='search' size={size} color={color} />
+          title: 'Báo cáo',
+          tabBarIcon: ({ color, size }) => <Ionicons name='search-circle-outline' size={size} color={color} />
         }}
       />
       <Tabs.Screen

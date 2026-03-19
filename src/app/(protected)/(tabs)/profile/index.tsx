@@ -1,8 +1,14 @@
 import { ThemeSelector } from '@/components/molecules/ThemeSelector'
 import { useLogout } from '@/features/auth/hooks/useAuth'
+import { OrderFilter } from '@/features/order/api/order.api'
+import { useOrders } from '@/features/order/hooks/useOrder'
+import { Order } from '@/features/order/types/order.type'
 import { useUpdateProfile } from '@/features/user/hooks/useUpdateProfile'
 import { useMe } from '@/features/user/hooks/useUser'
+import { STATUS } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
+import { formatCurrencyVND } from '@/shared/utils/currency'
+import { getTodayDateRange } from '@/shared/utils/date.util'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -19,6 +25,12 @@ export default function ProfileScreen() {
   const { colors, gradients } = useTheme()
   const insets = useSafeAreaInsets()
   const scrollViewRef = useRef<ScrollView>(null)
+  const { fromDate, toDate } = getTodayDateRange()
+  const { orders, isLoading: isLoadingOrders } = useOrders({
+    statusId: STATUS.ORDER.NO_COLLECTED,
+    fromDate,
+    toDate
+  } as OrderFilter)
 
   useFocusEffect(
     useCallback(() => {
@@ -52,18 +64,28 @@ export default function ProfileScreen() {
       return
     }
 
-    try {
-      const formData = new FormData()
-      formData.append('avatar', {
-        uri: asset.uri,
-        type: asset.mimeType || 'image/jpeg',
-        name: asset.fileName || 'avatar.jpg'
-      } as any)
-      await updateProfileMutation.mutateAsync(formData)
-    } catch (error) {
-      console.error(error)
-      Alert.alert('Lỗi', 'Không thể cập nhật ảnh đại diện')
-    }
+    Alert.alert('Xác nhận', 'Bạn muốn cập nhật ảnh đại diện?', [
+      { text: 'Huỷ', style: 'cancel' },
+      {
+        text: 'Đồng ý',
+        onPress: () => {
+          const formData = new FormData()
+
+          formData.append('avatar', {
+            uri: asset.uri,
+            type: asset.mimeType || 'image/jpeg',
+            name: asset.fileName || 'avatar.jpg'
+          } as any)
+
+          updateProfileMutation.mutate(formData, {
+            onError: (error) => {
+              console.error(error)
+              Alert.alert('Lỗi', 'Không thể cập nhật ảnh đại diện')
+            }
+          })
+        }
+      }
+    ])
   }
 
   const handleLogout = () => {
@@ -198,22 +220,26 @@ export default function ProfileScreen() {
             <View className='flex-row gap-4 pt-4' style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
               <View className='flex-1 items-center'>
                 <Text className='text-2xl font-bold' style={{ color: colors.text }}>
-                  24
+                  {isLoadingOrders ? 'Đang tải' : orders ? (orders as Order[]).length : 0}
                 </Text>
                 <Text className='text-xs mt-1' style={{ color: colors.textSecondary }}>
-                  Đơn hôm nay
+                  Đơn đã thanh toán hôm nay
                 </Text>
               </View>
               <View className='w-px' style={{ backgroundColor: colors.border }} />
               <View className='flex-1 items-center'>
                 <Text className='text-2xl font-bold' style={{ color: colors.text }}>
-                  1.2M
+                  {isLoadingOrders
+                    ? 'Đang tải'
+                    : !orders
+                      ? 0
+                      : formatCurrencyVND((orders as Order[]).reduce((sum, item) => sum + (item.totalAmount ?? 0), 0))}
                 </Text>
                 <Text className='text-xs mt-1' style={{ color: colors.textSecondary }}>
                   Doanh thu
                 </Text>
               </View>
-              <View className='w-px' style={{ backgroundColor: colors.border }} />
+              {/* <View className='w-px' style={{ backgroundColor: colors.border }} />
               <View className='flex-1 items-center'>
                 <Text className='text-2xl font-bold' style={{ color: colors.text }}>
                   4.8
@@ -221,7 +247,7 @@ export default function ProfileScreen() {
                 <Text className='text-xs mt-1' style={{ color: colors.textSecondary }}>
                   Đánh giá
                 </Text>
-              </View>
+              </View> */}
             </View>
           </View>
         </View>

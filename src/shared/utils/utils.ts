@@ -1,5 +1,6 @@
 import { ITEM_HEIGHT } from '@/shared/constants/other'
 import { AxiosError, HttpStatusCode, isAxiosError } from 'axios'
+import { ImagePickerAsset } from 'expo-image-picker'
 import { ApiErrorResponse } from '../types/api.type'
 import { RNFile } from '../types/file.type'
 
@@ -36,6 +37,8 @@ export function isAxiosExpiredTokenError<UnauthorizedError>(error: unknown): err
 export const isRNFile = (value: unknown): value is RNFile => {
   return typeof value === 'object' && value !== null && 'uri' in value
 }
+
+export const isImageAsset = (v: any): v is ImagePickerAsset => typeof v === 'object' && v !== null && 'uri' in v
 
 export const isChangedText = (current?: string | null, initial?: string | null) => (current ?? '') !== (initial ?? '')
 

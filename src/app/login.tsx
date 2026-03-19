@@ -1,75 +1,88 @@
-import { AppLogo } from '@/components/molecules/AppLogo'
-import { LoginForm } from '@/components/organisms/LoginForm'
-import { useTheme } from '@/shared/hooks/useTheme'
-import { useApiConfigStore } from '@/shared/store/apiConfigStore'
 import React from 'react'
 import { Text, View } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from 'react-native-keyboard-controller'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import { useTheme } from '@/shared/hooks/useTheme'
+import { useApiConfigStore } from '@/shared/store/apiConfigStore'
+
+import { AnimatedLogoContainer } from '@/components/atoms/AnimatedLogoContainer'
+import { AppLogo } from '@/components/molecules/AppLogo'
+import { LoginBackground } from '@/components/molecules/LoginBackground'
+import { LoginForm } from '@/components/organisms/LoginForm'
 
 export default function LoginScreen() {
-  const { colors } = useTheme()
+  const { colors, isDark, gradients } = useTheme()
   const { isVisible } = useKeyboardState()
   const clearApi = useApiConfigStore((s) => s.clearApiBaseUrl)
 
+  const insets = useSafeAreaInsets()
+
   const handleForgotPassword = () => {
-    // TODO: Navigate to forgot password screen
     clearApi()
   }
 
   return (
-    <SafeAreaView className='flex-1' style={{ backgroundColor: colors.background }} edges={['top', 'bottom']}>
+    <View className='flex-1'>
+      {/* Background */}
+      <LoginBackground colors={colors} isDark={isDark} gradients={gradients} />
       <KeyboardAwareScrollView
         contentContainerStyle={{
           flexGrow: 1,
           paddingHorizontal: 24,
-          paddingBottom: 20
+          paddingTop: insets.top + 16,
+          paddingBottom: insets.bottom + 24
         }}
-        bottomOffset={20}
-        disableScrollOnKeyboardHide={true}
+        bottomOffset={30}
+        disableScrollOnKeyboardHide
         scrollEnabled={isVisible}
-        // Kéo scoll thì keybroad tắt
-        // keyboardDismissMode='on-drag'
-        // Quyết định cách chạm vào để rồi tự động tắt keyboard
-        // keyboardShouldPersistTaps='handled'
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps='handled'
       >
-        <View className='justify-center pt-8' style={{ flexGrow: 1 }}>
-          {/* Header Section */}
-          <View className='mb-6 items-center'>
-            <View className='relative mb-6'>
-              <View
-                className='absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-10'
-                style={{ backgroundColor: colors.primary }}
-              />
-              <View
-                className='absolute -bottom-2 -left-2 w-16 h-16 rounded-full opacity-10'
-                style={{ backgroundColor: colors.secondary }}
-              />
+        {/* Logo + Title */}
+        <View
+          className='items-center pb-6'
+          style={{
+            paddingTop: 8
+          }}
+        >
+          <AnimatedLogoContainer colors={colors} isDark={isDark}>
+            <AppLogo size='large' showText={false} />
+          </AnimatedLogoContainer>
 
-              <View
-                className='rounded-full p-4'
-                style={{
-                  backgroundColor: `${colors.primary}08`,
-                  borderWidth: 2,
-                  borderColor: `${colors.primary}20`
-                }}
-              >
-                <AppLogo size='large' showText={false} />
-              </View>
-            </View>
+          <Text className='text-3xl font-bold tracking-wide mt-4' style={{ color: colors.text }}>
+            Milk Tea
+          </Text>
 
-            <Text className='text-4xl font-bold mb-2' style={{ color: colors.text }}>
-              Chào mừng
-            </Text>
-            <Text className='text-lg' style={{ color: colors.textSecondary }}>
-              Đăng nhập để tiếp tục
-            </Text>
-          </View>
+          <Text className='text-xl font-semibold' style={{ color: colors.primary }}>
+            Shop
+          </Text>
+        </View>
 
-          {/* Login Form */}
+        {/* Form Card */}
+        <View
+          className='rounded-3xl p-6'
+          style={{
+            backgroundColor: isDark ? `${colors.surface}B3` : `${colors.surface}E6`,
+            borderWidth: 1,
+            borderColor: isDark ? `${colors.border}66` : `${colors.border}B3`,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 12 },
+            shadowOpacity: isDark ? 0.4 : 0.15,
+            shadowRadius: 30,
+            elevation: isDark ? 15 : 8
+          }}
+        >
           <LoginForm onForgotPassword={handleForgotPassword} />
         </View>
+
+        {/* Footer */}
+        <View className='mt-8 items-center'>
+          <Text className='text-xs' style={{ color: colors.textTertiary }}>
+            © {new Date().getFullYear()} Milk Tea Shop
+          </Text>
+        </View>
       </KeyboardAwareScrollView>
-    </SafeAreaView>
+    </View>
   )
 }

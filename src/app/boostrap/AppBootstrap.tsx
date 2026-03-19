@@ -4,6 +4,7 @@ import { useAuthStore } from '@/features/auth/store/auth.store'
 import AppProvider from '@/Providers/AppProvider'
 import { useApiConfigStore } from '@/shared/store/apiConfigStore'
 import { useEffect, useState } from 'react'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 export default function AppBootstrap() {
   const isHydratingAuthStore = useAuthStore((s) => s.isHydrating)
@@ -32,9 +33,9 @@ export default function AppBootstrap() {
   }
 
   return (
-    <>
+    <SafeAreaProvider>
       <AppProvider />
       <ApiConfigModal visible={showApiModal} onClose={() => setShowApiModal(false)} />
-    </>
+    </SafeAreaProvider>
   )
 }

@@ -36,10 +36,15 @@ export function useUpdateProfile() {
   })
 }
 
-export function handleUpdateProfileFormErrors(error: any, setFieldError: (field: string, message: string) => void) {
+export function handleUpdateProfileFormErrors(
+  error: any,
+  setFieldError: (field: string, message: string) => void,
+  setFieldTouched: (field: string, touched?: boolean, shouldValidate?: boolean) => void
+) {
   if (error.fieldErrors) {
     error.fieldErrors.forEach((fieldError: { field: string; message: string }) => {
       setFieldError(fieldError.field, fieldError.message)
+      setFieldTouched(fieldError.field, true, false)
     })
   }
 }

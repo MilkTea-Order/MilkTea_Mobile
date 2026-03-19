@@ -1,15 +1,12 @@
 import { useTheme } from '@/shared/hooks/useTheme'
-import { RNFile } from '@/shared/types/file.type'
 import { Ionicons } from '@expo/vector-icons'
-import * as DocumentPicker from 'expo-document-picker'
+import * as ImagePicker from 'expo-image-picker'
 import React, { useState } from 'react'
 import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native'
-
 interface FormFilePickerProps {
   label?: string
-  // value có thể là URL từ BE (string) hoặc file user chọn (UploadFile) hoặc null
-  value?: RNFile | string | null
-  onChange: (file: RNFile | null) => void
+  value?: ImagePicker.ImagePickerAsset | string | null
+  onChange: (file: ImagePicker.ImagePickerAsset | null) => void
   error?: string
   touched?: boolean
   required?: boolean
@@ -25,44 +22,38 @@ export function FormFilePicker({
   touched,
   required = false,
   disabled = false,
-  placeholder = 'Tải lên tệp'
+  placeholder = 'Tải ảnh lên'
 }: FormFilePickerProps) {
   const { colors } = useTheme()
   const hasError = touched && error
   const [isPicking, setIsPicking] = useState(false)
-  const isUrl = typeof value === 'string'
-  const previewUri = isUrl ? value : value?.uri
+  const previewUri = typeof value === 'string' ? value : value?.uri
 
   const pickFile = async () => {
     if (disabled || isPicking) return
     try {
       setIsPicking(true)
-      const result = await DocumentPicker.getDocumentAsync({
-        copyToCacheDirectory: true,
-        multiple: false,
-        type: '*/*'
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8
       })
-
-      if (result.canceled) return
-      const asset = result.assets?.[0]
-      if (!asset) return
-
-      onChange({
-        uri: asset.uri,
-        name: asset.name ?? 'upload',
-        type: asset.mimeType ?? 'application/octet-stream'
-      })
+      if (result.canceled || !result.assets[0]) return
+      const asset = result.assets[0]
+      onChange(asset)
+      // onChange({
+      //   uri: asset.uri,
+      //   name: asset.fileName,
+      //   type: asset.mimeType,
+      //   size: asset.fileSize
+      // })
     } catch (err) {
       console.error(err)
     } finally {
       setIsPicking(false)
     }
   }
-
-  // const clear = () => {
-  //   if (disabled) return
-  //   onChange(null)
-  // }
 
   return (
     <View className='mb-4'>

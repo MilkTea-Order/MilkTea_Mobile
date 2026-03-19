@@ -151,7 +151,6 @@ export function usePayment(
         queryKey: orderKeys.list({ statusId: STATUS.ORDER.UNPAID } as OrderFilter)
       })
 
-      Toast.show('Thanh toán thành công')
       router.replace({
         pathname: '/(protected)/(tabs)',
         params: {
@@ -243,7 +242,7 @@ export function useCollectedOrder(
               availableQuantity: number
             }[])
           : []
-        const finalMessage = `${e0041.message}\n${materialMessages.map((m) => `${m.materialName} (cần ${m.requiredQuantity}, còn ${m.availableQuantity})`).join('\n')}`
+        const finalMessage = `${e0041.message}\n${materialMessages.map((m) => `${m.materialName} (Xuất ${m.requiredQuantity}, Tồn ${m.availableQuantity})`).join('\n')}`
 
         Alert.alert('Lỗi', finalMessage, [
           {
