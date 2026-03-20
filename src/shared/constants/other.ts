@@ -19,4 +19,10 @@ export const ORDER_FLOW_MODE = {
 
 export type OrderFlowMode = (typeof ORDER_FLOW_MODE)[keyof typeof ORDER_FLOW_MODE]
 
-export type PaymentMethod = 'CASH' | 'BANK' | 'SHOPEE' | 'GRAB'
+export const PAYMENT_METHOD = {
+  CASH: 'CASH' as const,
+  BANK: 'BANK' as const,
+  SHOPEE: 'SHOPEE' as const,
+  GRAB: 'GRAB' as const
+} as const
+export type PaymentMethod = (typeof PAYMENT_METHOD)[keyof typeof PAYMENT_METHOD]

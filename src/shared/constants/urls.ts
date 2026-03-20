@@ -18,5 +18,8 @@ export const URL = {
   MENU_GROUP_TYPES_AVAILABLE: 'catalog/menus/groups/available',
   MENUS_GROUP_BASE: 'catalog/menus/groups',
   MENUS_AVAILABLE_BASE: 'catalog/menus/items/available',
-  MENU_SIZES_BASE: 'catalog/menus'
+  MENU_SIZES_BASE: 'catalog/menus',
+
+  MATERIAL_INVENTORY_REPORT: 'inventory/report',
+  REVENUE_REPORT: 'orders/report'
 } as const

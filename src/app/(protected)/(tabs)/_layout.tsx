@@ -43,7 +43,7 @@ export default function TabLayout() {
         name='report'
         options={{
           title: 'Báo cáo',
-          tabBarIcon: ({ color, size }) => <Ionicons name='search-circle-outline' size={size} color={color} />
+          tabBarIcon: ({ color, size }) => <Ionicons name='analytics-outline' size={size} color={color} />
         }}
       />
       <Tabs.Screen

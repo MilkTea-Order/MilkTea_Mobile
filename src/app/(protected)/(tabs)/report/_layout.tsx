@@ -15,23 +15,20 @@ export default function ReportStackLayout() {
       }}
     >
       <Stack.Screen name='index' />
-    </Stack>
-  )
-}
-
-{
-  /* <Stack.Screen
-        name='change-password'
+      <Stack.Screen
+        name='inventory-report'
         options={{
           presentation: 'card',
           animation: 'slide_from_right'
         }}
       />
       <Stack.Screen
-        name='edit-profile'
+        name='revenue-report'
         options={{
           presentation: 'card',
           animation: 'slide_from_right'
         }}
-      /> */
+      />
+    </Stack>
+  )
 }

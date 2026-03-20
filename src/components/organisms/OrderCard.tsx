@@ -27,9 +27,6 @@ export const OrderCard = ({
   onPressPayment,
   onPressTransferTable
 }: Props) => {
-  // const imgTable =
-  //   order.status.id === Number(STATUS.ORDER.UNPAID) ? order.dinnerTable.usingImg : order.dinnerTable.emptyImg
-
   const imgTable = order.dinnerTable.usingImg
   return (
     <TouchableOpacity
