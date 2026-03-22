@@ -236,7 +236,7 @@ export default function ProfileScreen() {
                       : formatCurrencyVND((orders as Order[]).reduce((sum, item) => sum + (item.totalAmount ?? 0), 0))}
                 </Text>
                 <Text className='text-xs mt-1' style={{ color: colors.textSecondary }}>
-                  Doanh thu
+                  Tổng doanh thu
                 </Text>
               </View>
               {/* <View className='w-px' style={{ backgroundColor: colors.border }} />

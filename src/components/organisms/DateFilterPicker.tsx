@@ -9,14 +9,34 @@ type DateRange = {
   toDate: string | null
 }
 
+export type DateFilterPickerSize = 'sm' | 'md' | 'lg'
+
 type Props = {
   value: DateRange
   onChange: (range: DateRange) => void
   disabled?: boolean
   colors: any
+  size?: DateFilterPickerSize
 }
 
-export const DateFilterPicker = ({ value, onChange, disabled = false, colors }: Props) => {
+const SIZE_CONFIG: Record<
+  DateFilterPickerSize,
+  {
+    buttonPaddingX: number
+    buttonPaddingY: number
+    textSize: string
+    buttonGap: number
+    iconSize: number
+    applyPaddingX: number
+  }
+> = {
+  sm: { buttonPaddingX: 8, buttonPaddingY: 4, textSize: 'text-[10px]', buttonGap: 1, iconSize: 11, applyPaddingX: 10 },
+  md: { buttonPaddingX: 10, buttonPaddingY: 6, textSize: 'text-xs', buttonGap: 2, iconSize: 12, applyPaddingX: 12 },
+  lg: { buttonPaddingX: 14, buttonPaddingY: 8, textSize: 'text-sm', buttonGap: 3, iconSize: 14, applyPaddingX: 16 }
+}
+
+export const DateFilterPicker = ({ value, onChange, disabled = false, colors, size = 'md' }: Props) => {
+  const config = SIZE_CONFIG[size]
   const [showFromPicker, setShowFromPicker] = useState(false)
   const [showToPicker, setShowToPicker] = useState(false)
 
@@ -90,19 +110,21 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors }: 
   }
 
   return (
-    <View className='flex-row items-center gap-2'>
+    <View className='flex-row items-center' style={{ gap: config.buttonGap }}>
       <TouchableOpacity
         onPress={handleTodayPress}
         disabled={disabled}
-        className='px-2.5 py-1 rounded-lg border-2'
+        className='rounded-lg border-2'
         style={{
+          paddingHorizontal: config.buttonPaddingX + 2,
+          paddingVertical: config.buttonPaddingY,
           borderColor: isTodayPressed ? colors.primary : colors.border,
           backgroundColor: isTodayPressed ? colors.primary : 'transparent'
         }}
         activeOpacity={0.7}
       >
         <Text
-          className={`text-xs font-semibold`}
+          className={`${config.textSize} font-semibold`}
           style={{
             color: isTodayPressed ? '#fff' : colors.textSecondary
           }}
@@ -112,9 +134,11 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors }: 
       </TouchableOpacity>
 
       <View
-        className={`w-[1px] h-5 mx-1`}
+        className={`w-[1px]`}
         style={{
-          backgroundColor: colors.border
+          height: config.iconSize + 4,
+          backgroundColor: colors.border,
+          marginHorizontal: config.buttonGap
         }}
       />
 
@@ -124,20 +148,21 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors }: 
           setShowFromPicker(true)
         }}
         disabled={disabled}
-        className='px-2 py-1 rounded-lg border'
+        className='rounded-lg border'
         style={{
-          // borderColor: colors.border,
+          paddingHorizontal: config.buttonPaddingX,
+          paddingVertical: config.buttonPaddingY,
           borderColor: !isTodayPressed ? colors.primary : colors.border,
           backgroundColor: colors.card
         }}
         activeOpacity={0.7}
       >
-        <Text className='text-xs font-medium' style={{ color: colors.text }}>
+        <Text className={`${config.textSize} font-medium`} style={{ color: colors.text }}>
           {formatDisplayDate(dayjs(tempFromDate), 'DD/MM/YYYY')}
         </Text>
       </TouchableOpacity>
 
-      <Text className='text-xs' style={{ color: colors.textSecondary }}>
+      <Text className={`${config.textSize}`} style={{ color: colors.textSecondary }}>
         -
       </Text>
 
@@ -147,15 +172,16 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors }: 
           setShowToPicker(true)
         }}
         disabled={disabled}
-        className='px-2 py-1 rounded-lg border'
+        className='rounded-lg border'
         style={{
-          // borderColor: colors.border,
+          paddingHorizontal: config.buttonPaddingX,
+          paddingVertical: config.buttonPaddingY,
           borderColor: !isTodayPressed ? colors.primary : colors.border,
           backgroundColor: colors.card
         }}
         activeOpacity={0.7}
       >
-        <Text className='text-xs font-medium' style={{ color: colors.text }}>
+        <Text className={`${config.textSize} font-medium`} style={{ color: colors.text }}>
           {formatDisplayDate(dayjs(tempToDate), 'DD/MM/YYYY')}
         </Text>
       </TouchableOpacity>
@@ -164,13 +190,18 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors }: 
       <TouchableOpacity
         onPress={handleApply}
         disabled={disabled || isTodayPressed}
-        className='px-3 py-1 rounded-lg'
+        className='rounded-lg'
         style={{
+          paddingHorizontal: config.applyPaddingX,
+          paddingVertical: config.buttonPaddingY,
           backgroundColor: isTodayPressed ? colors.border : colors.primary
         }}
         activeOpacity={0.7}
       >
-        <Text className='text-xs font-semibold' style={{ color: isTodayPressed ? colors.textSecondary : '#fff' }}>
+        <Text
+          className={`${config.textSize} font-semibold`}
+          style={{ color: isTodayPressed ? colors.textSecondary : '#fff' }}
+        >
           Áp dụng
         </Text>
       </TouchableOpacity>

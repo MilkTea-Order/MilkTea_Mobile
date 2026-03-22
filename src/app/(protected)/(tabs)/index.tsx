@@ -88,16 +88,22 @@ export default function HomeScreen() {
   }, [refetch])
 
   const handleChangeStatus = (status: OrderStatus) => {
-    if ([STATUS.ORDER.NO_COLLECTED, STATUS.ORDER.CANCELED, STATUS.ORDER.PAID].includes(status as any)) {
-      const { fromDate, toDate } = getTodayDateRange()
-      setOrderFilter({
-        fromDate,
-        toDate,
-        statusId: status
-      })
-    } else {
-      setOrderFilter({ fromDate: null, toDate: null, statusId: status })
-    }
+    // if ([STATUS.ORDER.NO_COLLECTED, STATUS.ORDER.CANCELED, STATUS.ORDER.PAID].includes(status as any)) {
+    //   const { fromDate, toDate } = getTodayDateRange()
+    //   setOrderFilter({
+    //     fromDate,
+    //     toDate,
+    //     statusId: status
+    //   })
+    // } else {
+    //   setOrderFilter({ fromDate: null, toDate: null, statusId: status })
+    // }
+    router.replace({
+      pathname: '/(protected)/(tabs)',
+      params: {
+        filter: status
+      }
+    })
   }
 
   // Handle payment action

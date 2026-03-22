@@ -1,5 +1,5 @@
 import { PaymentMethod } from '@/shared/constants/other'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { reportApi } from '../api/report.api'
 
 export const reportKeys = {
@@ -36,7 +36,9 @@ export function useRevenueReport(filter: { paymentMethod: PaymentMethod; fromDat
       const response = await reportApi.getRevenueReport(filter)
       return response.data.data ?? []
     },
-    staleTime: 30 * 1000
+    // refetchOnWindowFocus: true,
+    staleTime: 30 * 1000,
+    placeholderData: keepPreviousData
   })
 
   return {

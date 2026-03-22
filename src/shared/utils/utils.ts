@@ -74,3 +74,10 @@ export const formatCurrency = (amount: number) => {
     currency: 'VND'
   }).format(amount)
 }
+
+export const formatNumber = (value: number, decimals = 2) => {
+  return new Intl.NumberFormat('vi-VN', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  }).format(value)
+}

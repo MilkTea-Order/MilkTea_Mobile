@@ -1,12 +1,12 @@
 import { CollapsibleSection } from '@/components/molecules/CollapsibleSection'
 import { useInventoryReport } from '@/features/report/hooks/useReport'
 import { useTheme } from '@/shared/hooks/useTheme'
-import { formatCurrency } from '@/shared/utils/utils'
+import { formatCurrency, formatNumber } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import React, { useMemo } from 'react'
-import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, FlatList, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function InventoryScreen() {
@@ -17,6 +17,16 @@ export default function InventoryScreen() {
   const { inventory = [], isLoading, isFetching, isRefetching, refetch } = useInventoryReport()
 
   const data = useMemo(() => inventory, [inventory])
+
+  // ✅ define width dùng chung
+  const COL = {
+    name: 130,
+    small: 80,
+    large: 80,
+    price: 110,
+    total: 100,
+    status: 90
+  }
 
   if (isLoading) {
     return (
@@ -60,9 +70,8 @@ export default function InventoryScreen() {
         contentContainerStyle={{
           padding: 16,
           paddingBottom: 100,
-          flexGrow: 1 // 🔥 để empty center đẹp
+          flexGrow: 1
         }}
-        // 🔥 Pull to refresh
         refreshing={isRefetching}
         onRefresh={refetch}
         ListEmptyComponent={
@@ -79,7 +88,6 @@ export default function InventoryScreen() {
               <ActivityIndicator size='small' color={colors.primary} />
             ) : (
               <>
-                {/* ICON */}
                 <View
                   style={{
                     width: 64,
@@ -94,7 +102,6 @@ export default function InventoryScreen() {
                   <Ionicons name='cube-outline' size={28} color={colors.primary} />
                 </View>
 
-                {/* TITLE */}
                 <Text
                   style={{
                     fontSize: 16,
@@ -106,7 +113,6 @@ export default function InventoryScreen() {
                   Chưa có dữ liệu
                 </Text>
 
-                {/* DESCRIPTION */}
                 <Text
                   style={{
                     fontSize: 13,
@@ -123,92 +129,138 @@ export default function InventoryScreen() {
           </View>
         }
         renderItem={({ item: group }) => (
-          <CollapsibleSection title={group.name} icon='cube-outline'>
-            <View className='gap-3'>
-              {group.materialItems.map((item) => {
-                const total = item.unitMin.quantity * item.latestPriceImport
+          <CollapsibleSection title={group.name} icon='cube-outline' defaultExpanded>
+            <ScrollView horizontal showsHorizontalScrollIndicator contentContainerStyle={{ paddingRight: 8 }}>
+              <View>
+                {/* 🔥 TABLE HEADER (FIXED ALIGN) */}
+                <View
+                  className='flex-row items-center rounded-xl pl-3 py-2.5 mb-2'
+                  style={{ backgroundColor: colors.primary + '12' }}
+                >
+                  <View style={{ width: COL.name }}>
+                    <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                      Nguyên liệu
+                    </Text>
+                  </View>
 
-                return (
-                  <View
-                    key={item.id}
-                    className='rounded-2xl p-4'
-                    style={{
-                      backgroundColor: colors.background,
-                      borderWidth: 1,
-                      borderColor: colors.border
-                    }}
-                  >
-                    {/* NAME */}
-                    <View className='flex-row justify-between items-center mb-2'>
-                      <View className='flex-1 gap-2 flex-row items-center'>
-                        <Text className='font-bold text-base' style={{ color: colors.text }}>
+                  <View style={{ width: COL.small, alignItems: 'flex-end' }}>
+                    <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                      Tồn (nhỏ)
+                    </Text>
+                  </View>
+
+                  <View style={{ width: COL.large, alignItems: 'flex-end' }}>
+                    <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                      Tồn (lớn)
+                    </Text>
+                  </View>
+
+                  <View style={{ width: COL.price, alignItems: 'flex-end' }}>
+                    <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                      Giá nhập
+                    </Text>
+                  </View>
+
+                  <View style={{ width: COL.total, alignItems: 'flex-end', paddingRight: 20 }}>
+                    <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                      Tạm tính
+                    </Text>
+                  </View>
+
+                  <View style={{ width: COL.status, alignItems: 'center' }}>
+                    <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                      Trạng thái
+                    </Text>
+                  </View>
+                </View>
+
+                {/* 🔥 DATA */}
+                {group.materialItems.map((item, index) => {
+                  const total = item.unitMin.quantity * item.latestPriceImport
+
+                  return (
+                    <View
+                      key={item.id}
+                      className='flex-row items-center rounded-xl px-3 py-3 mb-1.5'
+                      style={{
+                        backgroundColor: index % 2 === 0 ? colors.background : colors.card,
+                        borderWidth: 1,
+                        borderColor: colors.border
+                      }}
+                    >
+                      {/* NAME */}
+                      <View style={{ width: COL.name }}>
+                        <Text className='font-bold text-sm' style={{ color: colors.text }} numberOfLines={1}>
                           {item.name}
                         </Text>
+                        <Text className='text-xs mt-0.5' style={{ color: colors.textSecondary }} numberOfLines={1}>
+                          {formatNumber(item.styleQuantity, 0)} {item.unitMin.name}/{item.unitMax.name}
+                        </Text>
+                      </View>
 
+                      {/* UNIT MIN */}
+                      <View style={{ width: COL.small, alignItems: 'flex-end' }}>
+                        <Text className='text-sm font-medium' style={{ color: colors.text }}>
+                          {formatNumber(item.unitMin.quantity)}
+                        </Text>
                         <Text className='text-xs' style={{ color: colors.textSecondary }}>
-                          {item.styleQuantity} {item.unitMin.name}/{item.unitMax.name}
+                          {item.unitMin.name}
+                        </Text>
+                      </View>
+
+                      {/* UNIT MAX */}
+                      <View style={{ width: COL.large, alignItems: 'flex-end' }}>
+                        <Text className='text-sm font-medium' style={{ color: colors.text }}>
+                          {formatNumber(item.unitMax.quantity)}
+                        </Text>
+                        <Text className='text-xs' style={{ color: colors.textSecondary }}>
+                          {item.unitMax.name}
+                        </Text>
+                      </View>
+
+                      {/* PRICE */}
+                      <View style={{ width: COL.price, alignItems: 'flex-end' }}>
+                        <Text className='text-sm font-medium' style={{ color: colors.text }}>
+                          {formatCurrency(item.latestPriceImport)}
+                        </Text>
+                      </View>
+
+                      {/* TOTAL */}
+                      <View style={{ width: COL.total, alignItems: 'flex-end', paddingRight: 20 }}>
+                        <Text className='text-sm font-bold' style={{ color: colors.primary }}>
+                          {formatCurrency(total)}
                         </Text>
                       </View>
 
                       {/* STATUS */}
-                      <View
-                        className='px-2 py-1 rounded-lg'
-                        style={{
-                          backgroundColor: item.status.id === 1 ? colors.primary + '20' : '#99999920'
-                        }}
-                      >
-                        <Text
-                          className='text-xs font-semibold'
+                      <View style={{ width: COL.status, alignItems: 'center' }}>
+                        <View
+                          className='px-2 py-1 rounded-lg'
                           style={{
-                            color: item.status.id === 1 ? colors.primary : '#999'
+                            backgroundColor: item.status.id === 1 ? colors.primary + '20' : '#99999920'
                           }}
                         >
-                          {item.status.name}
-                        </Text>
+                          <Text
+                            className='text-xs font-semibold'
+                            style={{
+                              color: item.status.id === 1 ? colors.primary : '#999'
+                            }}
+                            numberOfLines={1}
+                          >
+                            {item.status.name}
+                          </Text>
+                        </View>
                       </View>
                     </View>
-
-                    {/* DATA */}
-                    <View className='flex-row justify-between mb-1'>
-                      <Text style={{ color: colors.textSecondary }}>Tồn (nhỏ)</Text>
-                      <Text style={{ color: colors.text }}>
-                        {item.unitMin.quantity.toFixed(2)} {item.unitMin.name}
-                      </Text>
-                    </View>
-
-                    <View className='flex-row justify-between mb-1'>
-                      <Text style={{ color: colors.textSecondary }}>Tồn (lớn)</Text>
-                      <Text style={{ color: colors.text }}>
-                        {item.unitMax.quantity.toFixed(2)} {item.unitMax.name}
-                      </Text>
-                    </View>
-
-                    <View className='flex-row justify-between mb-1'>
-                      <Text style={{ color: colors.textSecondary }}>Giá nhập gần nhất</Text>
-                      <Text style={{ color: colors.text }}>{formatCurrency(item.latestPriceImport)}</Text>
-                    </View>
-
-                    {/* TOTAL */}
-                    <View
-                      className='flex-row justify-between mt-2 pt-2 border-t'
-                      style={{ borderColor: colors.border }}
-                    >
-                      <Text className='font-semibold' style={{ color: colors.text }}>
-                        Tạm tính
-                      </Text>
-                      <Text className='font-bold' style={{ color: colors.primary }}>
-                        {formatCurrency(total)}
-                      </Text>
-                    </View>
-                  </View>
-                )
-              })}
-            </View>
+                  )
+                })}
+              </View>
+            </ScrollView>
           </CollapsibleSection>
         )}
       />
 
-      {/* 🔵 Background fetching (chỉ khi có data) */}
+      {/* loading nhỏ góc */}
       {isFetching && !isRefetching && data.length > 0 && (
         <View
           style={{

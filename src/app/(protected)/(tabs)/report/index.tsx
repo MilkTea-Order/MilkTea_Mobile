@@ -45,14 +45,6 @@ export default function ReportScreen() {
       </LinearGradient>
 
       <ScrollView className='flex-1' contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
-        {/* Intro */}
-        <View className='px-6 mt-6'>
-          <Text className='text-lg font-bold mb-2' style={{ color: colors.text }}>
-            Tổng quan
-          </Text>
-          <Text style={{ color: colors.textSecondary }}>Theo dõi tình hình kinh doanh và tồn kho của cửa hàng</Text>
-        </View>
-
         {/* Report Cards */}
         <View className='px-6 mt-6 gap-4'>
           {reportItems.map((item, index) => (
