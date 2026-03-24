@@ -58,6 +58,12 @@ export default function RevenueReportScreen() {
   //     }))
   // }, [revenue?.orders])
 
+  // const onPressOrderCard = (orderId: number) => {
+  //   router.push({
+  //     pathname: '/(protected)/order/detail',
+  //     params: { orderId: orderId, review: true }
+  //   })
+  // }
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
       <Header title='Báo cáo doanh thu' />
@@ -73,13 +79,13 @@ export default function RevenueReportScreen() {
             }))
           }
           colors={colors}
-          size='md'
+          size='lg'
         />
         {/* 🔥 ORDER STATUS FILTER */}
         <View className='mt-3'>
-          <Text className='text-xs font-medium mb-2' style={{ color: colors.textSecondary }}>
+          {/* <Text className='text-xs font-medium mb-2' style={{ color: colors.textSecondary }}>
             Trạng thái
-          </Text>
+          </Text> */}
           <View className='flex-row gap-2'>
             {ORDER_STATUS_OPTIONS.filter(
               (x) => x.value === STATUS.ORDER.NO_COLLECTED || x.value === STATUS.ORDER.PAID
@@ -107,9 +113,9 @@ export default function RevenueReportScreen() {
         </View>
         {/* 🔥 PAYMENT METHOD FILTER */}
         <View className='mt-3'>
-          <Text className='text-xs font-medium mb-2' style={{ color: colors.textSecondary }}>
+          {/* <Text className='text-xs font-medium mb-2' style={{ color: colors.textSecondary }}>
             Phương thức
-          </Text>
+          </Text> */}
           <View className='flex-row gap-2'>
             {(
               [
@@ -170,7 +176,7 @@ export default function RevenueReportScreen() {
           paddingHorizontal: 16,
           paddingBottom: 100,
           flexGrow: 1,
-          marginTop: 10
+          marginTop: 5
         }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
         ListEmptyComponent={
@@ -185,7 +191,7 @@ export default function RevenueReportScreen() {
             <View className='flex-1 justify-center items-center mt-20'>
               <Ionicons name='receipt-outline' size={50} color={colors.textSecondary} />
               <Text className='mt-3 text-base' style={{ color: colors.textSecondary }}>
-                Không có đơn hàng
+                Không có dữ liệu
               </Text>
             </View>
           )
@@ -198,7 +204,7 @@ export default function RevenueReportScreen() {
               headerContent={
                 <View className='flex-row items-center'>
                   <View className='flex-row flex-1'>
-                    <View className='rounded-xl p-2 mr-3' style={{ backgroundColor: `${colors.primary}20` }}>
+                    <View className='rounded-xl mr-3' style={{ backgroundColor: `${colors.primary}20` }}>
                       <Ionicons name='calendar-outline' size={20} color={colors.primary} />
                     </View>
                     <View>
@@ -216,7 +222,7 @@ export default function RevenueReportScreen() {
                 </View>
               }
             >
-              <View className='px-4 pb-3'>
+              <View className='px-3 pb-3'>
                 {group.orders.map((order: Order, orderIndex: number) => (
                   <OrderCardV2 key={order.orderID} order={order} isLast={orderIndex === group.orders.length - 1} />
                 ))}

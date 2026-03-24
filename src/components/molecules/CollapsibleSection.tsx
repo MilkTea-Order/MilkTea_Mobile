@@ -57,7 +57,7 @@ export function CollapsibleSection({
 
   return (
     <View
-      className='mb-3 rounded-2xl overflow-hidden'
+      className='mb-2 rounded-2xl overflow-hidden'
       style={{
         backgroundColor: colors.card,
         borderWidth: 1.5,
@@ -71,7 +71,7 @@ export function CollapsibleSection({
     >
       <TouchableOpacity
         onPress={toggleSection}
-        className='flex-row items-center justify-between px-5 py-4'
+        className='flex-row items-center justify-between px-5 py-2'
         activeOpacity={0.8}
         style={{
           backgroundColor: isExpanded ? `${colors.primary}08` : 'transparent'
@@ -108,7 +108,7 @@ export function CollapsibleSection({
       </TouchableOpacity>
 
       {isExpanded && (
-        <View className='px-5 py-4' style={{ backgroundColor: colors.card }}>
+        <View className='px-3' style={{ backgroundColor: colors.card }}>
           {children}
         </View>
       )}

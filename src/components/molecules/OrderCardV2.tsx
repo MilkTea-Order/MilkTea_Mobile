@@ -1,5 +1,4 @@
 import { Order } from '@/features/order/types/order.type'
-import { STATUS } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { formatDisplayDate } from '@/shared/utils/date.util'
@@ -15,13 +14,12 @@ interface OrderCardV2Props {
 
 export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props) {
   const { colors } = useTheme()
-
   const tableImg = order.dinnerTable.usingImg
-  const isUnpaid = order.status.id === parseInt(STATUS.ORDER.UNPAID, 10)
+  // const isUnpaid = order.status.id === parseInt(STATUS.ORDER.UNPAID, 10)
 
   return (
     <View
-      className={`rounded-xl overflow-hidden mb-2 ${!isLast ? 'border-b' : ''}`}
+      className={`rounded-xl overflow-hidden mb-1 ${!isLast ? 'border-b' : ''}`}
       style={{
         backgroundColor: colors.background,
         borderColor: colors.border
@@ -29,9 +27,9 @@ export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props
     >
       {/* Row header — always visible */}
       <TouchableOpacity onPress={onPress} activeOpacity={0.75}>
-        <View className='flex-row items-center px-3 py-3'>
+        <View className='flex-row items-center px-3 py-[1px]'>
           {/* Thumbnail */}
-          <View className='rounded-xl overflow-hidden mr-3' style={{ width: 52, height: 52 }}>
+          <View className='rounded-xl overflow-hidden mr-3' style={{ width: 40, height: 40 }}>
             {tableImg ? (
               <Image source={{ uri: tableImg }} style={{ width: '100%', height: '100%' }} resizeMode='cover' />
             ) : (
@@ -51,14 +49,14 @@ export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props
                 {order.dinnerTable.name}
               </Text>
               {/* Status badge */}
-              <View
+              {/* <View
                 className='px-1.5 py-0.5 rounded-full'
                 style={{ backgroundColor: isUnpaid ? '#f59e0b25' : `${colors.primary}25` }}
               >
                 <Text className='text-[9px] font-semibold' style={{ color: isUnpaid ? '#f59e0b' : colors.primary }}>
                   {order.status.name}
                 </Text>
-              </View>
+              </View> */}
             </View>
             <View className='flex-row items-center gap-3'>
               <View className='flex-row items-center gap-1'>
