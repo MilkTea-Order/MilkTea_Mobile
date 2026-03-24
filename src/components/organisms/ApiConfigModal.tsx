@@ -2,23 +2,28 @@ import { useTheme } from '@/shared/hooks/useTheme'
 import { useApiConfigStore } from '@/shared/store/apiConfigStore'
 import { Ionicons } from '@expo/vector-icons'
 import { useState } from 'react'
-import { Modal, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 interface ApiConfigModalProps {
   visible: boolean
   onClose?: () => void
+  canClose?: boolean
 }
 
-export function ApiConfigModal({ visible, onClose }: ApiConfigModalProps) {
+export function ApiConfigModal({ visible, onClose, canClose = false }: ApiConfigModalProps) {
   const { colors } = useTheme()
   const insets = useSafeAreaInsets()
   const setApiBaseUrl = useApiConfigStore((s) => s.setApiBaseUrl)
 
   const [apiUrlInput, setApiUrlInput] = useState('')
 
-  const handleSaveApiUrl = async () => {
+  const handleSaveApiUrl = () => {
     const url = apiUrlInput.trim()
+    if (!url) {
+      Alert.alert('Thông báo', 'Vui lòng nhập API Base URL')
+      return
+    }
     setApiBaseUrl(url)
     onClose?.()
   }
@@ -26,16 +31,20 @@ export function ApiConfigModal({ visible, onClose }: ApiConfigModalProps) {
   return (
     <Modal visible={visible} animationType='slide' presentationStyle='pageSheet' onRequestClose={() => {}}>
       <View className='flex-1' style={{ backgroundColor: colors.background }}>
-        <View
-          style={{
-            paddingTop: insets.top + 24,
-            paddingHorizontal: 20,
-            paddingBottom: 24
-          }}
-        >
-          <Text className='text-xl font-bold text-center' style={{ color: colors.text }}>
-            Cấu hình API
-          </Text>
+        <View className='flex-row items-center px-4 pb-4' style={{ paddingTop: insets.top + 16 }}>
+          {canClose ? (
+            <TouchableOpacity onPress={onClose} className='p-2 -ml-2'>
+              <Ionicons name='close' size={24} color={colors.text} />
+            </TouchableOpacity>
+          ) : (
+            <View className='w-8' />
+          )}
+          <View className='flex-1'>
+            <Text className='text-xl font-bold text-center' style={{ color: colors.text }}>
+              Cấu hình API
+            </Text>
+          </View>
+          <View className='w-8' />
         </View>
 
         <View className='flex-1 px-6'>
@@ -73,8 +82,11 @@ export function ApiConfigModal({ visible, onClose }: ApiConfigModalProps) {
           <TouchableOpacity
             onPress={handleSaveApiUrl}
             activeOpacity={0.7}
+            disabled={!apiUrlInput.trim()}
             className='rounded-lg py-4 items-center'
-            style={{ backgroundColor: colors.primary }}
+            style={{
+              backgroundColor: apiUrlInput.trim() ? colors.primary : `${colors.primary}50`
+            }}
           >
             <Text className='text-white font-bold text-lg'>Lưu & Tiếp tục</Text>
           </TouchableOpacity>

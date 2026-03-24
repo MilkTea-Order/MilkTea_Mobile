@@ -1,7 +1,7 @@
 import { useTheme } from '@/shared/hooks/useTheme'
 import { Ionicons } from '@expo/vector-icons'
-import React, { useEffect, useRef, useState } from 'react'
-import { Pressable, Text, TouchableOpacity, View } from 'react-native'
+import React, { useState } from 'react'
+import { Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 export interface SelectOption {
   label: string
@@ -13,6 +13,7 @@ interface FormSelectFieldProps {
   value: number | string
   options: SelectOption[]
   onChange: (value: number | string) => void
+  onPress?: () => void
   error?: string
   touched?: boolean
   required?: boolean
@@ -26,6 +27,7 @@ export function FormSelectField({
   value,
   options,
   onChange,
+  onPress,
   error,
   touched,
   required = false,
@@ -35,19 +37,9 @@ export function FormSelectField({
 }: FormSelectFieldProps) {
   const { colors } = useTheme()
   const [open, setOpen] = useState(false)
-  const listRef = useRef<View | null>(null)
+
   const hasError = touched && error
-
   const selectedOption = options.find((opt) => opt.value === value)
-
-  // Đóng dropdown khi mất focus (nhấn ngoài)
-  useEffect(() => {
-    if (!open) return
-    const timer = setTimeout(() => {
-      // No-op placeholder: có thể gắn listener PanResponder nếu cần
-    }, 0)
-    return () => clearTimeout(timer)
-  }, [open])
 
   return (
     <View className='mb-4'>
@@ -56,117 +48,111 @@ export function FormSelectField({
           <Ionicons
             name={icon}
             size={16}
-            color={hasError ? colors.error || '#ef4444' : colors.textSecondary}
+            color={hasError ? colors.error : colors.textSecondary}
             style={{ marginRight: 6 }}
           />
           <Text className='text-sm font-semibold' style={{ color: colors.text }}>
             {label}
-            {required && <Text style={{ color: colors.error || '#ef4444' }}> *</Text>}
+            {required && <Text style={{ color: colors.error }}> *</Text>}
           </Text>
         </View>
       )}
 
-      {/* Container relative để dropdown overlay, không đẩy layout */}
+      {/* container relative */}
       <View style={{ position: 'relative' }}>
         <TouchableOpacity
-          onPress={() => !disabled && setOpen((v) => !v)}
-          disabled={disabled}
-          activeOpacity={disabled ? 1 : 0.7}
+          onPress={() => {
+            if (disabled) return
+
+            onPress?.()
+            setOpen((v) => !v)
+          }}
+          activeOpacity={0.7}
         >
           <View
             className='flex-row items-center justify-between px-4 py-3'
             style={{
-              backgroundColor: disabled ? colors.surface : colors.card,
+              backgroundColor: colors.card,
               borderWidth: 1,
-              borderColor: hasError ? colors.error || '#ef4444' : colors.border,
-              opacity: disabled ? 0.6 : 1,
+              borderColor: hasError ? colors.error : colors.border,
               borderRadius: 10
             }}
           >
             <Text
               style={{
-                color: selectedOption ? colors.text : colors.textTertiary,
-                fontSize: 14,
-                fontWeight: '500'
+                color: selectedOption ? colors.text : colors.textTertiary
               }}
             >
               {selectedOption?.label || placeholder}
             </Text>
-            <Ionicons
-              name='chevron-down'
-              size={16}
-              color={colors.textSecondary}
-              style={{ transform: [{ rotate: open ? '180deg' : '0deg' }] }}
-            />
+
+            <Ionicons name='chevron-down' size={16} color={colors.textSecondary} />
           </View>
         </TouchableOpacity>
 
-        {/* Inline dropdown list (overlay giống select tag, không đẩy layout) */}
-        {open && !disabled && (
-          <View
-            ref={listRef}
-            className='overflow-hidden'
-            style={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              right: 0,
-              marginTop: 2,
-              borderWidth: 1,
-              borderColor: hasError ? colors.error || '#ef4444' : colors.border,
-              backgroundColor: colors.card,
-              borderRadius: 10,
-              maxHeight: 220,
-              zIndex: 20
-            }}
-          >
-            {options.map((option, idx) => {
-              const isSelected = option.value === value
-              const isLast = idx === options.length - 1
-              return (
-                <Pressable
-                  key={String(option.value)}
-                  onPress={() => {
-                    onChange(option.value)
-                    setOpen(false)
-                  }}
-                  android_ripple={{ color: `${colors.primary}08` }}
-                  style={{
-                    paddingHorizontal: 12,
-                    paddingVertical: 10,
-                    backgroundColor: isSelected ? `${colors.primary}10` : 'transparent',
-                    borderBottomWidth: isLast ? 0 : 1,
-                    borderBottomColor: colors.border,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: colors.text,
-                      fontSize: 14,
-                      fontWeight: isSelected ? '600' : '400'
-                    }}
-                  >
-                    {option.label}
-                  </Text>
-                  {isSelected && <Ionicons name='checkmark' size={18} color={colors.primary} />}
-                </Pressable>
-              )
-            })}
-          </View>
+        {/* DROPDOWN */}
+        {open && (
+          <>
+            {/* overlay để click ngoài */}
+            <Pressable
+              style={{
+                position: 'absolute',
+                top: -1000,
+                bottom: -1000,
+                left: -1000,
+                right: -1000,
+                zIndex: 1
+              }}
+              onPress={() => setOpen(false)}
+            />
+
+            {/* dropdown */}
+            <View
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                marginTop: 4,
+                backgroundColor: colors.card,
+                borderRadius: 10,
+                borderWidth: 1,
+                borderColor: colors.border,
+                maxHeight: 200,
+                zIndex: 2
+              }}
+            >
+              <ScrollView keyboardShouldPersistTaps='handled'>
+                {options.map((item) => {
+                  const isSelected = item.value === value
+
+                  return (
+                    <Pressable
+                      key={String(item.value)}
+                      onPress={() => {
+                        onChange(item.value)
+                        setOpen(false)
+                      }}
+                      style={{
+                        padding: 12,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        backgroundColor: isSelected ? `${colors.primary}15` : 'transparent'
+                      }}
+                    >
+                      <Text style={{ color: colors.text }}>{item.label}</Text>
+
+                      {isSelected && <Ionicons name='checkmark' size={18} color={colors.primary} />}
+                    </Pressable>
+                  )
+                })}
+              </ScrollView>
+            </View>
+          </>
         )}
       </View>
 
-      {hasError && (
-        <View className='flex-row items-center mt-1.5 ml-1'>
-          <Ionicons name='alert-circle' size={14} color={colors.error || '#ef4444'} />
-          <Text className='text-xs ml-1.5' style={{ color: colors.error || '#ef4444' }}>
-            {error}
-          </Text>
-        </View>
-      )}
+      {hasError && <Text style={{ color: colors.error, fontSize: 12 }}>{error}</Text>}
     </View>
   )
 }

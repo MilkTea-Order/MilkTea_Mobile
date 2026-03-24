@@ -1,4 +1,5 @@
 import { URL } from '@/shared/constants/urls'
+import { ApiResponse } from '@/shared/types/api.type'
 import http from '@/shared/utils/http'
 import { AxiosResponse } from 'axios'
 import {
@@ -6,12 +7,16 @@ import {
   ChangePasswordPayload,
   MeApiResponse,
   UpdateProfileApiResponse,
-  UpdateProfilePayload
+  UpdateProfilePayload,
+  User
 } from '../types/user.type'
 
 export const userApi = {
   getMe(): Promise<AxiosResponse<MeApiResponse>> {
     return http.get<MeApiResponse>(URL.USER_ME)
+  },
+  getUserList(): Promise<AxiosResponse<ApiResponse<{ users: User[] }>>> {
+    return http.get<ApiResponse<{ users: User[] }>>(URL.USER_LIST)
   },
 
   changePassword(body: ChangePasswordPayload): Promise<AxiosResponse<ChangePasswordApiResponse>> {

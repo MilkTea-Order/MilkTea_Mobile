@@ -1,9 +1,11 @@
 import dayjs, { Dayjs } from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 import utc from 'dayjs/plugin/utc'
 
 dayjs.extend(customParseFormat)
 dayjs.extend(utc)
+dayjs.extend(isSameOrBefore)
 
 /**
  * Normalize date format tokens to Dayjs-compatible format.
@@ -46,64 +48,46 @@ export const formatDisplayDate = (date?: Dayjs | null, format: string = 'DD/MM/Y
   return date ? date.format(format) : ''
 }
 
-/**
- * Convert a Dayjs date to an ISO 8601 DATE-ONLY string computed in UTC.
- *
- * Result format:
- *   YYYY-MM-DD
- *
- * Examples:
- * - 2025-01-01
- *
- * @param date - Dayjs instance
- * @returns ISO 8601 date-only string (UTC-based)
- */
 export const formatUTCDate = (date: Dayjs): string => {
   return date.utc().format('YYYY-MM-DD')
 }
+export const generateYears = (range: number = 100, maxDate: Dayjs = dayjs()): number[] => {
+  const currentYear = maxDate.year()
 
-/**
- * Generate a list of valid day numbers for a given month and year.
- *
- * @param year - Full year (e.g. 2025)
- * @param month - Month number (1 - 12)
- * @returns Array of day numbers (e.g. [1, 2, 3, ..., 31])
- */
-export const generateDays = (year: number, month: number): number[] => {
-  const daysInMonth = new Date(year, month, 0).getDate()
-  return Array.from({ length: daysInMonth }, (_, i) => i + 1)
+  return Array.from({ length: range }, (_, i) => currentYear - i).sort((a, b) => a - b)
 }
 
-/**
- * Generate a list of years counting backwards from the current UTC year.
- *
- * @param range - Number of years to generate (default: 100)
- * @returns Array of years (e.g. [2025, 2024, 2023, ...])
- */
-export const generateYears = (range: number = 100): number[] => {
-  const currentYear = new Date().getUTCFullYear()
-  return Array.from({ length: range }, (_, i) => currentYear - i)
-}
-
-/**
- * Generate a list of months for select / picker components.
- *
- * Note:
- * - value is ZERO-BASED month index (0 = January, 11 = December)
- *
- * @returns Array of month objects
- */
-export const generateMonths = (): { value: number; label: string }[] => {
-  return Array.from({ length: 12 }, (_, i) => ({
+export const generateMonths = (year: number, maxDate: Dayjs = dayjs()): { value: number; label: string }[] => {
+  const months = Array.from({ length: 12 }, (_, i) => ({
     value: i,
     label: `Tháng ${i + 1}`
   }))
+
+  const isCurrentYear = year === maxDate.year()
+
+  if (!isCurrentYear) return months
+
+  return months.slice(0, maxDate.month() + 1)
+}
+export const generateDays = (
+  year: number,
+  month: number, // 1-12
+  maxDate: Dayjs = dayjs()
+): number[] => {
+  const daysInMonth = new Date(year, month, 0).getDate()
+
+  const allDays = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+
+  const isCurrentYear = year === maxDate.year()
+  const isCurrentMonth = month === maxDate.month() + 1
+
+  if (isCurrentYear && isCurrentMonth) {
+    return allDays.slice(0, maxDate.date())
+  }
+
+  return allDays
 }
 
-/**
- * Get today's date range based on local timezone
- * and convert to UTC ISO strings for backend query.
- */
 export const getTodayDateRange = (): { fromDate: string; toDate: string } => {
   const now = dayjs()
 
@@ -116,12 +100,6 @@ export const getTodayDateRange = (): { fromDate: string; toDate: string } => {
   }
 }
 
-/**
- * Convert a Date object to ISO string (UTC).
- *
- * @param date - Date object
- * @returns ISO string
- */
 export const toISOString = (date: Date): string => {
   return dayjs(date).toISOString()
 }
@@ -135,4 +113,20 @@ export const toISOString = (date: Date): string => {
 export const isToday = (dateString: string | null): boolean => {
   if (!dateString) return false
   return dayjs(dateString).isSame(dayjs(), 'day')
+}
+
+/**
+ * Check if a date string is NOT in the future (local timezone).
+ *
+ * @param dateStr - Date string (e.g. "24/03/2026")
+ * @param format - Format (default: "DD/MM/YYYY")
+ * @returns true if valid (<= today), false if future/invalid
+ */
+export const isNotFutureDate = (dateStr: string, format: string = 'DD/MM/YYYY'): boolean => {
+  const input = parseStringToDate(dateStr, format)
+  if (!input) return false
+
+  const today = dayjs()
+
+  return input.isSame(today, 'day') || input.isBefore(today, 'day')
 }

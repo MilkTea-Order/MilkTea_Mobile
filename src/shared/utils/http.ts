@@ -23,11 +23,11 @@ class Http {
           config.baseURL = useApiConfigStore.getState().resolveApiBaseUrl() ?? ''
         }
         const { tokens } = useAuthStore.getState()
-
+        config.headers = config.headers ?? {}
         if (tokens?.accessToken) {
-          config.headers = config.headers ?? {}
           config.headers.Authorization = `Bearer ${tokens.accessToken}`
         }
+        config.headers['X-TimeZone'] = Intl.DateTimeFormat().resolvedOptions().timeZone
 
         if ((config.url === URL.LOGOUT || config.url?.endsWith(URL.LOGOUT)) && tokens?.refreshToken) {
           config.data = {

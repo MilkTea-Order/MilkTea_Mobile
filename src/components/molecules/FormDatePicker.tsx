@@ -34,7 +34,9 @@ export function FormDatePicker({
   }, [value])
 
   const open = () => !disabled && setShowPicker(true)
-  const close = () => setShowPicker(false)
+  const close = () => {
+    setShowPicker(false)
+  }
 
   return (
     <View className='mb-4'>

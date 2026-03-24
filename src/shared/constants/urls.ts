@@ -4,11 +4,11 @@ export const URL = {
   LOGIN: 'auth/login',
   LOGOUT: 'auth/logout',
   REFRESH_TOKEN: 'auth/refresh-token',
-  UPDATE_PHONE: 'auth/update-phone',
-  ME: 'auth/me',
-  USER_ME: 'user/me',
-  CHANGE_PASSWORD: 'user/update-password',
-  UPDATE_PROFILE: 'user/me/update-profile',
+
+  USER_LIST: 'users',
+  USER_ME: 'users/me',
+  CHANGE_PASSWORD: 'users/me/update-password',
+  UPDATE_PROFILE: 'users/me/update-profile',
 
   ORDERS: 'orders',
 
@@ -21,5 +21,7 @@ export const URL = {
   MENU_SIZES_BASE: 'catalog/menus',
 
   MATERIAL_INVENTORY_REPORT: 'inventory/report',
-  REVENUE_REPORT: 'orders/report'
+  REVENUE_REPORT: 'orders/report',
+
+  FINANCE: 'finance'
 } as const

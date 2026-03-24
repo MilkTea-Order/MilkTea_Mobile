@@ -17,11 +17,31 @@ function withFloatingButton<Props extends object>(
       setContainer({ width, height })
     }
 
+    // return (
+    //   <View style={{ flex: 1 }} onLayout={handleLayout}>
+    //     <WrappedComponent {...props} />
+
+    //     {container.width > 0 && <FloatingButton container={container}>{renderFloatingButton(props)}</FloatingButton>}
+    //   </View>
+    // )
     return (
       <View style={{ flex: 1 }} onLayout={handleLayout}>
         <WrappedComponent {...props} />
 
-        {container.width > 0 && <FloatingButton container={container}>{renderFloatingButton(props)}</FloatingButton>}
+        {container.width > 0 && (
+          <View
+            pointerEvents='box-none'
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0
+            }}
+          >
+            <FloatingButton container={container}>{renderFloatingButton(props)}</FloatingButton>
+          </View>
+        )}
       </View>
     )
   }

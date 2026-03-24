@@ -1,3 +1,4 @@
+import { PaymentMethod } from '@/shared/constants/other'
 import { Size, Status } from '@/shared/types/common.type'
 import { Menu } from './menu.type'
 import { DinnerTable } from './table.type'
@@ -8,6 +9,9 @@ export interface Order {
   orderBy: number
   createdDate: string
   createdBy: number
+  paymentMethod: PaymentMethod | null
+  paymentDate: string | null
+  paymentBy: number | null
   note: string | null
   totalAmount: number
   dinnerTable: DinnerTable

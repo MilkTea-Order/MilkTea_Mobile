@@ -1,8 +1,15 @@
 import { Order } from '@/features/order/types/order.type'
 
 export interface RevenueReport {
-  orders: Order[]
+  // orders: Order[]
+  dates: RevenueReportDate[]
   statics: RevenueStatics
+}
+
+export interface RevenueReportDate {
+  date: string
+  totalAmount: number
+  orders: Order[]
 }
 
 export interface RevenueStatics {

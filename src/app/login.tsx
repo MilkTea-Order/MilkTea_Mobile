@@ -1,20 +1,23 @@
-import React from 'react'
-import { Text, View } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import React, { useState } from 'react'
+import { Text, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-
-import { useTheme } from '@/shared/hooks/useTheme'
-import { useApiConfigStore } from '@/shared/store/apiConfigStore'
 
 import { AnimatedLogoContainer } from '@/components/atoms/AnimatedLogoContainer'
 import { AppLogo } from '@/components/molecules/AppLogo'
 import { LoginBackground } from '@/components/molecules/LoginBackground'
+import { ApiConfigModal } from '@/components/organisms/ApiConfigModal'
 import { LoginForm } from '@/components/organisms/LoginForm'
+import { useTheme } from '@/shared/hooks/useTheme'
+import { useApiConfigStore } from '@/shared/store/apiConfigStore'
 
 export default function LoginScreen() {
   const { colors, isDark, gradients } = useTheme()
   const { isVisible } = useKeyboardState()
   const clearApi = useApiConfigStore((s) => s.clearApiBaseUrl)
+
+  const [showApiModal, setShowApiModal] = useState(false)
 
   const insets = useSafeAreaInsets()
 
@@ -26,6 +29,21 @@ export default function LoginScreen() {
     <View className='flex-1'>
       {/* Background */}
       <LoginBackground colors={colors} isDark={isDark} gradients={gradients} />
+
+      {/* 🔧 API Config Button */}
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => setShowApiModal(true)}
+        className='absolute z-10 rounded-full p-2'
+        style={{
+          top: insets.top + 12,
+          right: 16,
+          backgroundColor: isDark ? `${colors.surface}CC` : `${colors.card}CC`
+        }}
+      >
+        <Ionicons name='settings-outline' size={22} color={colors.textSecondary} />
+      </TouchableOpacity>
+
       <KeyboardAwareScrollView
         contentContainerStyle={{
           flexGrow: 1,
@@ -40,12 +58,7 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps='handled'
       >
         {/* Logo + Title */}
-        <View
-          className='items-center pb-6'
-          style={{
-            paddingTop: 8
-          }}
-        >
+        <View className='items-center pb-6' style={{ paddingTop: 8 }}>
           <AnimatedLogoContainer colors={colors} isDark={isDark}>
             <AppLogo size='large' showText={false} />
           </AnimatedLogoContainer>
@@ -83,6 +96,8 @@ export default function LoginScreen() {
           </Text>
         </View>
       </KeyboardAwareScrollView>
+
+      <ApiConfigModal visible={showApiModal} onClose={() => setShowApiModal(false)} canClose={true} />
     </View>
   )
 }

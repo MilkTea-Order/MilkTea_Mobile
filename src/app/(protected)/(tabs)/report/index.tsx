@@ -27,6 +27,14 @@ export default function ReportScreen() {
       iconType: 'material',
       color: '#22c55e',
       onPress: () => router.push('/report/revenue-report')
+    },
+    {
+      title: 'Quản lý thu chi',
+      description: 'Theo dõi tiền chi, tiền thu theo ngày',
+      icon: 'wallet-outline',
+      iconType: 'ion',
+      color: '#f59e0b',
+      onPress: () => router.push('/report/expense-report')
     }
   ]
 

@@ -3,8 +3,9 @@ import { STATUS } from '@/shared/constants/status'
 import type { ThemeVariant } from '@/shared/constants/theme'
 import { statusColors } from '@/shared/constants/theme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
-import { formatDateTime } from '@/shared/utils/utils'
+import { formatDisplayDate } from '@/shared/utils/date.util'
 import { Ionicons } from '@expo/vector-icons'
+import dayjs from 'dayjs'
 import React from 'react'
 import { Image, Text, TouchableOpacity, View } from 'react-native'
 
@@ -68,7 +69,8 @@ export const OrderCard = ({
         <View className='flex-row items-center mb-1.5'>
           <Ionicons name='time-outline' size={10} color={colors.textSecondary} style={{ marginRight: 3 }} />
           <Text className='text-[9px]' style={{ color: colors.textSecondary }} numberOfLines={1}>
-            {formatDateTime(order.orderDate)}
+            {formatDisplayDate(dayjs(order.orderDate), 'HH:mm DD/MM/YYYY')}
+            {/* {order.orderID} */}
           </Text>
         </View>
 

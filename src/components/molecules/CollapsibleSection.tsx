@@ -8,17 +8,19 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 interface CollapsibleSectionProps {
-  title: string
+  title?: string
   children: React.ReactNode
   defaultExpanded?: boolean
   icon?: keyof typeof Ionicons.glyphMap
+  headerContent?: React.ReactNode
 }
 
 export function CollapsibleSection({
   title,
   children,
   defaultExpanded = false,
-  icon = 'chevron-down'
+  icon = 'chevron-down',
+  headerContent
 }: CollapsibleSectionProps) {
   const { colors } = useTheme()
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
@@ -76,19 +78,25 @@ export function CollapsibleSection({
         }}
       >
         <View className='flex-row items-center flex-1'>
-          {icon && (
-            <View
-              className='rounded-xl p-2.5 mr-3'
-              style={{
-                backgroundColor: `${colors.primary}20`
-              }}
-            >
-              <Ionicons name={icon} size={22} color={colors.primary} />
-            </View>
+          {headerContent ? (
+            headerContent
+          ) : (
+            <>
+              {icon && (
+                <View
+                  className='rounded-xl p-2.5 mr-3'
+                  style={{
+                    backgroundColor: `${colors.primary}20`
+                  }}
+                >
+                  <Ionicons name={icon} size={22} color={colors.primary} />
+                </View>
+              )}
+              <Text className='text-lg font-bold flex-1' style={{ color: colors.text }}>
+                {title}
+              </Text>
+            </>
           )}
-          <Text className='text-lg font-bold flex-1' style={{ color: colors.text }}>
-            {title}
-          </Text>
         </View>
         <Animated.View
           style={{

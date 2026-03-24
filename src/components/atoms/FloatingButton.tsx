@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 
@@ -52,6 +52,13 @@ export default function FloatingButton({ children, onPress, container }: Floatin
     transform: [{ translateX: x.value }, { translateY: y.value }]
   }))
 
+  useEffect(() => {
+    if (width && height) {
+      x.value = width - SIZE - MARGIN
+      y.value = height - SIZE - MARGIN
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [width, height])
   return (
     <GestureDetector gesture={gesture}>
       <Animated.View style={animatedStyle}>{children}</Animated.View>
