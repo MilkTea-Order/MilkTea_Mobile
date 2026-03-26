@@ -71,7 +71,7 @@ export function CollapsibleSection({
     >
       <TouchableOpacity
         onPress={toggleSection}
-        className='flex-row items-center justify-between px-5 py-2'
+        className='flex-row items-center justify-between px-5 py-1'
         activeOpacity={0.8}
         style={{
           backgroundColor: isExpanded ? `${colors.primary}08` : 'transparent'
@@ -89,7 +89,7 @@ export function CollapsibleSection({
                     backgroundColor: `${colors.primary}20`
                   }}
                 >
-                  <Ionicons name={icon} size={22} color={colors.primary} />
+                  <Ionicons name={icon} size={18} color={colors.primary} />
                 </View>
               )}
               <Text className='text-lg font-bold flex-1' style={{ color: colors.text }}>

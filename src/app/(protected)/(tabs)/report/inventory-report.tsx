@@ -5,8 +5,8 @@ import { formatCurrency, formatNumber } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import React, { useMemo } from 'react'
-import { ActivityIndicator, FlatList, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import React, { useMemo, useRef } from 'react'
+import { ActivityIndicator, FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function InventoryScreen() {
@@ -17,6 +17,7 @@ export default function InventoryScreen() {
   const { inventory = [], isLoading, isFetching, isRefetching, refetch } = useInventoryReport()
 
   const data = useMemo(() => inventory, [inventory])
+  const searchInputRef = useRef<TextInput>(null)
 
   const COL = {
     name: 120,
@@ -60,6 +61,31 @@ export default function InventoryScreen() {
 
         <Text className='text-white text-2xl font-bold text-center mt-2'>Báo cáo tồn kho</Text>
       </LinearGradient>
+
+      {/* SEARCH INPUT */}
+      <View className='px-4 pt-4 pb-2'>
+        <View
+          className='flex-row items-center rounded-2xl px-4 py-3'
+          style={{
+            backgroundColor: colors.card,
+            borderWidth: 1,
+            borderColor: colors.border
+          }}
+        >
+          <TouchableOpacity onPress={() => searchInputRef.current?.focus()}>
+            <Ionicons name='search' size={20} color={colors.textSecondary} />
+          </TouchableOpacity>
+          <View className='flex-1 ml-3'>
+            <TextInput
+              ref={searchInputRef}
+              className='text-base'
+              style={{ color: colors.textSecondary }}
+              placeholder='Tìm kiếm nguyên liệu...'
+              placeholderTextColor={colors.textSecondary}
+            />
+          </View>
+        </View>
+      </View>
 
       {/* CONTENT */}
       <FlatList
@@ -144,13 +170,13 @@ export default function InventoryScreen() {
 
                   <View style={{ width: COL.small, alignItems: 'center' }}>
                     <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
-                      Tồn
+                      S.Lg tồn
                     </Text>
                   </View>
 
                   <View style={{ width: COL.unit, alignItems: 'center' }}>
                     <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
-                      Đơn vị
+                      ĐVT
                     </Text>
                   </View>
 
@@ -180,7 +206,7 @@ export default function InventoryScreen() {
                   return (
                     <View
                       key={item.id}
-                      className='flex-row items-center rounded-xl px-3 py-3 mb-1.5'
+                      className='flex-row items-center rounded-xl px-2 py-1 mb-1.5'
                       style={{
                         backgroundColor: index % 2 === 0 ? colors.background : colors.card,
                         borderWidth: 1,

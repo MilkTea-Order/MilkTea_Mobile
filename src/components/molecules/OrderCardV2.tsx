@@ -19,7 +19,7 @@ export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props
 
   return (
     <View
-      className={`rounded-xl overflow-hidden mb-1 ${!isLast ? 'border-b' : ''}`}
+      className={`flex justify-center rounded-xl overflow-hidden mb-1 ${!isLast ? 'border-b' : ''}`}
       style={{
         backgroundColor: colors.background,
         borderColor: colors.border
@@ -34,7 +34,7 @@ export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props
       >
         <View className='flex-row items-center px-3 py-[1px]'>
           {/* Thumbnail */}
-          <View className='rounded-xl overflow-hidden mr-3' style={{ width: 40, height: 40 }}>
+          <View className='rounded-xl overflow-hidden mr-3 p-1' style={{ width: 40, height: 40 }}>
             {tableImg ? (
               <Image source={{ uri: tableImg }} style={{ width: '100%', height: '100%' }} resizeMode='cover' />
             ) : (
@@ -53,15 +53,6 @@ export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props
               <Text className='text-sm font-bold' style={{ color: colors.text }} numberOfLines={1}>
                 {order.dinnerTable.name}
               </Text>
-              {/* Status badge */}
-              {/* <View
-                className='px-1.5 py-0.5 rounded-full'
-                style={{ backgroundColor: isUnpaid ? '#f59e0b25' : `${colors.primary}25` }}
-              >
-                <Text className='text-[9px] font-semibold' style={{ color: isUnpaid ? '#f59e0b' : colors.primary }}>
-                  {order.status.name}
-                </Text>
-              </View> */}
             </View>
             <View className='flex-row items-center gap-3'>
               <View className='flex-row items-center gap-1'>
@@ -72,11 +63,6 @@ export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props
                 </Text>
               </View>
             </View>
-            {/* Item names preview
-            <Text className='text-[10px] mt-1' style={{ color: colors.textSecondary }} numberOfLines={1}>
-              {firstItem?.name ?? '—'}
-              {itemCount > 1 ? ` +${itemCount - 1} món` : ''}
-            </Text> */}
           </View>
 
           {/* Amount + chevron */}

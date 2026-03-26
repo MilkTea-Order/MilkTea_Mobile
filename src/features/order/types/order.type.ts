@@ -1,4 +1,4 @@
-import { PaymentMethod } from '@/shared/constants/other'
+import { PaymentMethod } from '@/shared/constants/payment'
 import { Size, Status } from '@/shared/types/common.type'
 import { Menu } from './menu.type'
 import { DinnerTable } from './table.type'

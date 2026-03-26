@@ -95,10 +95,11 @@ export default function RevenueReportScreen() {
         <FlatList
           data={PAYMENT_METHODS}
           keyExtractor={(item) => item.id}
+          // numColumns={4}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
-            gap: 10,
+            gap: 8,
             marginTop: 12
           }}
           renderItem={({ item: method }) => {
@@ -114,13 +115,15 @@ export default function RevenueReportScreen() {
 
             return (
               <TouchableOpacity
-                className='flex-row items-center gap-2 p-3'
+                className='flex items-center px-2 py-1'
                 activeOpacity={0.8}
                 onPress={() => {
                   setFilter((prev) => ({ ...prev, paymentMethod: method.id }))
                   listRef.current?.scrollToOffset({ offset: 0, animated: true })
                 }}
                 style={{
+                  // flexBasis: '22%',
+                  // maxWidth: '22%',
                   borderRadius: 14,
                   backgroundColor: isActive ? method.iconColor : `${method.iconColor}10`,
                   borderWidth: 1,

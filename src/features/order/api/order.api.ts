@@ -1,4 +1,4 @@
-import { PaymentMethod } from '@/shared/constants/other'
+import { PaymentMethod } from '@/shared/constants/payment'
 import { OrderStatus } from '@/shared/constants/status'
 import { URL } from '@/shared/constants/urls'
 import { ApiResponse } from '@/shared/types/api.type'
