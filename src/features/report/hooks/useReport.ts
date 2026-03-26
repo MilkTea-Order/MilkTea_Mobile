@@ -1,4 +1,4 @@
-import { PaymentMethod } from '@/shared/constants/other'
+import { PaymentMethod } from '@/shared/constants/payment'
 import { OrderStatus } from '@/shared/constants/status'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert } from 'react-native'

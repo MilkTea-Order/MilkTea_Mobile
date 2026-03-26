@@ -18,11 +18,10 @@ export default function InventoryScreen() {
 
   const data = useMemo(() => inventory, [inventory])
 
-  // ✅ define width dùng chung
   const COL = {
-    name: 130,
+    name: 120,
     small: 80,
-    large: 80,
+    unit: 70,
     price: 110,
     total: 100,
     status: 90
@@ -143,25 +142,25 @@ export default function InventoryScreen() {
                     </Text>
                   </View>
 
-                  <View style={{ width: COL.small, alignItems: 'flex-end' }}>
+                  <View style={{ width: COL.small, alignItems: 'center' }}>
                     <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
-                      Tồn (nhỏ)
+                      Tồn
                     </Text>
                   </View>
 
-                  <View style={{ width: COL.large, alignItems: 'flex-end' }}>
+                  <View style={{ width: COL.unit, alignItems: 'center' }}>
                     <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
-                      Tồn (lớn)
+                      Đơn vị
                     </Text>
                   </View>
 
-                  <View style={{ width: COL.price, alignItems: 'flex-end' }}>
+                  <View style={{ width: COL.price, alignItems: 'center' }}>
                     <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
                       Giá nhập
                     </Text>
                   </View>
 
-                  <View style={{ width: COL.total, alignItems: 'flex-end', paddingRight: 20 }}>
+                  <View style={{ width: COL.total, alignItems: 'center', paddingRight: 20 }}>
                     <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
                       Tạm tính
                     </Text>
@@ -193,40 +192,43 @@ export default function InventoryScreen() {
                         <Text className='font-bold text-sm' style={{ color: colors.text }} numberOfLines={1}>
                           {item.name}
                         </Text>
-                        <Text className='text-xs mt-0.5' style={{ color: colors.textSecondary }} numberOfLines={1}>
+                        {/* <Text className='text-xs mt-0.5' style={{ color: colors.textSecondary }} numberOfLines={1}>
                           {formatNumber(item.styleQuantity, 0)} {item.unitMin.name}/{item.unitMax.name}
-                        </Text>
+                        </Text> */}
                       </View>
 
                       {/* UNIT MIN */}
-                      <View style={{ width: COL.small, alignItems: 'flex-end' }}>
+                      <View style={{ width: COL.small, alignItems: 'center' }}>
                         <Text className='text-sm font-medium' style={{ color: colors.text }}>
                           {formatNumber(item.unitMin.quantity)}
                         </Text>
-                        <Text className='text-xs' style={{ color: colors.textSecondary }}>
+                        {/* <Text className='text-xs' style={{ color: colors.textSecondary }}>
                           {item.unitMin.name}
-                        </Text>
+                        </Text> */}
                       </View>
 
                       {/* UNIT MAX */}
-                      <View style={{ width: COL.large, alignItems: 'flex-end' }}>
-                        <Text className='text-sm font-medium' style={{ color: colors.text }}>
-                          {formatNumber(item.unitMax.quantity)}
-                        </Text>
+                      <View style={{ width: COL.unit, alignItems: 'center' }}>
                         <Text className='text-xs' style={{ color: colors.textSecondary }}>
-                          {item.unitMax.name}
+                          {item.unitMin.name}
                         </Text>
+                        {/* <Text className='text-sm font-medium' style={{ color: colors.text }}>
+                          {formatNumber(item.unitMax.quantity)}
+                        </Text> */}
+                        {/* <Text className='text-xs' style={{ color: colors.textSecondary }}>
+                          {item.unitMax.name}
+                        </Text> */}
                       </View>
 
                       {/* PRICE */}
-                      <View style={{ width: COL.price, alignItems: 'flex-end' }}>
+                      <View style={{ width: COL.price, alignItems: 'center' }}>
                         <Text className='text-sm font-medium' style={{ color: colors.text }}>
                           {formatCurrency(item.latestPriceImport)}
                         </Text>
                       </View>
 
                       {/* TOTAL */}
-                      <View style={{ width: COL.total, alignItems: 'flex-end', paddingRight: 20 }}>
+                      <View style={{ width: COL.total, alignItems: 'center', paddingRight: 20 }}>
                         <Text className='text-sm font-bold' style={{ color: colors.primary }}>
                           {formatCurrency(total)}
                         </Text>

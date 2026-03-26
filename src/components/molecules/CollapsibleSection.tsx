@@ -108,7 +108,7 @@ export function CollapsibleSection({
       </TouchableOpacity>
 
       {isExpanded && (
-        <View className='px-3' style={{ backgroundColor: colors.card }}>
+        <View className='px-3 mt-1' style={{ backgroundColor: colors.card }}>
           {children}
         </View>
       )}

@@ -1,5 +1,5 @@
 import { ERROR_CODE } from '@/shared/constants/errorCode'
-import { PaymentMethod } from '@/shared/constants/other'
+import { PaymentMethod } from '@/shared/constants/payment'
 import { STATUS } from '@/shared/constants/status'
 import type { ApiErrorResponse } from '@/shared/types/api.type'
 import { extractErrorDetails } from '@/shared/utils/formErrors'

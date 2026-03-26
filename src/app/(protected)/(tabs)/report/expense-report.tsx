@@ -1,40 +1,37 @@
+import withFloatingButton from '@/components/hoc/withFloatingButton'
 import { Header } from '@/components/layouts/Header'
 import { CollapsibleSection } from '@/components/molecules/CollapsibleSection'
 import { CreateExpenseModal } from '@/components/organisms/CreateExpenseModal'
 import { DateFilterPicker } from '@/components/organisms/DateFilterPicker'
 import { useFinanceGroupReport, useFinanceReport } from '@/features/report/hooks/useReport'
-import { FinanceReport, FinanceReportDate } from '@/features/report/types/finance.type'
+import { FinanceGroupReport, FinanceReport } from '@/features/report/types/finance.type'
 import { useUserList } from '@/features/user/hooks/useUser'
+import { MARGIN_FAB, SIZE_FAB } from '@/shared/constants/other'
+import { ColorTheme } from '@/shared/constants/theme'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { formatDisplayDate, getTodayDateRange } from '@/shared/utils/date.util'
 import { Ionicons } from '@expo/vector-icons'
+import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query'
 
 import dayjs from 'dayjs'
 import { useFocusEffect } from 'expo-router'
-import { useCallback, useState } from 'react'
-import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
+import { useCallback, useMemo, useState } from 'react'
+import { Dimensions, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-const COLOR_NEGATIVE = '#ef4444' // đỏ: số âm
-const COLOR_POSITIVE = '#22c55e' // xanh: số dương
+const COLOR_NEGATIVE = '#ef4444'
+const COLOR_POSITIVE = '#22c55e'
+const { width, height } = Dimensions.get('window')
 
 function getAmountColor(amount: number) {
   return amount < 0 ? COLOR_NEGATIVE : COLOR_POSITIVE
 }
 
-function FinanceItemRow({
-  item,
-  isLast,
-  amount
-}: {
-  item: { id: number; name: string; amount: number; createdDate: string }
-  isLast: boolean
-  amount: number
-}) {
+function FinanceItemRow({ item, isLast, amount }: any) {
   const { colors } = useTheme()
   const color = getAmountColor(amount)
 
-  // createdDate is UTC — convert to local for display time
   const displayTime = dayjs(item.createdDate).format('HH:mm')
 
   return (
@@ -60,68 +57,21 @@ function FinanceItemRow({
   )
 }
 
-function DateGroup({ dateGroup, defaultExpanded }: { dateGroup: FinanceReportDate; defaultExpanded: boolean }) {
-  const { colors } = useTheme()
-  const color = getAmountColor(dateGroup.totalAmount)
-
-  return (
-    <CollapsibleSection
-      defaultExpanded={defaultExpanded}
-      icon={dateGroup.totalAmount < 0 ? 'arrow-down-circle-outline' : 'arrow-up-circle-outline'}
-      headerContent={
-        <View className='flex-row items-center flex-1'>
-          <View className='rounded-xl p-2 mr-3' style={{ backgroundColor: `${color}20` }}>
-            <Ionicons name='calendar-outline' size={18} color={color} />
-          </View>
-          <View className='flex-1'>
-            <Text className='text-sm font-bold' style={{ color: colors.text }}>
-              {formatDisplayDate(dayjs(dateGroup.date), 'DD/MM/YYYY')}
-            </Text>
-            <Text className='text-xs' style={{ color: colors.textSecondary }}>
-              {dateGroup.items.length} biến động
-            </Text>
-          </View>
-          <Text className='text-sm font-bold mr-2' style={{ color }}>
-            {formatCurrencyVND(dateGroup.totalAmount)}
-          </Text>
-        </View>
-      }
-    >
-      <View className='px-1 pb-1'>
-        <FlatList
-          data={dateGroup.items}
-          scrollEnabled={false}
-          keyExtractor={(item) => `${item.id}`}
-          contentContainerStyle={{ flexGrow: 1 }}
-          renderItem={({ item, index }) => (
-            <FinanceItemRow item={item} isLast={index === dateGroup.items.length - 1} amount={dateGroup.totalAmount} />
-          )}
-        />
-      </View>
-    </CollapsibleSection>
-  )
-}
-
-function GroupSection({ group }: { group: FinanceReport }) {
+function GroupSection({ group }: { group: FinanceGroupReport }) {
   const { colors } = useTheme()
   const color = getAmountColor(group.totalAmount)
-  const isNegative = group.totalAmount < 0
 
   return (
     <CollapsibleSection
-      // defaultExpanded={true}
-      icon={isNegative ? 'arrow-down-circle' : 'arrow-up-circle'}
+      icon={group.totalAmount < 0 ? 'arrow-down-circle' : 'arrow-up-circle'}
       headerContent={
         <View className='flex-row items-center flex-1'>
-          <View className='rounded-xl p-2.5 mr-3' style={{ backgroundColor: `${color}20` }}>
-            <Ionicons name={isNegative ? 'arrow-down-outline' : 'arrow-up-outline'} size={22} color={color} />
-          </View>
           <View className='flex-1'>
             <Text className='text-base font-bold' style={{ color: colors.text }}>
               {group.name}
             </Text>
             <Text className='text-xs' style={{ color: colors.textSecondary }}>
-              {group.dates.length} ngày
+              {group.items.length} biến động
             </Text>
           </View>
           <Text className='text-base font-bold mr-2' style={{ color }}>
@@ -131,204 +81,247 @@ function GroupSection({ group }: { group: FinanceReport }) {
       }
     >
       <FlatList
-        data={group.dates}
+        data={group.items}
         scrollEnabled={false}
-        keyExtractor={(item) => `${item.date}`}
-        contentContainerStyle={{ gap: 8, flexGrow: 1 }}
-        renderItem={({ item, index }) => <DateGroup dateGroup={item} defaultExpanded={false} />}
+        keyExtractor={(item) => `${item.id}`}
+        renderItem={({ item, index }) => (
+          <FinanceItemRow item={item} isLast={index === group.items.length - 1} amount={group.totalAmount} />
+        )}
       />
     </CollapsibleSection>
   )
 }
 
-// function ContentComponent({ onOpenCreate }: { onOpenCreate: () => void }) {
-//   const { colors } = useTheme()
+function DateGroup({ dateGroup }: { dateGroup: FinanceReport }) {
+  const { colors } = useTheme()
+  const color = getAmountColor(dateGroup.totalAmount)
 
-//   const { fromDate, toDate } = getTodayDateRange()
-//   const [filter, setFilter] = useState({
-//     fromDate: fromDate ?? null,
-//     toDate: toDate ?? null
-//   })
+  return (
+    <CollapsibleSection
+      icon={dateGroup.totalAmount < 0 ? 'arrow-down-circle-outline' : 'arrow-up-circle-outline'}
+      headerContent={
+        <View className='flex-row items-center flex-1'>
+          <View className='flex-1'>
+            <Text className='text-sm font-bold' style={{ color: colors.text }}>
+              {formatDisplayDate(dayjs(dateGroup.date), 'DD/MM/YYYY')}
+            </Text>
+            <Text className='text-xs' style={{ color: colors.textSecondary }}>
+              {dateGroup.groups.reduce<number>((sum, g) => sum + g.items.length, 0)} biến động
+            </Text>
+          </View>
+          <Text className='text-sm font-bold mr-2' style={{ color }}>
+            {formatCurrencyVND(dateGroup.totalAmount)}
+          </Text>
+        </View>
+      }
+    >
+      <FlatList
+        data={dateGroup.groups}
+        scrollEnabled={false}
+        keyExtractor={(item) => `${dateGroup.date}-${item.id}`}
+        renderItem={({ item }) => <GroupSection group={item} />}
+      />
+    </CollapsibleSection>
+  )
+}
 
-//   const { finance, isLoading, isRefetching, refetch } = useFinanceReport(filter)
+function ContentComponent(props: {
+  finance: FinanceReport[]
+  colors: ColorTheme
+  isLoading: boolean
+  isRefetching: boolean
+  refetch: (options?: RefetchOptions) => Promise<QueryObserverResult<FinanceReport[], Error>>
+  filter: {
+    fromDate: string
+    toDate: string
+  }
+  setFilter: React.Dispatch<
+    React.SetStateAction<{
+      fromDate: string
+      toDate: string
+    }>
+  >
+  onPress: () => void
+  EmptyComponent: React.ComponentType<any> | React.ReactElement | null
+}) {
+  const { finance, colors, isRefetching, refetch, filter, setFilter, EmptyComponent } = props
 
-//   return (
-//     <View className='flex-1'>
-//       <FlatList
-//         data={finance}
-//         keyExtractor={(item) => `group-${item.id}`}
-//         contentContainerStyle={{ paddingBottom: 100, flexGrow: 1 }}
-//         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
-//         ListHeaderComponent={
-//           <View className='mt-2 px-4 pb-3'>
-//             <DateFilterPicker
-//               value={{ fromDate: filter.fromDate, toDate: filter.toDate }}
-//               onChange={(range: { fromDate: string | null; toDate: string | null }) =>
-//                 setFilter({
-//                   fromDate: range.fromDate as string,
-//                   toDate: range.toDate as string
-//                 })
-//               }
-//               colors={colors}
-//               size='lg'
-//             />
-//           </View>
-//         }
-//         ListEmptyComponent={isLoading ? <ActivityIndicator /> : <Text>Không có dữ liệu</Text>}
-//         renderItem={({ item }) => (
-//           <View className='px-4'>
-//             <GroupSection group={item} />
-//           </View>
-//         )}
-//       />
-//     </View>
-//   )
-// }
+  const totalAmount = finance.reduce((sum, dateGroup) => sum + dateGroup.totalAmount, 0)
+  const totalColor = getAmountColor(totalAmount)
+  const hasData = finance.length > 0
 
-// const ContentWithFab = withFloatingButton(ContentComponent, (props: { onOpenCreate: () => void }) => (
-//   <TouchableOpacity
-//     onPress={props.onOpenCreate}
-//     className='absolute bottom-24 right-5 w-14 h-14 rounded-full items-center justify-center'
-//     style={{
-//       // backgroundColor: colors.primary,
-//       // shadowColor: colors.primary,
-//       backgroundColor: '#FB923C',
-//       shadowColor: '#FB923C',
-//       shadowOffset: { width: 0, height: 4 },
-//       shadowOpacity: 0.35,
-//       shadowRadius: 8,
-//       elevation: 8
-//     }}
-//     activeOpacity={0.85}
-//   >
-//     <Ionicons name='add' size={28} color='#fff' />
-//   </TouchableOpacity>
-// ))
+  return (
+    <View className='flex-1'>
+      <View className='flex mt-2 px-4 pb-3'>
+        <DateFilterPicker value={filter} onChange={(range: any) => setFilter(range)} colors={colors} size='lg' />
+      </View>
+      <FlatList
+        data={finance}
+        keyExtractor={(item) => item.date}
+        contentContainerStyle={{ paddingBottom: 90, flexGrow: 1 }}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
+        ListEmptyComponent={EmptyComponent}
+        renderItem={({ item }) => (
+          <View className='px-4'>
+            <DateGroup dateGroup={item} />
+          </View>
+        )}
+        showsVerticalScrollIndicator={false}
+      />
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 20,
+          left: 16,
+          right: 16,
+          borderRadius: 16,
+          paddingVertical: 14,
+          paddingHorizontal: 16,
+          backgroundColor: hasData ? totalColor : 'transparent',
+          opacity: hasData ? 1 : 0,
 
-// export default function ExpenseReportScreen() {
-//   const { colors } = useTheme()
+          // Shadow (iOS)
+          shadowColor: hasData ? '#000' : 'transparent',
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: hasData ? 0.2 : 0,
+          shadowRadius: 8,
 
-//   const [showCreateModal, setShowCreateModal] = useState(false)
+          // Shadow (Android)
+          elevation: hasData ? 8 : 0
+        }}
+      >
+        <View className='flex-row items-center justify-between'>
+          {/* LEFT */}
+          <View className='flex-row items-center'>
+            <View
+              style={{
+                backgroundColor: hasData ? 'rgba(255,255,255,0.2)' : 'transparent',
+                padding: 8,
+                borderRadius: 10,
+                marginRight: 10
+              }}
+            >
+              <Ionicons name='wallet-outline' size={18} color={hasData ? 'white' : 'transparent'} />
+            </View>
 
-//   const { groups: groupFinance } = useFinanceGroupReport(showCreateModal)
-//   const { users } = useUserList(showCreateModal)
+            <View>
+              <Text className='text-xs' style={{ color: hasData ? 'rgba(255,255,255,0.8)' : 'transparent' }}>
+                Tổng cộng
+              </Text>
+              <Text className='text-sm font-semibold' style={{ color: hasData ? 'white' : 'transparent' }}>
+                {hasData ? `${finance.length} ngày giao dịch` : '0 ngày giao dịch'}
+              </Text>
+            </View>
+          </View>
 
-//   return (
-//     <View className='flex-1' style={{ backgroundColor: colors.background }}>
-//       <Header title='Quản lý thu chi' />
-
-//       {/* CONTENT + FAB */}
-//       <ContentWithFab onOpenCreate={() => setShowCreateModal(true)} />
-
-//       {/* MODAL */}
-//       <CreateExpenseModal
-//         visible={showCreateModal}
-//         onClose={() => setShowCreateModal(false)}
-//         users={users}
-//         groups={groupFinance}
-//       />
-//     </View>
-//   )
-// }
+          {/* RIGHT */}
+          <Text className='text-lg font-bold' style={{ color: hasData ? 'white' : 'transparent' }}>
+            {formatCurrencyVND(totalAmount)}
+          </Text>
+        </View>
+      </View>
+    </View>
+  )
+}
 
 export default function ExpenseReportScreen() {
   const { colors } = useTheme()
   const { fromDate, toDate } = getTodayDateRange()
+  const insets = useSafeAreaInsets()
 
-  const [filter, setFilter] = useState({
-    fromDate: fromDate ?? null,
-    toDate: toDate ?? null
-  })
+  const [filter, setFilter] = useState({ fromDate, toDate })
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   const { finance, isLoading, isRefetching, refetch } = useFinanceReport(filter)
-
-  // Load khi mở modal
-  const { groups: groupFinance } = useFinanceGroupReport(showCreateModal)
+  const { groups } = useFinanceGroupReport(showCreateModal)
   const { users } = useUserList(showCreateModal)
+
+  const x = width - SIZE_FAB - MARGIN_FAB - insets.right
+  const y = height - (SIZE_FAB + MARGIN_FAB + insets.bottom + 240)
 
   useFocusEffect(
     useCallback(() => {
-      if (!isLoading) {
-        refetch()
-      }
-    }, [refetch, isLoading])
+      if (!isLoading) refetch()
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isLoading])
   )
 
-  return (
-    <View className='flex-1' style={{ backgroundColor: colors.background }}>
-      <Header title='Quản lý thu chi' />
-
-      <FlatList
-        data={finance}
-        keyExtractor={(item) => `group-${item.id}`}
-        contentContainerStyle={{
-          paddingBottom: 100,
-          flexGrow: 1
-        }}
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
-        ListHeaderComponent={
-          <View className='mt-2 px-4 pb-3'>
-            <DateFilterPicker
-              value={{ fromDate: filter.fromDate, toDate: filter.toDate }}
-              onChange={(range: { fromDate: string | null; toDate: string | null }) =>
-                setFilter({
-                  fromDate: range.fromDate as string,
-                  toDate: range.toDate as string
-                })
-              }
-              colors={colors}
-              size='lg'
-            />
-          </View>
-        }
-        ListEmptyComponent={
-          isLoading ? (
-            <View className='flex-1 justify-center items-center'>
-              <ActivityIndicator size='large' color={colors.primary} />
-              <Text className='mt-3' style={{ color: colors.textSecondary }}>
-                Đang tải dữ liệu...
-              </Text>
-            </View>
-          ) : (
-            <View className='flex-1 justify-center items-center'>
-              <Ionicons name='wallet-outline' size={50} color={colors.textSecondary} />
-              <Text className='mt-3 text-base' style={{ color: colors.textSecondary }}>
-                Không có dữ liệu thu chi
-              </Text>
-            </View>
-          )
-        }
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item: group }) => (
-          <View className='px-4'>
-            <GroupSection group={group} />
-          </View>
-        )}
-      />
-
-      {/* FAB: Tạo thu chi */}
+  const ContentWithFab = withFloatingButton(
+    ContentComponent,
+    (props: { colors: ColorTheme; onPress: () => void }) => (
       <TouchableOpacity
-        onPress={() => setShowCreateModal(true)}
-        className='absolute bottom-24 right-5 w-14 h-14 rounded-full items-center justify-center'
+        onPress={props.onPress}
+        className='rounded-full p-7'
         style={{
-          backgroundColor: colors.primary,
-          shadowColor: colors.primary,
+          backgroundColor: props.colors.primary,
+          shadowColor: props.colors.primary,
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.35,
           shadowRadius: 8,
           elevation: 8
         }}
-        activeOpacity={0.85}
       >
-        <Ionicons name='add' size={28} color='#fff' />
+        <Ionicons name='add' size={28} color='white' />
       </TouchableOpacity>
+    ),
+    { defaultPosition: { x: x, y: y } }
+  )
+
+  const EmptyComponent = useMemo(() => {
+    const showLoading = isLoading || (isRefetching && finance.length === 0)
+
+    if (showLoading) {
+      return (
+        <View className='items-center justify-center' style={{ minHeight: 300 }}>
+          <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
+            <Ionicons name='time-outline' size={48} color={colors.primary} />
+          </View>
+          <Text className='text-lg font-semibold mt-2' style={{ color: colors.text }}>
+            Đang tải dữ liệu...
+          </Text>
+          <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
+            Vui lòng đợi trong giây lát
+          </Text>
+        </View>
+      )
+    }
+
+    return (
+      <View className='items-center justify-center' style={{ minHeight: 300 }}>
+        <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
+          <Ionicons name='receipt-outline' size={48} color={colors.primary} />
+        </View>
+        <Text className='text-xl font-bold mt-2' style={{ color: colors.text }}>
+          Không có dữ liệu
+        </Text>
+        <Text className='text-sm mt-2 text-center px-8' style={{ color: colors.textSecondary }}>
+          Không có biến động nào trong khoảng thời gian này
+        </Text>
+      </View>
+    )
+  }, [colors.primary, colors.text, colors.textSecondary, isLoading, isRefetching, finance.length])
+
+  return (
+    <View className='flex-1' style={{ backgroundColor: colors.background }}>
+      <Header title='Quản lý thu chi' />
+
+      <ContentWithFab
+        finance={finance}
+        colors={colors}
+        isLoading={isLoading}
+        isRefetching={isRefetching}
+        refetch={refetch}
+        filter={filter}
+        setFilter={setFilter}
+        onPress={() => setShowCreateModal(true)}
+        EmptyComponent={EmptyComponent}
+      />
 
       <CreateExpenseModal
         visible={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         users={users}
-        groups={groupFinance}
+        groups={groups}
       />
     </View>
   )

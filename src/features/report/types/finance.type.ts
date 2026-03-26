@@ -1,7 +1,14 @@
+export interface FinanceReport {
+  date: string
+  totalAmount: number
+  groups: FinanceGroupReport[]
+}
+
 export interface FinanceGroupReport {
   id: number
   name: string
   totalAmount: number
+  items: FinanceItemReport[]
 }
 
 export interface FinanceItemReport {
@@ -10,16 +17,6 @@ export interface FinanceItemReport {
   amount: number
   actionDate: string
   createdDate: string
-}
-
-export interface FinanceReport extends FinanceGroupReport {
-  dates: FinanceReportDate[]
-}
-
-export interface FinanceReportDate {
-  date: string
-  totalAmount: number
-  items: FinanceItemReport[]
 }
 
 export interface AddFinanceTransactionPayload {

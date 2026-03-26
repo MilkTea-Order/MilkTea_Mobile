@@ -1,9 +1,10 @@
+import { MARGIN_FAB, SIZE_FAB } from '@/shared/constants/other'
 import React, { useEffect } from 'react'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
+import { EdgeInsets } from 'react-native-safe-area-context'
 
-const SIZE = 84
-const MARGIN = 24
+export type FloatingPosition = 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left' | 'center-bottom'
 
 export interface FloatingButtonProps {
   children: React.ReactNode
@@ -12,14 +13,46 @@ export interface FloatingButtonProps {
     width: number
     height: number
   }
+  defaultPosition?: FloatingPosition | { x: number; y: number }
+  insets?: EdgeInsets
 }
 
-export default function FloatingButton({ children, onPress, container }: FloatingButtonProps) {
+export default function FloatingButton({ children, onPress, container, defaultPosition, insets }: FloatingButtonProps) {
   const width = container.width
   const height = container.height
 
-  const x = useSharedValue(width - SIZE - MARGIN)
-  const y = useSharedValue(height - SIZE - MARGIN)
+  const getDefaultCoords = () => {
+    if (!defaultPosition) {
+      return {
+        x: width - SIZE_FAB - MARGIN_FAB,
+        y: height - SIZE_FAB - MARGIN_FAB
+      }
+    }
+
+    const pos = defaultPosition as { x: number; y: number } | FloatingPosition
+
+    if (typeof pos === 'object') {
+      return { x: pos.x, y: pos.y }
+    }
+
+    switch (pos) {
+      case 'bottom-left':
+        return { x: MARGIN_FAB, y: height - SIZE_FAB - MARGIN_FAB }
+      case 'top-right':
+        return { x: width - SIZE_FAB - MARGIN_FAB, y: MARGIN_FAB }
+      case 'top-left':
+        return { x: MARGIN_FAB, y: MARGIN_FAB }
+      case 'center-bottom':
+        return { x: (width - SIZE_FAB) / 2, y: height - SIZE_FAB - MARGIN_FAB }
+      case 'bottom-right':
+      default:
+        return { x: width - SIZE_FAB - MARGIN_FAB, y: height - SIZE_FAB - MARGIN_FAB }
+    }
+  }
+
+  const defaultCoords = getDefaultCoords()
+  const x = useSharedValue(defaultCoords.x)
+  const y = useSharedValue(defaultCoords.y)
 
   const startX = useSharedValue(0)
   const startY = useSharedValue(0)
@@ -34,12 +67,12 @@ export default function FloatingButton({ children, onPress, container }: Floatin
       const nextX = startX.value + e.translationX
       const nextY = startY.value + e.translationY
 
-      x.value = Math.min(Math.max(nextX, MARGIN), width - SIZE - MARGIN)
+      x.value = Math.min(Math.max(nextX, MARGIN_FAB), width - SIZE_FAB - MARGIN_FAB)
 
-      y.value = Math.min(Math.max(nextY, MARGIN), height - SIZE - MARGIN)
+      y.value = Math.min(Math.max(nextY, MARGIN_FAB), height - SIZE_FAB - MARGIN_FAB)
     })
     .onEnd(() => {
-      const snapX = x.value > width / 2 ? width - SIZE - MARGIN : MARGIN
+      const snapX = x.value > width / 2 ? width - SIZE_FAB - MARGIN_FAB : MARGIN_FAB
 
       x.value = withSpring(snapX, {
         damping: 15,
@@ -54,8 +87,9 @@ export default function FloatingButton({ children, onPress, container }: Floatin
 
   useEffect(() => {
     if (width && height) {
-      x.value = width - SIZE - MARGIN
-      y.value = height - SIZE - MARGIN
+      const coords = getDefaultCoords()
+      x.value = coords.x
+      y.value = coords.y
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, height])

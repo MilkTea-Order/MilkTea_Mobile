@@ -1,46 +1,7 @@
-import { PaymentMethod } from '@/shared/constants/other'
+import { PAYMENT_METHODS, PaymentMethod, PaymentMethodOption } from '@/shared/constants/payment'
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
 import { Modal, Text, TouchableOpacity, View } from 'react-native'
-
-interface PaymentMethodOption {
-  id: PaymentMethod
-  label: string
-  icon: string
-  iconColor: string
-  bgColor: string
-}
-
-const PAYMENT_METHODS: PaymentMethodOption[] = [
-  {
-    id: 'CASH',
-    label: 'Tiền mặt',
-    icon: 'cash-outline',
-    iconColor: '#22c55e',
-    bgColor: '#22c55e20'
-  },
-  {
-    id: 'BANK',
-    label: 'Chuyển khoản',
-    icon: 'card-outline',
-    iconColor: '#3b82f6',
-    bgColor: '#3b82f620'
-  },
-  {
-    id: 'SHOPEE',
-    label: 'ShopeeFood',
-    icon: 'bag-handle-outline',
-    iconColor: '#f97316',
-    bgColor: '#f9731620'
-  },
-  {
-    id: 'GRAB',
-    label: 'Grab',
-    icon: 'bicycle-outline',
-    iconColor: '#00b140',
-    bgColor: '#00b14020'
-  }
-]
 
 interface PaymentMethodModalProps {
   visible: boolean
@@ -96,7 +57,11 @@ export function PaymentMethodModal({
         activeOpacity={0.7}
       >
         <View className='w-12 h-12 rounded-lg items-center justify-center' style={{ backgroundColor: method.bgColor }}>
-          <Ionicons name={method.icon as any} size={24} color={method.iconColor} />
+          {method.logo ? (
+            <method.logo width={24} height={24} />
+          ) : (
+            <Ionicons name={method.icon as any} size={24} color={method.iconColor} />
+          )}
         </View>
 
         <Text className='flex-1 ml-4 font-bold text-base' style={{ color: colors.text }}>

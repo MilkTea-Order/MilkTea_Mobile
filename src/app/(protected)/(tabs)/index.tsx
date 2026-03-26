@@ -9,13 +9,14 @@ import { TransferTableModal } from '@/features/order/components/organisms/Transf
 import { useChangeTable, useOrders, usePayment } from '@/features/order/hooks/useOrder'
 import { Order } from '@/features/order/types/order.type'
 import { useMe } from '@/features/user/hooks/useUser'
-import { PaymentMethod } from '@/shared/constants/other'
+import { PaymentMethod } from '@/shared/constants/payment'
 import { ORDER_STATUS_LABEL, STATUS, type OrderStatus } from '@/shared/constants/status'
+import { ColorTheme } from '@/shared/constants/theme'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { getTodayDateRange } from '@/shared/utils/date.util'
 import { Ionicons } from '@expo/vector-icons'
-import { router, useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Alert, FlatList, Image, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
 
@@ -223,6 +224,7 @@ export default function HomeScreen() {
         handlePayment={handlePayment}
         handleTransferTable={handleTransferTable}
         router={router}
+        onPress={() => router.push('/(protected)/order/select-menu')}
         EmptyComponent={EmptyComponent}
       />
 
@@ -263,6 +265,7 @@ function ContentComponent(props: {
   orderFilter: OrderFilter
   setOrderFilter: any
   refreshing: boolean
+  onPress: () => void
   onRefresh: () => void
   handlePayment: (order: Order) => void
   handleTransferTable: (order: Order) => void
@@ -334,14 +337,14 @@ function ContentComponent(props: {
   )
 }
 
-const ContentWithFab = withFloatingButton(ContentComponent, () => (
+const ContentWithFab = withFloatingButton(ContentComponent, (props: { colors: ColorTheme; onPress: () => void }) => (
   <TouchableOpacity
     activeOpacity={0.8}
-    onPress={() => router.push('/(protected)/order/select-menu')}
+    onPress={props.onPress}
     className='rounded-full p-7'
     style={{
-      backgroundColor: '#FB923C',
-      shadowColor: '#FB923C',
+      backgroundColor: props.colors.primary,
+      shadowColor: props.colors.primary,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.4,
       shadowRadius: 12,

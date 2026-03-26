@@ -5,14 +5,14 @@ import { DateFilterPicker } from '@/components/organisms/DateFilterPicker'
 import { Order } from '@/features/order/types/order.type'
 import { useRevenueReport } from '@/features/report/hooks/useReport'
 import { RevenueReportDate } from '@/features/report/types/revenue.type'
-import { PAYMENT_METHOD, PaymentMethod } from '@/shared/constants/other'
+import { PAYMENT_METHOD, PAYMENT_METHODS, PaymentMethod } from '@/shared/constants/payment'
 import { ORDER_STATUS_OPTIONS, OrderStatus, STATUS } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { formatDisplayDate, getTodayDateRange } from '@/shared/utils/date.util'
 import { Ionicons } from '@expo/vector-icons'
 import dayjs from 'dayjs'
-import { useFocusEffect } from 'expo-router'
+import { router, useFocusEffect } from 'expo-router'
 import { useCallback, useRef, useState } from 'react'
 import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
 
@@ -40,30 +40,13 @@ export default function RevenueReportScreen() {
   )
   const statics = revenue?.statics
   const group = revenue?.dates
-  // Group orders by date
-  // const groupedOrders = useMemo(() => {
-  //   const orders = revenue?.orders ?? []
-  //   const groups: Record<string, Order[]> = {}
-  //   orders.forEach((order) => {
-  //     const dateKey = dayjs(order.orderDate).format('YYYY-MM-DD')
-  //     if (!groups[dateKey]) groups[dateKey] = []
-  //     groups[dateKey].push(order)
-  //   })
-  //   return Object.entries(groups)
-  //     .sort(([a], [b]) => b.localeCompare(a))
-  //     .map(([date, items]) => ({
-  //       date,
-  //       label: dayjs(date).format('DD/MM/YYYY'),
-  //       orders: items.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())
-  //     }))
-  // }, [revenue?.orders])
 
-  // const onPressOrderCard = (orderId: number) => {
-  //   router.push({
-  //     pathname: '/(protected)/order/detail',
-  //     params: { orderId: orderId, review: true }
-  //   })
-  // }
+  const handleOnPressItem = (orderId: number) => {
+    router.push({
+      pathname: '/(protected)/order/detail',
+      params: { orderId: orderId, review: String(true) }
+    })
+  }
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
       <Header title='Báo cáo doanh thu' />
@@ -83,9 +66,6 @@ export default function RevenueReportScreen() {
         />
         {/* 🔥 ORDER STATUS FILTER */}
         <View className='mt-3'>
-          {/* <Text className='text-xs font-medium mb-2' style={{ color: colors.textSecondary }}>
-            Trạng thái
-          </Text> */}
           <View className='flex-row gap-2'>
             {ORDER_STATUS_OPTIONS.filter(
               (x) => x.value === STATUS.ORDER.NO_COLLECTED || x.value === STATUS.ORDER.PAID
@@ -112,59 +92,75 @@ export default function RevenueReportScreen() {
           </View>
         </View>
         {/* 🔥 PAYMENT METHOD FILTER */}
-        <View className='mt-3'>
-          {/* <Text className='text-xs font-medium mb-2' style={{ color: colors.textSecondary }}>
-            Phương thức
-          </Text> */}
-          <View className='flex-row gap-2'>
-            {(
-              [
-                { key: PAYMENT_METHOD.CASH, label: 'Tiền mặt', value: statics?.totalAmountCash ?? 0, bg: '#4CAF50' },
-                { key: PAYMENT_METHOD.SHOPEE, label: 'Shopee', value: statics?.totalAmountShopee ?? 0, bg: '#F44336' },
-                {
-                  key: PAYMENT_METHOD.BANK,
-                  label: 'Chuyển khoản',
-                  value: statics?.totalAmountBank ?? 0,
-                  bg: '#2196F3'
-                },
-                { key: PAYMENT_METHOD.GRAB, label: 'Grab', value: statics?.totalAmountGrab ?? 0, bg: '#FF9800' }
-              ] as const
-            ).map((item) => {
-              const isActive = filter.paymentMethod === item.key
-              return (
-                <TouchableOpacity
-                  key={item.key}
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    setFilter((prev) => ({ ...prev, paymentMethod: item.key }))
-                    listRef.current?.scrollToOffset({ offset: 0, animated: true })
-                  }}
-                  className='rounded-xl px-3 py-2'
+        <FlatList
+          data={PAYMENT_METHODS}
+          keyExtractor={(item) => item.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            gap: 10,
+            marginTop: 12
+          }}
+          renderItem={({ item: method }) => {
+            const valueMap = {
+              CASH: statics?.totalAmountCash ?? 0,
+              BANK: statics?.totalAmountBank ?? 0,
+              SHOPEE: statics?.totalAmountShopee ?? 0,
+              GRAB: statics?.totalAmountGrab ?? 0
+            }
+
+            const value = valueMap[method.id]
+            const isActive = filter.paymentMethod === method.id
+
+            return (
+              <TouchableOpacity
+                className='flex-row items-center gap-2 p-3'
+                activeOpacity={0.8}
+                onPress={() => {
+                  setFilter((prev) => ({ ...prev, paymentMethod: method.id }))
+                  listRef.current?.scrollToOffset({ offset: 0, animated: true })
+                }}
+                style={{
+                  borderRadius: 14,
+                  backgroundColor: isActive ? method.iconColor : `${method.iconColor}10`,
+                  borderWidth: 1,
+                  borderColor: isActive ? method.iconColor : `${method.iconColor}30`
+                }}
+              >
+                {/* ICON */}
+                <View
                   style={{
-                    backgroundColor: isActive ? item.bg : `${item.bg}15`,
-                    borderWidth: 1.5,
-                    borderColor: isActive ? item.bg : `${item.bg}40`,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: isActive ? 0.15 : 0.04,
-                    shadowRadius: isActive ? 4 : 2,
-                    elevation: isActive ? 3 : 1
+                    width: 34,
+                    height: 34,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 6,
+                    backgroundColor: isActive ? 'rgba(255,255,255,0.2)' : `${method.iconColor}20`
                   }}
                 >
-                  <Text className='text-xs font-bold' style={{ color: isActive ? '#fff' : item.bg }}>
-                    {item.label}
-                  </Text>
-                  <Text
-                    className='text-xs font-bold mt-0.5'
-                    style={{ color: isActive ? 'rgba(255,255,255,0.9)' : item.bg }}
-                  >
-                    {formatCurrencyVND(item.value)}
-                  </Text>
-                </TouchableOpacity>
-              )
-            })}
-          </View>
-        </View>
+                  {method.logo ? (
+                    <method.logo width={20} height={20} />
+                  ) : (
+                    <Ionicons name={method.icon as any} size={18} color={isActive ? '#fff' : method.iconColor} />
+                  )}
+                </View>
+
+                {/* VALUE */}
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontSize: 12,
+                    fontWeight: '600',
+                    color: isActive ? '#fff' : method.iconColor
+                  }}
+                >
+                  {formatCurrencyVND(value)}
+                </Text>
+              </TouchableOpacity>
+            )
+          }}
+        />
       </View>
 
       {/* 🔥 ORDER LIST - GROUPED BY DATE */}
@@ -180,7 +176,7 @@ export default function RevenueReportScreen() {
         }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
         ListEmptyComponent={
-          isLoading ? (
+          !isRefetching && isLoading ? (
             <View className='flex-1 justify-center items-center mt-20'>
               <ActivityIndicator size='large' color={colors.primary} />
               <Text className='mt-3' style={{ color: colors.textSecondary }}>
@@ -204,7 +200,7 @@ export default function RevenueReportScreen() {
               headerContent={
                 <View className='flex-row items-center'>
                   <View className='flex-row flex-1'>
-                    <View className='rounded-xl mr-3' style={{ backgroundColor: `${colors.primary}20` }}>
+                    <View className='flex justify-center mr-3'>
                       <Ionicons name='calendar-outline' size={20} color={colors.primary} />
                     </View>
                     <View>
@@ -222,9 +218,14 @@ export default function RevenueReportScreen() {
                 </View>
               }
             >
-              <View className='px-3 pb-3'>
+              <View className='px-3 pb-3 mt-1'>
                 {group.orders.map((order: Order, orderIndex: number) => (
-                  <OrderCardV2 key={order.orderID} order={order} isLast={orderIndex === group.orders.length - 1} />
+                  <OrderCardV2
+                    key={order.orderID}
+                    order={order}
+                    isLast={orderIndex === group.orders.length - 1}
+                    onPress={handleOnPressItem}
+                  />
                 ))}
               </View>
             </CollapsibleSection>

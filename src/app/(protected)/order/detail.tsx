@@ -15,21 +15,25 @@ import {
 } from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
 import { OrderDetail } from '@/features/order/types/order.type'
-import { ORDER_FLOW_MODE, PaymentMethod } from '@/shared/constants/other'
+import { ORDER_FLOW_MODE } from '@/shared/constants/other'
+import { PaymentMethod } from '@/shared/constants/payment'
 import { ORDER_STATUS_LABEL, STATUS, type OrderStatus } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { formatCurrency } from '@/shared/utils/utils'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Alert, Text, View } from 'react-native'
 
 export default function OrderDetailScreen() {
   const { colors } = useTheme()
-  const { orderId } = useLocalSearchParams<{ orderId: string }>()
+  const { orderId, review } = useLocalSearchParams<{ orderId: string; review: 'true' | 'false' }>()
   const router = useRouter()
-  const orderIdNumber = orderId ? parseInt(orderId, 10) : null
   const [filterMode, setFilterMode] = useState<'placed' | 'cancelled'>('placed')
+
+  const orderIdNumber = useMemo(() => (orderId ? parseInt(orderId, 10) : null), [orderId])
+  const isReview = useMemo(() => review === 'true', [review])
+
   const { order, isLoading, isRefetching, refetch } = useOrderDetail(orderIdNumber, filterMode === 'cancelled')
   const [cancellingItemId, setCancellingItemId] = useState<number | null>(null)
   const [showTransferModal, setShowTransferModal] = useState(false)
@@ -198,7 +202,7 @@ export default function OrderDetailScreen() {
                 label: 'Chuyển bàn',
                 icon: 'swap-horizontal-outline',
                 variant: 'info',
-                visible: order?.status.id === Number(STATUS.ORDER.UNPAID),
+                visible: order?.status.id === Number(STATUS.ORDER.UNPAID) && !isReview,
                 onPress: () => setShowTransferModal(true)
               },
               {
@@ -206,7 +210,7 @@ export default function OrderDetailScreen() {
                 label: 'Gộp bàn',
                 icon: 'git-merge-outline',
                 variant: 'warning',
-                visible: order?.status.id === Number(STATUS.ORDER.UNPAID),
+                visible: order?.status.id === Number(STATUS.ORDER.UNPAID) && !isReview,
                 onPress: () => setShowMergeModal(true)
               },
               {
@@ -214,7 +218,7 @@ export default function OrderDetailScreen() {
                 label: 'Thanh toán',
                 icon: 'card-outline',
                 variant: 'primary',
-                visible: order?.status.id === Number(STATUS.ORDER.UNPAID),
+                visible: order?.status.id === Number(STATUS.ORDER.UNPAID) && !isReview,
                 onPress: () => setShowPaymentModal(true)
               },
               {
@@ -222,7 +226,7 @@ export default function OrderDetailScreen() {
                 label: 'Hủy bàn',
                 icon: 'close-circle-outline',
                 variant: 'danger',
-                visible: order?.status.id === Number(STATUS.ORDER.UNPAID),
+                visible: order?.status.id === Number(STATUS.ORDER.UNPAID) && !isReview,
                 onPress: () => {
                   Alert.alert('Xác nhận', 'Bạn muốn hủy toàn bộ đơn hàng này?', [
                     { text: 'Không', style: 'cancel' },
@@ -241,7 +245,7 @@ export default function OrderDetailScreen() {
                 label: 'Đã thu tiền',
                 icon: 'cash-outline',
                 variant: 'primary',
-                visible: order?.status.id === Number(STATUS.ORDER.NO_COLLECTED),
+                visible: order?.status.id === Number(STATUS.ORDER.NO_COLLECTED) && !isReview,
                 onPress: handleCollectedOrder
               }
             ]}

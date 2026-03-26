@@ -9,7 +9,7 @@ import { Image, Text, TouchableOpacity, View } from 'react-native'
 interface OrderCardV2Props {
   order: Order
   isLast?: boolean
-  onPress?: () => void
+  onPress?: (orderId: number) => void
 }
 
 export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props) {
@@ -26,7 +26,12 @@ export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props
       }}
     >
       {/* Row header — always visible */}
-      <TouchableOpacity onPress={onPress} activeOpacity={0.75}>
+      <TouchableOpacity
+        onPress={() => {
+          onPress?.(order.orderID)
+        }}
+        activeOpacity={0.75}
+      >
         <View className='flex-row items-center px-3 py-[1px]'>
           {/* Thumbnail */}
           <View className='rounded-xl overflow-hidden mr-3' style={{ width: 40, height: 40 }}>

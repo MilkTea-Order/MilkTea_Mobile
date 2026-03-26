@@ -6,6 +6,9 @@ export const MAX_SIZE_IMG = 5 * 1024 * 1024
 export const ALLOWED_MIMES_IMG = ['image/jpeg', 'image/png', 'image/jpg']
 export const ALLOWED_EXT_IMG = ['.jpg', '.jpeg', '.png']
 
+export const SIZE_FAB = 84
+export const MARGIN_FAB = 24
+
 export const GENDER_OPTIONS = [
   { label: 'Nam', value: 1 },
   { label: 'Nữ', value: 2 }
@@ -18,11 +21,3 @@ export const ORDER_FLOW_MODE = {
 } as const
 
 export type OrderFlowMode = (typeof ORDER_FLOW_MODE)[keyof typeof ORDER_FLOW_MODE]
-
-export const PAYMENT_METHOD = {
-  CASH: 'CASH' as const,
-  BANK: 'BANK' as const,
-  SHOPEE: 'SHOPEE' as const,
-  GRAB: 'GRAB' as const
-} as const
-export type PaymentMethod = (typeof PAYMENT_METHOD)[keyof typeof PAYMENT_METHOD]

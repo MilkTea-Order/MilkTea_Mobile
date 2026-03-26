@@ -1,10 +1,16 @@
+import { ColorTheme } from '@/shared/constants/theme'
 import React, { useState } from 'react'
 import { LayoutChangeEvent, View } from 'react-native'
-import FloatingButton from '../atoms/FloatingButton'
+import FloatingButton, { FloatingPosition } from '../atoms/FloatingButton'
 
-function withFloatingButton<Props extends object>(
+interface WithFloatingButtonOptions {
+  defaultPosition?: FloatingPosition | { x: number; y: number }
+}
+
+function withFloatingButton<Props extends { colors: ColorTheme; onPress: () => void }>(
   WrappedComponent: React.ComponentType<Props>,
-  renderFloatingButton: (props: Props) => React.ReactNode
+  renderFloatingButton: (props: Props) => React.ReactNode,
+  options?: WithFloatingButtonOptions
 ) {
   function WithFloatingButton(props: Props) {
     const [container, setContainer] = useState({
@@ -17,13 +23,6 @@ function withFloatingButton<Props extends object>(
       setContainer({ width, height })
     }
 
-    // return (
-    //   <View style={{ flex: 1 }} onLayout={handleLayout}>
-    //     <WrappedComponent {...props} />
-
-    //     {container.width > 0 && <FloatingButton container={container}>{renderFloatingButton(props)}</FloatingButton>}
-    //   </View>
-    // )
     return (
       <View style={{ flex: 1 }} onLayout={handleLayout}>
         <WrappedComponent {...props} />
@@ -39,7 +38,9 @@ function withFloatingButton<Props extends object>(
               bottom: 0
             }}
           >
-            <FloatingButton container={container}>{renderFloatingButton(props)}</FloatingButton>
+            <FloatingButton container={container} defaultPosition={options?.defaultPosition}>
+              {renderFloatingButton(props)}
+            </FloatingButton>
           </View>
         )}
       </View>
