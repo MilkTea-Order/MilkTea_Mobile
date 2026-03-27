@@ -1,4 +1,5 @@
 import { Order } from '@/features/order/types/order.type'
+import { STATUS } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { formatDisplayDate } from '@/shared/utils/date.util'
@@ -59,7 +60,15 @@ export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props
                 <Ionicons name='time-outline' size={10} color={colors.textSecondary} />
 
                 <Text className='text-[10px]' style={{ color: colors.textSecondary }}>
-                  Giờ thanh toán: {formatDisplayDate(dayjs(order.paymentDate), 'HH:mm')}
+                  Giờ {order.status.id === parseInt(STATUS.ORDER.PAID, 10) ? 'thu tiền' : 'thanh toán'}:{' '}
+                  {formatDisplayDate(
+                    dayjs(
+                      order.status.id === parseInt(STATUS.ORDER.PAID, 10)
+                        ? (order.actionDate ?? null)
+                        : order.paymentDate
+                    ),
+                    'HH:mm'
+                  )}
                 </Text>
               </View>
             </View>

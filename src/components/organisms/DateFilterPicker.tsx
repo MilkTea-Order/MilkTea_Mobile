@@ -1,4 +1,4 @@
-import { formatDisplayDate, getTodayDateRange, toISOString } from '@/shared/utils/date.util'
+import { formatDisplayDate, getTodayDateRange, toISOString, toEndOfDayISOString } from '@/shared/utils/date.util'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
@@ -72,11 +72,11 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
     if (Platform.OS === 'android') {
       setShowToPicker(false)
       if (event.type === 'set' && selectedDate) {
-        setTempToDate(toISOString(selectedDate))
+        setTempToDate(toEndOfDayISOString(selectedDate))
       }
     } else {
       if (selectedDate) {
-        setTempToDate(toISOString(selectedDate))
+        setTempToDate(toEndOfDayISOString(selectedDate))
       }
     }
   }

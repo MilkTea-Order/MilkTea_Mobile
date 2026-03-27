@@ -12,6 +12,8 @@ export interface Order {
   paymentMethod: PaymentMethod | null
   paymentDate: string | null
   paymentBy: number | null
+  actionDate: string | null
+  actionBy: number | null
   note: string | null
   totalAmount: number
   dinnerTable: DinnerTable

@@ -100,8 +100,25 @@ export const getTodayDateRange = (): { fromDate: string; toDate: string } => {
   }
 }
 
+/**
+ * Convert a Date object to start-of-day UTC ISO string (00:00:00.000Z).
+ * Used for fromDate.
+ */
 export const toISOString = (date: Date): string => {
-  return dayjs(date).toISOString()
+  return dayjs(date).startOf('day').utc().toISOString()
+}
+
+/**
+ * Convert a Date object to end-of-day UTC ISO string (23:59:59.999Z).
+ * Used for toDate to ensure the full last day is included.
+ *
+ * Example: user picks 8/3/2026 in Vietnam (UTC+7)
+ *   → Date object is 2026-03-08T00:00:00.000+07:00
+ *   → End of day in UTC = 2026-03-08T16:59:59.999Z
+ *   → In Vietnam time that is 2026-03-08T23:59:59
+ */
+export const toEndOfDayISOString = (date: Date): string => {
+  return dayjs(date).endOf('day').utc().toISOString()
 }
 
 /**
