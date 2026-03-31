@@ -80,7 +80,9 @@ export function FormSelectField({
           >
             <Text
               style={{
-                color: selectedOption ? colors.text : colors.textTertiary
+                color: selectedOption ? colors.text : colors.textTertiary,
+                fontSize: 15,
+                fontWeight: '500'
               }}
             >
               {selectedOption?.label || placeholder}

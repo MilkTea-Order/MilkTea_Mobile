@@ -7,7 +7,7 @@ import { AddFinanceTransactionPayload } from '../types/finance.type'
 
 export const reportKeys = {
   all: ['report'] as const,
-  inventory: () => [...reportKeys.all, 'inventory'] as const,
+  inventory: (materialName?: string) => [...reportKeys.all, 'inventory', materialName ?? ''] as const,
   revenue: (filter: { paymentMethod: PaymentMethod; fromDate: string; toDate: string; orderStatusId: OrderStatus }) =>
     [...reportKeys.all, 'revenue', filter.paymentMethod, filter.fromDate, filter.toDate, filter.orderStatusId] as const,
   finance: (filter?: { fromDate: string; toDate: string }) =>
@@ -15,11 +15,13 @@ export const reportKeys = {
   financeGroup: () => [...reportKeys.all, 'financeGroup'] as const
 }
 
-export function useInventoryReport() {
+export function useInventoryReport(materialName?: string) {
+  const keyword = materialName?.trim() ?? ''
+
   const query = useQuery({
-    queryKey: reportKeys.inventory(),
+    queryKey: reportKeys.inventory(keyword),
     queryFn: async () => {
-      const response = await reportApi.getMaterialInventoryReport()
+      const response = await reportApi.getMaterialInventoryReport(keyword ? { materialName: keyword } : undefined)
       return response.data.data ?? []
     },
     staleTime: 30 * 1000

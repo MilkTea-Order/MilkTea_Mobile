@@ -68,7 +68,20 @@ export function CreateExpenseModal({ visible, onClose, groups, users }: Props) {
   }, [visible])
 
   /* ================= OPTIONS ================= */
-  const groupOptions = useMemo(() => groups.map((g) => ({ label: g.name, value: g.id })), [groups])
+  const groupOptions = useMemo(() => {
+    return groups.map((g) => {
+      let shortName = g.name
+
+      if (g.name.toLowerCase().includes('thu')) shortName = 'thu'
+      if (g.name.toLowerCase().includes('chi')) shortName = 'chi'
+
+      return {
+        label: g.name,
+        group: shortName,
+        value: g.id
+      }
+    })
+  }, [groups])
   const userOptions = useMemo(() => users.map((u) => ({ label: u.fullName, value: u.userId })), [users])
 
   /* ================= INITIAL ================= */
@@ -161,6 +174,7 @@ export function CreateExpenseModal({ visible, onClose, groups, users }: Props) {
                     {/* GROUP */}
                     <FormSelectField
                       label='Nhóm'
+                      placeholder='Chọn nhóm'
                       required
                       onPress={blurAll}
                       value={values.transactionGroupId ?? ''}
@@ -173,12 +187,23 @@ export function CreateExpenseModal({ visible, onClose, groups, users }: Props) {
                     {/* NAME */}
                     <FormTextField
                       ref={nameRef}
-                      label='Tên'
+                      label={
+                        'Nội dung ' +
+                        (!!values.transactionGroupId
+                          ? groupOptions.find((x) => x.value === values.transactionGroupId)?.group
+                          : 'thu chi')
+                      }
                       required
                       value={values.name}
                       onChangeText={(text) => setFieldValue('name', text, true)}
                       onBlur={handleBlur('name')}
                       returnKeyType='next'
+                      placeholder={
+                        'Nhập nội dung ' +
+                        (!!values.transactionGroupId
+                          ? groupOptions.find((x) => x.value === values.transactionGroupId)?.group
+                          : 'thu chi')
+                      }
                       onSubmitEditing={() => amountRef.current?.focus()}
                       error={errors.name}
                       touched={touched.name}
@@ -186,12 +211,23 @@ export function CreateExpenseModal({ visible, onClose, groups, users }: Props) {
 
                     {/* DATE */}
                     <FormDatePicker
-                      label='Ngày'
+                      label={
+                        'Ngày ' +
+                        (!!values.transactionGroupId
+                          ? groupOptions.find((x) => x.value === values.transactionGroupId)?.group
+                          : 'thu chi')
+                      }
                       required
                       value={values.transactionDate}
                       onChange={(date) => {
                         setFieldValue('transactionDate', date, true)
                       }}
+                      placeholder={
+                        'Chọn ngày ' +
+                        (!!values.transactionGroupId
+                          ? groupOptions.find((x) => x.value === values.transactionGroupId)?.group
+                          : 'thu chi')
+                      }
                       error={errors.transactionDate}
                       touched={touched.transactionDate}
                     />
@@ -199,7 +235,13 @@ export function CreateExpenseModal({ visible, onClose, groups, users }: Props) {
                     {/* AMOUNT */}
                     <FormTextField
                       ref={amountRef}
-                      label='Số tiền'
+                      // label='Số tiền'
+                      label={
+                        'Số tiền ' +
+                        (!!values.transactionGroupId
+                          ? groupOptions.find((x) => x.value === values.transactionGroupId)?.group
+                          : 'thu chi')
+                      }
                       required
                       value={String(values.amount)}
                       keyboardType='numeric'
@@ -207,6 +249,12 @@ export function CreateExpenseModal({ visible, onClose, groups, users }: Props) {
                         const clean = text.replace(/[^0-9]/g, '')
                         setFieldValue('amount', clean, true)
                       }}
+                      placeholder={
+                        'Nhập số tiền ' +
+                        (!!values.transactionGroupId
+                          ? groupOptions.find((x) => x.value === values.transactionGroupId)?.group
+                          : 'thu chi')
+                      }
                       onBlur={handleBlur('amount')}
                       returnKeyType='next'
                       onSubmitEditing={() => noteRef.current?.focus()}
@@ -222,7 +270,12 @@ export function CreateExpenseModal({ visible, onClose, groups, users }: Props) {
 
                     {/* USER */}
                     <FormSelectField
-                      label='Người thu'
+                      label={
+                        'Người ' +
+                        (!!values.transactionGroupId
+                          ? groupOptions.find((x) => x.value === values.transactionGroupId)?.group
+                          : 'thu chi')
+                      }
                       required
                       value={values.transactionBy ?? ''}
                       onPress={blurAll}
@@ -231,6 +284,12 @@ export function CreateExpenseModal({ visible, onClose, groups, users }: Props) {
                         setFieldValue('transactionBy', v, true)
                       }}
                       error={errors.transactionBy}
+                      placeholder={
+                        'Chọn người ' +
+                        (!!values.transactionGroupId
+                          ? groupOptions.find((x) => x.value === values.transactionGroupId)?.group
+                          : 'thu chi')
+                      }
                       touched={touched.transactionBy}
                     />
 
@@ -238,6 +297,7 @@ export function CreateExpenseModal({ visible, onClose, groups, users }: Props) {
                     <FormTextField
                       ref={noteRef}
                       label='Ghi chú'
+                      placeholder='Nhập ghi chú'
                       value={values.note}
                       onChangeText={(text) => setFieldValue('note', text)}
                       returnKeyType='done'

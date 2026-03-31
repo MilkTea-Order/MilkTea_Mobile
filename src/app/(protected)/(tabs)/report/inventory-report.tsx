@@ -5,7 +5,7 @@ import { formatCurrency, formatNumber } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import React, { useMemo, useRef } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -14,10 +14,20 @@ export default function InventoryScreen() {
   const { colors, gradients } = useTheme()
   const insets = useSafeAreaInsets()
 
-  const { inventory = [], isLoading, isFetching, isRefetching, refetch } = useInventoryReport()
+  const [searchText, setSearchText] = useState('')
+  const [submittedMaterialName, setSubmittedMaterialName] = useState<string | undefined>(undefined)
+
+  const canSubmitSearch = searchText.trim().length >= 3
+
+  const { inventory = [], isLoading, isFetching, isRefetching, refetch } = useInventoryReport(submittedMaterialName)
 
   const data = useMemo(() => inventory, [inventory])
   const searchInputRef = useRef<TextInput>(null)
+
+  const handleSubmitSearch = useCallback(() => {
+    if (!canSubmitSearch) return
+    setSubmittedMaterialName(searchText.trim())
+  }, [searchText, canSubmitSearch])
 
   const COL = {
     name: 120,
@@ -65,24 +75,56 @@ export default function InventoryScreen() {
       {/* SEARCH INPUT */}
       <View className='px-4 pt-4 pb-2'>
         <View
-          className='flex-row items-center rounded-2xl px-4 py-3'
+          className='flex-row items-center rounded-2xl px-4 p-3'
           style={{
             backgroundColor: colors.card,
             borderWidth: 1,
             borderColor: colors.border
           }}
         >
-          <TouchableOpacity onPress={() => searchInputRef.current?.focus()}>
+          <TouchableOpacity
+            onPress={() => {
+              if (canSubmitSearch) {
+                handleSubmitSearch()
+                return
+              }
+              searchInputRef.current?.focus()
+            }}
+            disabled={!canSubmitSearch}
+            style={{ opacity: canSubmitSearch ? 1 : 0.5 }}
+          >
             <Ionicons name='search' size={20} color={colors.textSecondary} />
           </TouchableOpacity>
-          <View className='flex-1 ml-3'>
+          <View className='flex-1 ml-3 flex-row items-center'>
             <TextInput
               ref={searchInputRef}
-              className='text-base'
-              style={{ color: colors.textSecondary }}
+              value={searchText}
+              onChangeText={(text) => {
+                setSearchText(text)
+                if (text.trim().length === 0) {
+                  setSubmittedMaterialName(undefined)
+                }
+              }}
+              onSubmitEditing={handleSubmitSearch}
+              returnKeyType='search'
+              enablesReturnKeyAutomatically={canSubmitSearch}
+              className='text-base flex-1'
+              style={{ color: colors.textSecondary, opacity: canSubmitSearch ? 1 : 0.5 }}
               placeholder='Tìm kiếm nguyên liệu...'
               placeholderTextColor={colors.textSecondary}
             />
+
+            {searchText.length > 0 && (
+              <TouchableOpacity
+                onPress={() => {
+                  setSearchText('')
+                  setSubmittedMaterialName(undefined)
+                }}
+                className='ml-2'
+              >
+                <Ionicons name='close-circle-sharp' size={24} color={colors.primary} />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </View>
@@ -155,140 +197,158 @@ export default function InventoryScreen() {
         }
         renderItem={({ item: group }) => (
           <CollapsibleSection title={group.name} icon='cube-outline' defaultExpanded>
-            <ScrollView horizontal showsHorizontalScrollIndicator contentContainerStyle={{ paddingRight: 8 }}>
-              <View>
-                {/* 🔥 TABLE HEADER (FIXED ALIGN) */}
+            <View className='flex-row pb-3'>
+              <View style={{ width: COL.name + 16 }}>
+                {/* HEADER */}
                 <View
-                  className='flex-row items-center rounded-xl pl-3 py-2.5 mb-2'
-                  style={{ backgroundColor: colors.primary + '12' }}
+                  className='rounded-l-xl pl-3 py-2.5 mb-2 justify-center'
+                  style={{
+                    backgroundColor: colors.primary + '12',
+                    borderColor: colors.primary + '30',
+                    borderWidth: 1,
+                    borderRightWidth: 0,
+                    borderTopLeftRadius: 12,
+                    borderBottomLeftRadius: 12
+                  }}
                 >
-                  <View style={{ width: COL.name }}>
-                    <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
-                      Nguyên liệu
-                    </Text>
-                  </View>
-
-                  <View style={{ width: COL.small, alignItems: 'center' }}>
-                    <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
-                      S.Lg tồn
-                    </Text>
-                  </View>
-
-                  <View style={{ width: COL.unit, alignItems: 'center' }}>
-                    <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
-                      ĐVT
-                    </Text>
-                  </View>
-
-                  <View style={{ width: COL.price, alignItems: 'center' }}>
-                    <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
-                      Giá nhập
-                    </Text>
-                  </View>
-
-                  <View style={{ width: COL.total, alignItems: 'center', paddingRight: 20 }}>
-                    <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
-                      Tạm tính
-                    </Text>
-                  </View>
-
-                  <View style={{ width: COL.status, alignItems: 'center' }}>
-                    <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
-                      Trạng thái
-                    </Text>
-                  </View>
+                  <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                    Nguyên liệu
+                  </Text>
                 </View>
 
-                {/* 🔥 DATA */}
-                {group.materialItems.map((item, index) => {
-                  const total = item.unitMin.quantity * item.latestPriceImport
+                {group.materialItems.map((item, index) => (
+                  <View
+                    key={`fixed-${item.id}`}
+                    className='pl-2 justify-center'
+                    style={{
+                      height: 44,
+                      backgroundColor: index % 2 === 0 ? colors.background : colors.card,
+                      borderWidth: 1,
+                      borderRightWidth: 0,
+                      borderColor: colors.border
+                    }}
+                  >
+                    <Text className='font-bold text-sm' style={{ color: colors.text }} numberOfLines={1}>
+                      {item.name}
+                    </Text>
+                  </View>
+                ))}
+              </View>
 
-                  return (
-                    <View
-                      key={item.id}
-                      className='flex-row items-center rounded-xl px-2 py-1 mb-1.5'
-                      style={{
-                        backgroundColor: index % 2 === 0 ? colors.background : colors.card,
-                        borderWidth: 1,
-                        borderColor: colors.border
-                      }}
-                    >
-                      {/* NAME */}
-                      <View style={{ width: COL.name }}>
-                        <Text className='font-bold text-sm' style={{ color: colors.text }} numberOfLines={1}>
-                          {item.name}
-                        </Text>
-                        {/* <Text className='text-xs mt-0.5' style={{ color: colors.textSecondary }} numberOfLines={1}>
-                          {formatNumber(item.styleQuantity, 0)} {item.unitMin.name}/{item.unitMax.name}
-                        </Text> */}
-                      </View>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View>
+                  {/* HEADER */}
+                  <View
+                    className='flex-row items-center py-2.5 mb-2'
+                    style={{
+                      backgroundColor: colors.primary + '12',
+                      borderWidth: 1,
+                      borderLeftWidth: 0,
+                      borderColor: colors.primary + '30',
+                      borderTopRightRadius: 12,
+                      borderBottomRightRadius: 12
+                    }}
+                  >
+                    <View style={{ width: COL.small, alignItems: 'center' }}>
+                      <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                        S.Lg tồn
+                      </Text>
+                    </View>
 
-                      {/* UNIT MIN */}
-                      <View style={{ width: COL.small, alignItems: 'center' }}>
-                        <Text className='text-sm font-medium' style={{ color: colors.text }}>
-                          {formatNumber(item.unitMin.quantity)}
-                        </Text>
-                        {/* <Text className='text-xs' style={{ color: colors.textSecondary }}>
-                          {item.unitMin.name}
-                        </Text> */}
-                      </View>
+                    <View style={{ width: COL.unit, alignItems: 'center' }}>
+                      <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                        ĐVT
+                      </Text>
+                    </View>
 
-                      {/* UNIT MAX */}
-                      <View style={{ width: COL.unit, alignItems: 'center' }}>
-                        <Text className='text-xs' style={{ color: colors.textSecondary }}>
-                          {item.unitMin.name}
-                        </Text>
-                        {/* <Text className='text-sm font-medium' style={{ color: colors.text }}>
-                          {formatNumber(item.unitMax.quantity)}
-                        </Text> */}
-                        {/* <Text className='text-xs' style={{ color: colors.textSecondary }}>
-                          {item.unitMax.name}
-                        </Text> */}
-                      </View>
+                    <View style={{ width: COL.price, alignItems: 'center' }}>
+                      <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                        Giá nhập
+                      </Text>
+                    </View>
 
-                      {/* PRICE */}
-                      <View style={{ width: COL.price, alignItems: 'center' }}>
-                        <Text className='text-sm font-medium' style={{ color: colors.text }}>
-                          {formatCurrency(item.latestPriceImport)}
-                        </Text>
-                      </View>
+                    <View style={{ width: COL.total, alignItems: 'center', paddingRight: 20 }}>
+                      <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                        Tạm tính
+                      </Text>
+                    </View>
 
-                      {/* TOTAL */}
-                      <View style={{ width: COL.total, alignItems: 'center', paddingRight: 20 }}>
-                        <Text className='text-sm font-bold' style={{ color: colors.primary }}>
-                          {formatCurrency(total)}
-                        </Text>
-                      </View>
+                    <View style={{ width: COL.status, alignItems: 'center' }}>
+                      <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                        Trạng thái
+                      </Text>
+                    </View>
+                  </View>
 
-                      {/* STATUS */}
-                      <View style={{ width: COL.status, alignItems: 'center' }}>
-                        <View
-                          className='px-2 py-1 rounded-lg'
-                          style={{
-                            backgroundColor: item.status.id === 1 ? colors.primary + '20' : '#99999920'
-                          }}
-                        >
-                          <Text
-                            className='text-xs font-semibold'
-                            style={{
-                              color: item.status.id === 1 ? colors.primary : '#999'
-                            }}
-                            numberOfLines={1}
-                          >
-                            {item.status.name}
+                  {/* ROWS */}
+                  {group.materialItems.map((item, index) => {
+                    const total = item.unitMin.quantity * item.latestPriceImport
+
+                    return (
+                      <View
+                        key={item.id}
+                        className='flex-row items-center px-2'
+                        style={{
+                          height: 44,
+                          backgroundColor: index % 2 === 0 ? colors.background : colors.card,
+                          borderWidth: 1,
+                          borderLeftWidth: 0,
+                          borderColor: colors.border
+                        }}
+                      >
+                        <View style={{ width: COL.small, alignItems: 'center' }}>
+                          <Text className='text-sm font-medium' style={{ color: colors.text }}>
+                            {formatNumber(item.unitMin.quantity)}
                           </Text>
                         </View>
+
+                        <View style={{ width: COL.unit, alignItems: 'center' }}>
+                          <Text className='text-xs' style={{ color: colors.textSecondary }}>
+                            {item.unitMin.name}
+                          </Text>
+                        </View>
+
+                        <View style={{ width: COL.price, alignItems: 'center' }}>
+                          <Text className='text-sm font-medium' style={{ color: colors.text }}>
+                            {formatCurrency(item.latestPriceImport)}
+                          </Text>
+                        </View>
+
+                        <View style={{ width: COL.total, alignItems: 'center', paddingRight: 20 }}>
+                          <Text className='text-sm font-bold' style={{ color: colors.primary }}>
+                            {formatCurrency(total)}
+                          </Text>
+                        </View>
+
+                        <View style={{ width: COL.status, alignItems: 'center' }}>
+                          <View
+                            className='px-2 py-1 rounded-lg'
+                            style={{
+                              backgroundColor: item.status.id === 1 ? colors.primary + '20' : '#99999920'
+                            }}
+                          >
+                            <Text
+                              className='text-xs font-semibold'
+                              style={{
+                                color: item.status.id === 1 ? colors.primary : '#999'
+                              }}
+                              numberOfLines={1}
+                            >
+                              {item.status.name}
+                            </Text>
+                          </View>
+                        </View>
                       </View>
-                    </View>
-                  )
-                })}
-              </View>
-            </ScrollView>
+                    )
+                  })}
+                </View>
+              </ScrollView>
+            </View>
           </CollapsibleSection>
         )}
       />
 
-      {/* loading nhỏ góc */}
+      {/* loading nhỏ */}
       {isFetching && !isRefetching && data.length > 0 && (
         <View
           style={{

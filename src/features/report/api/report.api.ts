@@ -9,8 +9,12 @@ import { MaterialReport } from '../types/material.inventory.type'
 import { RevenueReport } from '../types/revenue.type'
 
 export const reportApi = {
-  getMaterialInventoryReport(): Promise<AxiosResponse<ApiResponse<MaterialReport[]>>> {
-    return http.get<ApiResponse<MaterialReport[]>>(URL.MATERIAL_INVENTORY_REPORT)
+  getMaterialInventoryReport(filter?: {
+    materialName?: string
+  }): Promise<AxiosResponse<ApiResponse<MaterialReport[]>>> {
+    return http.get<ApiResponse<MaterialReport[]>>(URL.MATERIAL_INVENTORY_REPORT, {
+      params: filter?.materialName ? { materialName: filter.materialName } : undefined
+    })
   },
   getRevenueReport(filter: {
     paymentMethod: PaymentMethod

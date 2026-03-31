@@ -14,6 +14,7 @@ interface FormDatePickerProps {
   touched?: boolean
   required?: boolean
   disabled?: boolean
+  placeholder?: string
 }
 
 export function FormDatePicker({
@@ -23,7 +24,8 @@ export function FormDatePicker({
   error,
   touched,
   required = false,
-  disabled = false
+  disabled = false,
+  placeholder = 'Chọn ngày'
 }: FormDatePickerProps) {
   const { colors } = useTheme()
   const [showPicker, setShowPicker] = useState(false)
@@ -72,7 +74,7 @@ export function FormDatePicker({
               fontWeight: '500'
             }}
           >
-            {committedDate ? formatDisplayDate(committedDate) : 'Chọn ngày'}
+            {committedDate ? formatDisplayDate(committedDate) : placeholder}
           </Text>
           <Ionicons name='calendar' size={20} color={colors.primary} />
         </View>

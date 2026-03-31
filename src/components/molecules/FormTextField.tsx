@@ -87,7 +87,7 @@ export const FormTextField = forwardRef<TextInput, FormTextFieldProps>(
           }}
         >
           <TextInput
-            ref={ref} // 🔥 FIX CHÍNH
+            ref={ref}
             {...rest}
             value={displayValue}
             onChangeText={handleChange}

@@ -15,7 +15,7 @@ export function ApiConfigModal({ visible, onClose, canClose = false }: ApiConfig
   const { colors } = useTheme()
   const insets = useSafeAreaInsets()
   const setApiBaseUrl = useApiConfigStore((s) => s.setApiBaseUrl)
-
+  const apiBaseUrl = useApiConfigStore((s) => s.apiBaseUrl)
   const [apiUrlInput, setApiUrlInput] = useState('')
 
   const handleSaveApiUrl = () => {
@@ -56,10 +56,19 @@ export function ApiConfigModal({ visible, onClose, canClose = false }: ApiConfig
               <Ionicons name='server-outline' size={40} color={colors.primary} />
             </View>
             <Text className='text-base text-center' style={{ color: colors.textSecondary }}>
-              Vui lòng cấu hình API URL để tiếp tục sử dụng ứng dụng
+              {!apiBaseUrl ? 'Vui lòng cấu hình API URL để tiếp tục sử dụng ứng dụng' : ''}
             </Text>
           </View>
-
+          <Text className='text-sm mb-2' style={{ color: colors.textSecondary }}>
+            API Base URL hiện tại:
+          </Text>
+          <Text
+            className='text-sm font-medium mb-4'
+            style={{ color: apiBaseUrl ? colors.primary : colors.textSecondary }}
+            numberOfLines={1}
+          >
+            {apiBaseUrl || 'Chưa cấu hình'}
+          </Text>
           <Text className='text-sm mb-2' style={{ color: colors.text }}>
             API Base URL:
           </Text>

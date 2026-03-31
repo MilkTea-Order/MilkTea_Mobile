@@ -205,11 +205,14 @@ function ContentComponent(props: {
             </View>
 
             <View>
-              <Text className='text-xs' style={{ color: hasData ? 'rgba(255,255,255,0.8)' : 'transparent' }}>
+              {/* <Text className='text-xs' style={{ color: hasData ? 'rgba(255,255,255,0.8)' : 'transparent' }}>
                 Tổng cộng
               </Text>
               <Text className='text-sm font-semibold' style={{ color: hasData ? 'white' : 'transparent' }}>
                 {hasData ? `${finance.length} ngày giao dịch` : '0 ngày giao dịch'}
+              </Text> */}
+              <Text className='text-lg font-bold' style={{ color: hasData ? 'white' : 'transparent' }}>
+                Tổng cộng
               </Text>
             </View>
           </View>

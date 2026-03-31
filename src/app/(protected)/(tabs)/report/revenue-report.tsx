@@ -92,17 +92,14 @@ export default function RevenueReportScreen() {
           </View>
         </View>
         {/* 🔥 PAYMENT METHOD FILTER */}
-        <FlatList
-          data={PAYMENT_METHODS}
-          keyExtractor={(item) => item.id}
-          // numColumns={4}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
+        <View
+          style={{
+            flexDirection: 'row',
             gap: 8,
             marginTop: 12
           }}
-          renderItem={({ item: method }) => {
+        >
+          {PAYMENT_METHODS.map((method) => {
             const valueMap = {
               CASH: statics?.totalAmountCash ?? 0,
               BANK: statics?.totalAmountBank ?? 0,
@@ -115,6 +112,7 @@ export default function RevenueReportScreen() {
 
             return (
               <TouchableOpacity
+                key={method.id}
                 className='flex items-center px-2 py-1'
                 activeOpacity={0.8}
                 onPress={() => {
@@ -122,8 +120,8 @@ export default function RevenueReportScreen() {
                   listRef.current?.scrollToOffset({ offset: 0, animated: true })
                 }}
                 style={{
-                  // flexBasis: '22%',
-                  // maxWidth: '22%',
+                  width: '23%',
+                  alignItems: 'center',
                   borderRadius: 14,
                   backgroundColor: isActive ? method.iconColor : `${method.iconColor}10`,
                   borderWidth: 1,
@@ -162,8 +160,8 @@ export default function RevenueReportScreen() {
                 </Text>
               </TouchableOpacity>
             )
-          }}
-        />
+          })}
+        </View>
       </View>
 
       {/* 🔥 ORDER LIST - GROUPED BY DATE */}
