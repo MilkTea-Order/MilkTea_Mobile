@@ -1,4 +1,10 @@
-import { formatDisplayDate, getTodayDateRange, toISOString, toEndOfDayISOString } from '@/shared/utils/date.util'
+import {
+  formatDate,
+  getTodayDateRange,
+  toEndOfDayString,
+  toNativeDate,
+  toStartOfDayString
+} from '@/shared/utils/date.util'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
@@ -39,45 +45,52 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
   const config = SIZE_CONFIG[size]
   const [showFromPicker, setShowFromPicker] = useState(false)
   const [showToPicker, setShowToPicker] = useState(false)
+  const [tempFromDate, setTempFromDate] = useState<Date | null>(toNativeDate(value.fromDate))
+  const [tempToDate, setTempToDate] = useState<Date | null>(toNativeDate(value.toDate))
 
-  const [tempFromDate, setTempFromDate] = useState<string | null>(value.fromDate)
-  const [tempToDate, setTempToDate] = useState<string | null>(value.toDate)
   const [isTodayPressed, setIsTodayPressed] = useState(true)
 
   useEffect(() => {
-    setTempFromDate(value.fromDate)
-    setTempToDate(value.toDate)
+    setTempFromDate(toNativeDate(value.fromDate))
+    setTempToDate(toNativeDate(value.toDate))
+
     if (value.fromDate && value.toDate) {
       const todayRange = getTodayDateRange()
       setIsTodayPressed(value.fromDate === todayRange.fromDate && value.toDate === todayRange.toDate)
+    } else {
+      setIsTodayPressed(false)
     }
   }, [value.fromDate, value.toDate])
 
   const handleFromDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     setIsTodayPressed(false)
+
     if (Platform.OS === 'android') {
       setShowFromPicker(false)
       if (event.type === 'set' && selectedDate) {
-        setTempFromDate(toISOString(selectedDate))
+        setTempFromDate(selectedDate)
       }
-    } else {
-      if (selectedDate) {
-        setTempFromDate(toISOString(selectedDate))
-      }
+      return
+    }
+
+    if (selectedDate) {
+      setTempFromDate(selectedDate)
     }
   }
 
   const handleToDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     setIsTodayPressed(false)
+
     if (Platform.OS === 'android') {
       setShowToPicker(false)
       if (event.type === 'set' && selectedDate) {
-        setTempToDate(toEndOfDayISOString(selectedDate))
+        setTempToDate(selectedDate)
       }
-    } else {
-      if (selectedDate) {
-        setTempToDate(toEndOfDayISOString(selectedDate))
-      }
+      return
+    }
+
+    if (selectedDate) {
+      setTempToDate(selectedDate)
     }
   }
 
@@ -91,9 +104,11 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
 
   const handleTodayPress = () => {
     const { fromDate, toDate } = getTodayDateRange()
-    setTempFromDate(fromDate)
-    setTempToDate(toDate)
+
+    setTempFromDate(toNativeDate(fromDate))
+    setTempToDate(toNativeDate(toDate))
     setIsTodayPressed(true)
+
     onChange({
       fromDate,
       toDate
@@ -101,11 +116,10 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
   }
 
   const handleApply = () => {
-    if (tempFromDate && tempToDate && dayjs(tempFromDate).isAfter(tempToDate)) return
-
+    if (tempFromDate && tempToDate && dayjs(tempFromDate).isAfter(dayjs(tempToDate), 'day')) return
     onChange({
-      fromDate: tempFromDate,
-      toDate: tempToDate
+      fromDate: toStartOfDayString(tempFromDate),
+      toDate: toEndOfDayString(tempToDate)
     })
   }
 
@@ -125,16 +139,14 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
       >
         <Text
           className={`${config.textSize} font-semibold`}
-          style={{
-            color: isTodayPressed ? '#fff' : colors.textSecondary
-          }}
+          style={{ color: isTodayPressed ? '#fff' : colors.textSecondary }}
         >
           Hôm nay
         </Text>
       </TouchableOpacity>
 
       <View
-        className={`w-[1px]`}
+        className='w-[1px]'
         style={{
           height: config.iconSize + 4,
           backgroundColor: colors.border,
@@ -142,11 +154,8 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
         }}
       />
 
-      {/* From Date */}
       <TouchableOpacity
-        onPress={() => {
-          setShowFromPicker(true)
-        }}
+        onPress={() => setShowFromPicker(true)}
         disabled={disabled}
         className='rounded-lg border'
         style={{
@@ -158,7 +167,7 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
         activeOpacity={0.7}
       >
         <Text className={`${config.textSize} font-medium`} style={{ color: colors.text }}>
-          {formatDisplayDate(dayjs(tempFromDate), 'DD/MM/YYYY')}
+          {formatDate(tempFromDate, 'DD/MM/YYYY')}
         </Text>
       </TouchableOpacity>
 
@@ -166,11 +175,8 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
         -
       </Text>
 
-      {/* To Date */}
       <TouchableOpacity
-        onPress={() => {
-          setShowToPicker(true)
-        }}
+        onPress={() => setShowToPicker(true)}
         disabled={disabled}
         className='rounded-lg border'
         style={{
@@ -182,11 +188,10 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
         activeOpacity={0.7}
       >
         <Text className={`${config.textSize} font-medium`} style={{ color: colors.text }}>
-          {formatDisplayDate(dayjs(tempToDate), 'DD/MM/YYYY')}
+          {formatDate(tempToDate, 'DD/MM/YYYY')}
         </Text>
       </TouchableOpacity>
 
-      {/* Apply Button - always visible but disabled when today is selected */}
       <TouchableOpacity
         onPress={handleApply}
         disabled={disabled || isTodayPressed}
@@ -206,7 +211,6 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
         </Text>
       </TouchableOpacity>
 
-      {/* From Date Picker Modal */}
       {Platform.OS === 'ios' && showFromPicker && (
         <Modal transparent animationType='slide'>
           <View className='flex-1 justify-end bg-black/50'>
@@ -227,11 +231,12 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
                   <Text style={{ color: colors.primary, fontWeight: '600' }}>Xong</Text>
                 </TouchableOpacity>
               </View>
+
               <DateTimePicker
-                value={tempFromDate ? new Date(tempFromDate) : new Date()}
+                value={tempFromDate ?? new Date()}
                 mode='date'
                 locale='vi'
-                maximumDate={tempToDate ? new Date(tempToDate) : undefined}
+                maximumDate={tempToDate ?? undefined}
                 display='spinner'
                 onChange={handleFromDateChange}
                 textColor={colors.text}
@@ -243,15 +248,13 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
 
       {Platform.OS === 'android' && showFromPicker && (
         <DateTimePicker
-          value={tempFromDate ? new Date(tempFromDate) : new Date()}
+          value={tempFromDate ?? new Date()}
           mode='date'
-          maximumDate={tempToDate ? new Date(tempToDate) : undefined}
+          maximumDate={tempToDate ?? undefined}
           display='default'
           onChange={handleFromDateChange}
         />
       )}
-
-      {/* To Date Picker Modal */}
 
       {Platform.OS === 'ios' && showToPicker && (
         <Modal transparent animationType='slide'>
@@ -273,13 +276,14 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
                   <Text style={{ color: colors.primary, fontWeight: '600' }}>Xong</Text>
                 </TouchableOpacity>
               </View>
+
               <DateTimePicker
-                value={tempToDate ? new Date(tempToDate) : new Date()}
+                value={tempToDate ?? new Date()}
                 mode='date'
                 locale='vi-VN'
                 display='spinner'
                 maximumDate={new Date()}
-                minimumDate={tempFromDate ? new Date(tempFromDate) : undefined}
+                minimumDate={tempFromDate ?? undefined}
                 onChange={handleToDateChange}
                 textColor={colors.text}
               />
@@ -287,13 +291,14 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
           </View>
         </Modal>
       )}
+
       {Platform.OS === 'android' && showToPicker && (
         <DateTimePicker
-          value={tempToDate ? new Date(tempToDate) : new Date()}
+          value={tempToDate ?? new Date()}
           mode='date'
           display='default'
           maximumDate={new Date()}
-          minimumDate={tempFromDate ? new Date(tempFromDate) : undefined}
+          minimumDate={tempFromDate ?? undefined}
           onChange={handleToDateChange}
         />
       )}

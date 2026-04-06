@@ -1,4 +1,4 @@
-export type ErrorDomain = 'auth' | 'user' | 'order' | 'common'
+export type ErrorDomain = 'auth' | 'user' | 'order' | 'common' | 'forgotPassword'
 
 export const ERROR_CODE = {
   // General Errors (E0001-E0009)
@@ -25,6 +25,13 @@ export const ERROR_CODE = {
   // Authentication Errors (E0043-E0049)
   E0043: 'E0043', // Unauthorized - Token has been expired
   E0044: 'E0044', // Unauthorized - Token has been revoked or invalid
+
+  // Forgot Password Errors (E0050-E0059)
+  E0050: 'E0050', // OTP expired
+  E0051: 'E0051', // OTP invalid
+  E0052: 'E0052', // OTP attempts exceeded
+  E0053: 'E0053', // Reset token expired
+  E0054: 'E0054', // Reset token invalid
 
   // System Errors
   E9999: 'E9999' // Internal server error - Unexpected system error

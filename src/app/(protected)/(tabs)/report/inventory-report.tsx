@@ -17,7 +17,7 @@ export default function InventoryScreen() {
   const [searchText, setSearchText] = useState('')
   const [submittedMaterialName, setSubmittedMaterialName] = useState<string | undefined>(undefined)
 
-  const canSubmitSearch = searchText.trim().length >= 3
+  const canSubmitSearch = searchText.trim().length > 0
 
   const { inventory = [], isLoading, isFetching, isRefetching, refetch } = useInventoryReport(submittedMaterialName)
 

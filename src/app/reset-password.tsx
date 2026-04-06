@@ -1,6 +1,7 @@
+import { useTheme } from '@/shared/hooks/useTheme'
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
-import React, { useState } from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import React from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -8,19 +9,43 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AnimatedLogoContainer } from '@/components/atoms/AnimatedLogoContainer'
 import { AppLogo } from '@/components/molecules/AppLogo'
 import { LoginBackground } from '@/components/molecules/LoginBackground'
-import { ApiConfigModal } from '@/components/organisms/ApiConfigModal'
-import { LoginForm } from '@/components/organisms/LoginForm'
-import { useTheme } from '@/shared/hooks/useTheme'
+import { ResetPasswordForm } from '@/components/organisms/ResetPasswordForm'
 
-export default function LoginScreen() {
+export default function ResetPasswordScreen() {
   const { colors, isDark, gradients } = useTheme()
   const { isVisible } = useKeyboardState()
-  const [showApiModal, setShowApiModal] = useState(false)
-  const router = useRouter()
   const insets = useSafeAreaInsets()
+  const router = useRouter()
+  const { resetPasswordToken, expiresAt } = useLocalSearchParams<{
+    resetPasswordToken: string
+    expiresAt: string
+  }>()
 
-  const handleForgotPassword = () => {
-    router.push('/forgot-password' as any)
+  if (!resetPasswordToken) {
+    return (
+      <View className='flex-1 items-center justify-center'>
+        <View className='items-center'>
+          <Ionicons name='warning' size={48} color={colors.error} />
+          <Text className='text-lg font-bold mt-4' style={{ color: colors.error }}>
+            Liên kết không hợp lệ
+          </Text>
+          <Text className='text-sm mt-2 text-center px-8' style={{ color: colors.textSecondary }}>
+            Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.
+          </Text>
+          <TouchableOpacity
+            onPress={() => router.replace('/forgot-password')}
+            className='mt-6 px-6 py-3 rounded-2xl'
+            style={{ backgroundColor: colors.primary }}
+          >
+            <Text className='text-white font-semibold'>Quay lại</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    )
+  }
+
+  const handleSuccess = () => {
+    router.replace('/login')
   }
 
   return (
@@ -28,18 +53,18 @@ export default function LoginScreen() {
       {/* Background */}
       <LoginBackground colors={colors} isDark={isDark} gradients={gradients} />
 
-      {/* 🔧 API Config Button */}
+      {/* Back Button */}
       <TouchableOpacity
+        onPress={() => router.replace('/forgot-password')}
         activeOpacity={0.7}
-        onPress={() => setShowApiModal(true)}
         className='absolute z-10 rounded-full p-2'
         style={{
           top: insets.top + 12,
-          right: 16,
+          left: 16,
           backgroundColor: isDark ? `${colors.surface}CC` : `${colors.card}CC`
         }}
       >
-        <Ionicons name='settings-outline' size={22} color={colors.textSecondary} />
+        <Ionicons name='arrow-back' size={22} color={colors.text} />
       </TouchableOpacity>
 
       <KeyboardAwareScrollView
@@ -62,11 +87,7 @@ export default function LoginScreen() {
           </AnimatedLogoContainer>
 
           <Text className='text-3xl font-bold tracking-wide mt-4' style={{ color: colors.text }}>
-            Milk Tea
-          </Text>
-
-          <Text className='text-xl font-semibold' style={{ color: colors.primary }}>
-            Shop
+            Đặt lại mật khẩu
           </Text>
         </View>
 
@@ -84,7 +105,7 @@ export default function LoginScreen() {
             elevation: isDark ? 15 : 8
           }}
         >
-          <LoginForm onForgotPassword={handleForgotPassword} />
+          <ResetPasswordForm resetPasswordToken={resetPasswordToken} expiresAt={expiresAt} onSuccess={handleSuccess} />
         </View>
 
         {/* Footer */}
@@ -94,8 +115,6 @@ export default function LoginScreen() {
           </Text>
         </View>
       </KeyboardAwareScrollView>
-
-      <ApiConfigModal visible={showApiModal} onClose={() => setShowApiModal(false)} canClose={true} />
     </View>
   )
 }

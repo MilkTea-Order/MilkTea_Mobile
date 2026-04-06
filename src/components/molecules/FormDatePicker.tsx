@@ -1,6 +1,6 @@
 import { DatePickerModal } from '@/components/molecules/DatePickerModal'
 import { useTheme } from '@/shared/hooks/useTheme'
-import { formatDisplayDate, parseStringToDate } from '@/shared/utils/date.util'
+import { formatDate, parseDate } from '@/shared/utils/date.util'
 import { Ionicons } from '@expo/vector-icons'
 import dayjs from 'dayjs'
 import React, { useMemo, useState } from 'react'
@@ -32,7 +32,7 @@ export function FormDatePicker({
   const hasError = touched && error
 
   const committedDate = useMemo(() => {
-    return parseStringToDate(value) ?? (value ? dayjs(value) : null)
+    return parseDate(value, 'YYYY-MM-DD') ?? (value ? dayjs(value) : null)
   }, [value])
 
   const open = () => !disabled && setShowPicker(true)
@@ -74,7 +74,7 @@ export function FormDatePicker({
               fontWeight: '500'
             }}
           >
-            {committedDate ? formatDisplayDate(committedDate) : placeholder}
+            {committedDate ? formatDate(committedDate, 'DD/MM/YYYY') : placeholder}
           </Text>
           <Ionicons name='calendar' size={20} color={colors.primary} />
         </View>
@@ -94,7 +94,9 @@ export function FormDatePicker({
         initialDate={committedDate ?? dayjs()}
         onCancel={close}
         onConfirm={(d) => {
-          onChange(formatDisplayDate(d))
+          // const now = dayjs()
+          // const dateWithTime = d.hour(now.hour()).minute(now.minute()).second(now.second())
+          onChange(formatDate(d, 'YYYY-MM-DD'))
           close()
         }}
       />

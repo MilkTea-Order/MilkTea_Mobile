@@ -7,7 +7,6 @@ import { AddFinanceTransactionPayload, FinanceGroupReport } from '@/features/rep
 import { User } from '@/features/user/types/user.type'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { Ionicons } from '@expo/vector-icons'
-import dayjs from 'dayjs'
 import { Formik } from 'formik'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import {
@@ -104,7 +103,7 @@ export function CreateExpenseModal({ visible, onClose, groups, users }: Props) {
     const payload: AddFinanceTransactionPayload = {
       transactionGroupId: values.transactionGroupId,
       name: values.name,
-      transactionDate: dayjs(values.transactionDate, 'DD/MM/YYYY').toISOString(),
+      transactionDate: values.transactionDate,
       transactionBy: values.transactionBy,
       amount: Number(values.amount),
       note: values.note

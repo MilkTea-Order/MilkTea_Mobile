@@ -9,7 +9,7 @@ import { PAYMENT_METHOD, PAYMENT_METHODS, PaymentMethod } from '@/shared/constan
 import { ORDER_STATUS_OPTIONS, OrderStatus, STATUS } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
-import { formatDisplayDate, getTodayDateRange } from '@/shared/utils/date.util'
+import { formatDate, getTodayDateRange } from '@/shared/utils/date.util'
 import { Ionicons } from '@expo/vector-icons'
 import dayjs from 'dayjs'
 import { router, useFocusEffect } from 'expo-router'
@@ -206,7 +206,7 @@ export default function RevenueReportScreen() {
                     </View>
                     <View>
                       <Text className='text-base font-bold' style={{ color: colors.text }}>
-                        {formatDisplayDate(dayjs(group.date), 'DD/MM/YYYY')}
+                        {formatDate(dayjs(group.date), 'DD/MM/YYYY')}
                       </Text>
                       <Text className='text-xs' style={{ color: colors.textSecondary }}>
                         {group.orders.length} đơn

@@ -4,15 +4,18 @@ export const COMMON_ERROR_MESSAGES: Record<string, string> = {
   [ERROR_CODE.E0001]: 'Không tồn tại hoặc không khớp với dữ liệu',
   [ERROR_CODE.E0002]: 'Đã tồn tại',
   [ERROR_CODE.E0004]: 'Yêu cầu một trong các mục: Code hoặc Email hoặc Phone',
-  [ERROR_CODE.E0005]: 'Tài khoản của bạn chưa được kích hoạt. Vui lòng liên hệ quản trị viên.',
+  [ERROR_CODE.E0012]: 'Mật khẩu mới không được giống mật khẩu cũ.',
   [ERROR_CODE.E0027]: 'Lỗi xử lý. Vui lòng thử lại.',
-  [ERROR_CODE.E0029]: 'Trạng thái không hợp lệ cho thao tác này.',
   [ERROR_CODE.E0036]: 'Dữ liệu không hợp lệ.',
-  [ERROR_CODE.E0040]: 'Món không có sẵn.',
   [ERROR_CODE.E0041]: 'Nguyên liệu không đủ số lượng để xuất.',
   [ERROR_CODE.E0042]: 'Không thể hủy đơn - Trạng thái đơn hàng không cho phép hủy.',
-  [ERROR_CODE.E0043]: 'Không có quyền truy cập - Token đã bị hết hạn',
-  [ERROR_CODE.E0044]: 'Không có quyền truy cập - Token đã bị thu hồi hoặc không hợp lệ',
+
+  // Forgot Password Errors
+  [ERROR_CODE.E0050]: 'Mã xác minh đã hết hạn. Vui lòng gửi lại mã mới.',
+  [ERROR_CODE.E0051]: 'Mã xác minh không chính xác.',
+  [ERROR_CODE.E0052]: 'Bạn đã nhập sai quá nhiều lần. Vui lòng gửi lại mã mới.',
+  [ERROR_CODE.E0053]: 'Liên kết đặt lại mật khẩu đã hết hạn.',
+  [ERROR_CODE.E0054]: 'Liên kết đặt lại mật khẩu không hợp lệ.',
   [ERROR_CODE.E9999]: 'Lỗi hệ thống. Vui lòng thử lại sau.'
 }
 
@@ -28,6 +31,32 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
       phone: 'Số điện thoại đã tồn tại'
     }
   },
+  forgotPassword: {
+    // Send OTP
+    [ERROR_CODE.E0001]: {
+      email: 'Email không tồn tại trong hệ thống',
+      otp: 'OTP không đúng'
+    },
+    [ERROR_CODE.E0002]: {
+      newpassword: 'Mật khẩu mới không được giống mật khẩu cũ',
+      confirmpassword: 'Mật khẩu xác nhận không khớp với mật khẩu mới'
+    },
+    [ERROR_CODE.E0043]: {
+      otp: 'OTP đã hết hạn'
+    },
+    [ERROR_CODE.E0044]: {
+      otp: 'OTP của bạn không được phép xác thực, hãy liên hệ admin',
+      email: 'Bạn đã vượt quá số lần cho phép gữi lại otp'
+    },
+    [ERROR_CODE.E0036]: {
+      email: 'Email không hợp lệ',
+      newpassword: 'Mật khẩu mới không hợp lệ'
+    },
+    [ERROR_CODE.E9999]: {
+      sendotp: 'Không thể gửi mã xác minh. Vui lòng thử lại.',
+      resetpassword: 'Đặt lại mật khẩu không thành công. Vui lòng thử lại.'
+    }
+  },
   user: {
     [ERROR_CODE.E0001]: {
       password: 'Mật khẩu không đúng',
@@ -35,12 +64,11 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
     },
     [ERROR_CODE.E0002]: {
       email: 'Email đã được sử dụng',
-      cellphone: 'Số điện thoại đã được sử dụng'
-    },
-    [ERROR_CODE.E0012]: {
+      cellphone: 'Số điện thoại đã được sử dụng',
       newpassword: 'Mật khẩu mới không được giống mật khẩu cũ',
       confirmpassword: 'Mật khẩu xác nhận không khớp với mật khẩu mới'
     },
+
     [ERROR_CODE.E0036]: {
       fullname: 'Họ và tên phải từ 2 kí tự trở lên',
       gender: 'Chọn giới tính không hợp lệ',

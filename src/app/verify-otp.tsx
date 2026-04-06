@@ -1,6 +1,7 @@
+import { useTheme } from '@/shared/hooks/useTheme'
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
-import React, { useState } from 'react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import React from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -8,19 +9,35 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { AnimatedLogoContainer } from '@/components/atoms/AnimatedLogoContainer'
 import { AppLogo } from '@/components/molecules/AppLogo'
 import { LoginBackground } from '@/components/molecules/LoginBackground'
-import { ApiConfigModal } from '@/components/organisms/ApiConfigModal'
-import { LoginForm } from '@/components/organisms/LoginForm'
-import { useTheme } from '@/shared/hooks/useTheme'
+import { VerifyOtpForm } from '@/components/organisms/VerifyOtpForm'
 
-export default function LoginScreen() {
+export default function VerifyOtpScreen() {
   const { colors, isDark, gradients } = useTheme()
   const { isVisible } = useKeyboardState()
-  const [showApiModal, setShowApiModal] = useState(false)
-  const router = useRouter()
   const insets = useSafeAreaInsets()
+  const router = useRouter()
+  const { email } = useLocalSearchParams<{ email: string; expiresAt: string }>()
 
-  const handleForgotPassword = () => {
-    router.push('/forgot-password' as any)
+  if (!email) {
+    return (
+      <View className='flex-1 items-center justify-center'>
+        <Text style={{ color: colors.error }}>Không tìm thấy email</Text>
+        <TouchableOpacity onPress={() => router.replace('/login')} className='mt-4'>
+          <Text style={{ color: colors.primary }}>Quay về đăng nhập</Text>
+        </TouchableOpacity>
+      </View>
+    )
+  }
+
+  const handleBack = () => {
+    router.back()
+  }
+
+  const handleSuccess = (resetPasswordToken: string, expiresAt: string) => {
+    router.replace({
+      pathname: '/reset-password',
+      params: { resetPasswordToken, expiresAt }
+    })
   }
 
   return (
@@ -28,18 +45,18 @@ export default function LoginScreen() {
       {/* Background */}
       <LoginBackground colors={colors} isDark={isDark} gradients={gradients} />
 
-      {/* 🔧 API Config Button */}
+      {/* Back Button */}
       <TouchableOpacity
+        onPress={handleBack}
         activeOpacity={0.7}
-        onPress={() => setShowApiModal(true)}
         className='absolute z-10 rounded-full p-2'
         style={{
           top: insets.top + 12,
-          right: 16,
+          left: 16,
           backgroundColor: isDark ? `${colors.surface}CC` : `${colors.card}CC`
         }}
       >
-        <Ionicons name='settings-outline' size={22} color={colors.textSecondary} />
+        <Ionicons name='arrow-back' size={22} color={colors.text} />
       </TouchableOpacity>
 
       <KeyboardAwareScrollView
@@ -62,11 +79,7 @@ export default function LoginScreen() {
           </AnimatedLogoContainer>
 
           <Text className='text-3xl font-bold tracking-wide mt-4' style={{ color: colors.text }}>
-            Milk Tea
-          </Text>
-
-          <Text className='text-xl font-semibold' style={{ color: colors.primary }}>
-            Shop
+            Nhập OTP
           </Text>
         </View>
 
@@ -84,7 +97,7 @@ export default function LoginScreen() {
             elevation: isDark ? 15 : 8
           }}
         >
-          <LoginForm onForgotPassword={handleForgotPassword} />
+          <VerifyOtpForm email={email} onBack={handleBack} onSuccess={handleSuccess} />
         </View>
 
         {/* Footer */}
@@ -94,8 +107,6 @@ export default function LoginScreen() {
           </Text>
         </View>
       </KeyboardAwareScrollView>
-
-      <ApiConfigModal visible={showApiModal} onClose={() => setShowApiModal(false)} canClose={true} />
     </View>
   )
 }

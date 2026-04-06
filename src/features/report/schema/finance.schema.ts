@@ -9,7 +9,7 @@ const schema = yup.object({
     .required('Chọn ngày')
     .test('not-in-future', 'Không được chọn ngày tương lai', (value) => {
       if (!value) return false
-      return isNotFutureDate(value)
+      return isNotFutureDate(value, 'YYYY-MM-DD')
     }),
   amount: yup.number().typeError('Số tiền không hợp lệ').positive('Phải > 0').required('Nhập số tiền'),
   transactionBy: yup.number().required('Chọn người thu'),

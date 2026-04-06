@@ -17,6 +17,7 @@ export interface FinanceItemReport {
   amount: number
   actionDate: string
   createdDate: string
+  note?: string
 }
 
 export interface AddFinanceTransactionPayload {

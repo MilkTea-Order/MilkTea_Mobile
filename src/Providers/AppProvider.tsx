@@ -32,6 +32,9 @@ export default function AppProvider() {
               </Stack.Protected>
               <Stack.Protected guard={!isAuthenticated}>
                 <Stack.Screen name='login' options={{ gestureEnabled: false }} />
+                <Stack.Screen name='forgot-password' options={{ gestureEnabled: true }} />
+                <Stack.Screen name='verify-otp' options={{ gestureEnabled: true }} />
+                <Stack.Screen name='reset-password' options={{ gestureEnabled: true }} />
               </Stack.Protected>
             </Stack>
             <StatusBar style={effectiveTheme === THEME_VARIANT.DARK ? 'light' : 'dark'} />

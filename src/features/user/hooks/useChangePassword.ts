@@ -1,7 +1,6 @@
 import { useAuthStore } from '@/features/auth/store/auth.store'
 import { extractFieldErrors, setFormikFieldErrors } from '@/shared/utils/formErrors'
 import { useMutation } from '@tanstack/react-query'
-import { Toast } from 'react-native-toast-notifications'
 import { userApi } from '../apis/user.api'
 import { ChangePasswordPayload } from '../types/user.type'
 
@@ -20,8 +19,6 @@ export function useChangePassword() {
       return response.data
     },
     onSuccess: async (apiResponse) => {
-      const message = 'Đổi mật khẩu thành công!'
-      Toast.show(message, { type: 'success' })
       await logout()
     },
     onError: (error: any) => {

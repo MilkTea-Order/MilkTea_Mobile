@@ -4,13 +4,14 @@ import { CollapsibleSection } from '@/components/molecules/CollapsibleSection'
 import { CreateExpenseModal } from '@/components/organisms/CreateExpenseModal'
 import { DateFilterPicker } from '@/components/organisms/DateFilterPicker'
 import { useFinanceGroupReport, useFinanceReport } from '@/features/report/hooks/useReport'
-import { FinanceGroupReport, FinanceReport } from '@/features/report/types/finance.type'
+import { FinanceGroupReport, FinanceItemReport, FinanceReport } from '@/features/report/types/finance.type'
 import { useUserList } from '@/features/user/hooks/useUser'
+import { FINANCE_GROUP_ID } from '@/shared/constants/finance'
 import { MARGIN_FAB, SIZE_FAB } from '@/shared/constants/other'
 import { ColorTheme } from '@/shared/constants/theme'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
-import { formatDisplayDate, getTodayDateRange } from '@/shared/utils/date.util'
+import { formatDate, getTodayDateRange } from '@/shared/utils/date.util'
 import { Ionicons } from '@expo/vector-icons'
 import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query'
 
@@ -28,11 +29,19 @@ function getAmountColor(amount: number) {
   return amount < 0 ? COLOR_NEGATIVE : COLOR_POSITIVE
 }
 
-function FinanceItemRow({ item, isLast, amount }: any) {
+function FinanceItemRow({
+  item,
+  isLast,
+  amount,
+  isCollected
+}: {
+  item: FinanceItemReport
+  isLast: boolean
+  amount: number
+  isCollected: boolean
+}) {
   const { colors } = useTheme()
   const color = getAmountColor(amount)
-
-  const displayTime = dayjs(item.createdDate).format('HH:mm')
 
   return (
     <View
@@ -47,8 +56,13 @@ function FinanceItemRow({ item, isLast, amount }: any) {
           {item.name}
         </Text>
         <Text className='text-xs mt-0.5' style={{ color: colors.textSecondary }}>
-          Giờ tạo: {displayTime}
+          Giờ {isCollected ? 'thu' : 'chi'}: {formatDate(dayjs(item.actionDate), 'HH:mm')}
         </Text>
+        {item.note && (
+          <Text className='text-xs mt-0.5' style={{ color: colors.textSecondary }}>
+            Ghi chú: {item.note}
+          </Text>
+        )}
       </View>
       <Text className='text-sm font-bold' style={{ color }}>
         {formatCurrencyVND(item.amount)}
@@ -85,7 +99,12 @@ function GroupSection({ group }: { group: FinanceGroupReport }) {
         scrollEnabled={false}
         keyExtractor={(item) => `${item.id}`}
         renderItem={({ item, index }) => (
-          <FinanceItemRow item={item} isLast={index === group.items.length - 1} amount={group.totalAmount} />
+          <FinanceItemRow
+            item={item}
+            isLast={index === group.items.length - 1}
+            amount={group.totalAmount}
+            isCollected={group.id === FINANCE_GROUP_ID.COLLECTED}
+          />
         )}
       />
     </CollapsibleSection>
@@ -103,7 +122,7 @@ function DateGroup({ dateGroup }: { dateGroup: FinanceReport }) {
         <View className='flex-row items-center flex-1'>
           <View className='flex-1'>
             <Text className='text-sm font-bold' style={{ color: colors.text }}>
-              {formatDisplayDate(dayjs(dateGroup.date), 'DD/MM/YYYY')}
+              {formatDate(dayjs(dateGroup.date), 'DD/MM/YYYY')}
             </Text>
             <Text className='text-xs' style={{ color: colors.textSecondary }}>
               {dateGroup.groups.reduce<number>((sum, g) => sum + g.items.length, 0)} biến động

@@ -2,7 +2,7 @@ import { Order } from '@/features/order/types/order.type'
 import { STATUS } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
-import { formatDisplayDate } from '@/shared/utils/date.util'
+import { formatDate } from '@/shared/utils/date.util'
 import { Ionicons } from '@expo/vector-icons'
 import dayjs from 'dayjs'
 import { Image, Text, TouchableOpacity, View } from 'react-native'
@@ -61,7 +61,7 @@ export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props
 
                 <Text className='text-[10px]' style={{ color: colors.textSecondary }}>
                   Giờ {order.status.id === parseInt(STATUS.ORDER.PAID, 10) ? 'thu tiền' : 'thanh toán'}:{' '}
-                  {formatDisplayDate(
+                  {formatDate(
                     dayjs(
                       order.status.id === parseInt(STATUS.ORDER.PAID, 10)
                         ? (order.actionDate ?? null)

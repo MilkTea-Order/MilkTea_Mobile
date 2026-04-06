@@ -21,3 +21,29 @@ export interface Profile {
 export interface LoginResponse extends Token, Profile {}
 
 export type LoginApiResponse = ApiResponse<LoginResponse>
+
+// ─── Forgot Password Types ─────────────────────────────────────────────────
+
+export interface ForgotPasswordPayload {
+  email: string
+}
+
+export interface VerifyOtpPayload {
+  email: string
+  otp: string
+}
+
+export interface ResetPasswordPayload {
+  resetPasswordToken: string
+  newPassword: string
+  confirmPassword: string
+}
+
+export interface VerifyOtpResponseData {
+  resetPasswordToken: string
+  expiresAt: string
+}
+
+export type ForgotPasswordResponse = ApiResponse<{ expiresAt: string }>
+export type VerifyOtpApiResponse = ApiResponse<VerifyOtpResponseData>
+export type ResetPasswordApiResponse = ApiResponse<null>

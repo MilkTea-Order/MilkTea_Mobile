@@ -3,7 +3,7 @@ import { STATUS } from '@/shared/constants/status'
 import type { ThemeVariant } from '@/shared/constants/theme'
 import { statusColors } from '@/shared/constants/theme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
-import { formatDisplayDate } from '@/shared/utils/date.util'
+import { formatDate } from '@/shared/utils/date.util'
 import { Ionicons } from '@expo/vector-icons'
 import dayjs from 'dayjs'
 import React from 'react'
@@ -29,6 +29,14 @@ export const OrderCard = ({
   onPressTransferTable
 }: Props) => {
   const imgTable = order.dinnerTable.usingImg
+  const date =
+    order.status.id === parseInt(STATUS.ORDER.UNPAID, 10)
+      ? order.orderDate
+      : order.status.id === parseInt(STATUS.ORDER.NO_COLLECTED, 10)
+        ? order.paymentDate
+        : order.status.id === parseInt(STATUS.ORDER.PAID, 10)
+          ? order.actionDate
+          : order.cancelledDate
   return (
     <TouchableOpacity
       className='rounded-2xl overflow-hidden'
@@ -69,7 +77,7 @@ export const OrderCard = ({
         <View className='flex-row items-center mb-1.5'>
           <Ionicons name='time-outline' size={10} color={colors.textSecondary} style={{ marginRight: 3 }} />
           <Text className='text-[9px]' style={{ color: colors.textSecondary }} numberOfLines={1}>
-            {formatDisplayDate(dayjs(order.orderDate), 'HH:mm DD/MM/YYYY')}
+            {formatDate(date ? dayjs(date) : null, 'HH:mm DD/MM/YYYY')}
             {/* {order.orderID} */}
           </Text>
         </View>
