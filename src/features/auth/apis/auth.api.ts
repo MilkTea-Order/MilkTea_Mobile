@@ -7,6 +7,7 @@ import {
   ForgotPasswordResponse,
   LoginPayload,
   LoginResponse,
+  ResendOtpPayload,
   ResetPasswordApiResponse,
   ResetPasswordPayload,
   VerifyOtpApiResponse,
@@ -23,15 +24,26 @@ export const authApi = {
   },
 
   forgotPassword(body: ForgotPasswordPayload): Promise<AxiosResponse<ForgotPasswordResponse>> {
-    return http.post<ForgotPasswordResponse>(URL.FORGOT_PASSWORD, body)
+    return http.post<ForgotPasswordResponse>(URL.FORGOT_PASSWORD, { email: body.email, function: 'RESET_PASSWORD' })
   },
 
-  verifyOtp(body: VerifyOtpPayload): Promise<AxiosResponse<VerifyOtpApiResponse>> {
-    return http.post<VerifyOtpApiResponse>(URL.FORGOT_PASSWORD_VERIFY, body)
+  verifyOtp(body: VerifyOtpPayload, sessionId: number): Promise<AxiosResponse<VerifyOtpApiResponse>> {
+    return http.post<VerifyOtpApiResponse>(URL.FORGOT_PASSWORD_VERIFY + sessionId + '/verify', body)
   },
 
-  resendOtp(body: ForgotPasswordPayload): Promise<AxiosResponse<ForgotPasswordResponse>> {
-    return http.post<ForgotPasswordResponse>(URL.FORGOT_PASSWORD_RESEND, body)
+  // resendOtp(body: ResendOtpPayload, sessionId: number): Promise<AxiosResponse<ForgotPasswordResponse>> {
+  //   return http.post<ForgotPasswordResponse>(URL.FORGOT_PASSWORD_RESEND + sessionId + '/resend', body)
+  // },
+  resendOtp(
+    body: ResendOtpPayload,
+    sessionId: number,
+    idempotencyKey: string
+  ): Promise<AxiosResponse<ForgotPasswordResponse>> {
+    return http.post<ForgotPasswordResponse>(`${URL.FORGOT_PASSWORD_RESEND}${sessionId}/resend`, body, {
+      headers: {
+        'Idempotency-Key': idempotencyKey
+      }
+    })
   },
   resetPassword(body: ResetPasswordPayload): Promise<AxiosResponse<ResetPasswordApiResponse>> {
     return http.post<ResetPasswordApiResponse>(URL.FORGOT_PASSWORD_RESET, body)

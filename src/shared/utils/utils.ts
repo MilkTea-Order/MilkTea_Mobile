@@ -81,3 +81,9 @@ export const formatNumber = (value: number, decimals = 2) => {
     maximumFractionDigits: decimals
   }).format(value)
 }
+
+export const generateIdempotencyKey = (): string => {
+  const timestamp = Date.now().toString(36)
+  const randomPart = Math.random().toString(36).substring(2, 15)
+  return `${timestamp}-${randomPart}`
+}

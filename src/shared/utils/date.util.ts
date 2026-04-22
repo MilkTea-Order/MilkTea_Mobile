@@ -59,6 +59,13 @@ export const getTodayDateRange = (): { fromDate: string; toDate: string } => {
     toDate: today
   }
 }
+export const checkIsToday = (fromDate: string | null, toDate: string | null): boolean => {
+  if (!fromDate || !toDate) return false
+  const today = dayjs().format('YYYY-MM-DD')
+  const from = fromDate.split('T')[0]
+  const to = toDate.split('T')[0]
+  return from === today && to === today
+}
 
 export const isToday = (value?: string | Date | null, format = 'YYYY-MM-DD'): boolean => {
   const d = parseDate(value, format)

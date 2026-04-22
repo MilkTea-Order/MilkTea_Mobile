@@ -28,9 +28,12 @@ export interface ForgotPasswordPayload {
   email: string
 }
 
+export interface ResendOtpPayload {
+  channel: 'EMAIL' | 'SMS'
+}
+
 export interface VerifyOtpPayload {
-  email: string
-  otp: string
+  otpCode: string
 }
 
 export interface ResetPasswordPayload {
@@ -44,6 +47,6 @@ export interface VerifyOtpResponseData {
   expiresAt: string
 }
 
-export type ForgotPasswordResponse = ApiResponse<{ expiresAt: string }>
+export type ForgotPasswordResponse = ApiResponse<{ sessionId: number; expiresAt: string }>
 export type VerifyOtpApiResponse = ApiResponse<VerifyOtpResponseData>
 export type ResetPasswordApiResponse = ApiResponse<null>

@@ -3,7 +3,10 @@ import * as Yup from 'yup'
 // ─── Forgot Password Schema ───────────────────────────────────────────────
 
 export const forgotPasswordValidationSchema = Yup.object({
-  email: Yup.string().trim().email('Email không hợp lệ').required('Vui lòng nhập email')
+  email: Yup.string()
+    .trim()
+    .required('Vui lòng nhập email.')
+    .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Email không hợp lệ.')
 })
 
 export type ForgotPasswordSchema = Yup.InferType<typeof forgotPasswordValidationSchema>
@@ -11,8 +14,6 @@ export type ForgotPasswordSchema = Yup.InferType<typeof forgotPasswordValidation
 // ─── Verify OTP Schema ────────────────────────────────────────────────────
 
 export const verifyOtpValidationSchema = Yup.object({
-  email: Yup.string().trim().email('Email không hợp lệ').required('Vui lòng nhập email'),
-
   otp: Yup.string()
     .length(6, 'Mã xác minh phải gồm 6 chữ số')
     .matches(/^\d{6}$/, 'Mã xác minh chỉ bao gồm chữ số')

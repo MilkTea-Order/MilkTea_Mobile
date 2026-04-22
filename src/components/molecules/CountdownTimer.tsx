@@ -1,5 +1,5 @@
 import { useTheme } from '@/shared/hooks/useTheme'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 
 export interface CountdownTimerProps {
@@ -13,6 +13,11 @@ export function CountdownTimer({ seconds = 60, onExpire, autoStart = true, onRes
   const { colors } = useTheme()
   const [remaining, setRemaining] = useState(autoStart ? seconds : 0)
   const [isActive, setIsActive] = useState(autoStart)
+  const onExpireRef = useRef(onExpire)
+
+  useEffect(() => {
+    onExpireRef.current = onExpire
+  }, [onExpire])
 
   useEffect(() => {
     if (!isActive) return
@@ -22,7 +27,7 @@ export function CountdownTimer({ seconds = 60, onExpire, autoStart = true, onRes
         if (prev <= 1) {
           clearInterval(timer)
           setIsActive(false)
-          onExpire()
+          onExpireRef.current()
           return 0
         }
         return prev - 1
@@ -30,7 +35,7 @@ export function CountdownTimer({ seconds = 60, onExpire, autoStart = true, onRes
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [isActive, onExpire])
+  }, [isActive])
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60)

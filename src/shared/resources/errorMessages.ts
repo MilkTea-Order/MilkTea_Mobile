@@ -34,26 +34,39 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
   forgotPassword: {
     // Send OTP
     [ERROR_CODE.E0001]: {
-      email: 'Email không tồn tại trong hệ thống',
-      otp: 'OTP không đúng'
+      email: 'Email không tồn tại',
+      otpcode: 'OTP không đúng',
+      sessionid: 'Không tồn tại phiên. Vui lòng liên hệ admin để được hỗ trợ',
+      user: 'Không tồn tại người dùng. Vui lòng liên hệ admin để được hỗ trợ',
+      channel: 'Kênh không hỗ trợ. Vui lòng liên hệ admin để được hỗ trợ',
+      idempotencyKey: 'Thiếu idempotency key. Vui lòng liên hệ admin để được hỗ trợ'
     },
     [ERROR_CODE.E0002]: {
       newpassword: 'Mật khẩu mới không được giống mật khẩu cũ',
       confirmpassword: 'Mật khẩu xác nhận không khớp với mật khẩu mới'
     },
+    [ERROR_CODE.E0042]: {
+      sessionid: 'Phiên đã xác minh thành công, Vui lòng mở một phiên mới để thử lại'
+    },
     [ERROR_CODE.E0043]: {
-      otp: 'OTP đã hết hạn'
+      otp: 'OTP đã hết hạn',
+      sessionid: 'Phiên đã hết hạn, Vui lòng mở một phiên mới để thử lại'
     },
     [ERROR_CODE.E0044]: {
       otp: 'OTP của bạn không được phép xác thực, hãy liên hệ admin',
+      sessionid: 'Phiên đã vượt quá số lần cho phép, Vui lòng mở một phiên mới để thử lại',
       email: 'Bạn đã vượt quá số lần cho phép gữi lại otp'
     },
     [ERROR_CODE.E0036]: {
+      function: 'Có lỗi xảy ra hãy liên hệ admin để được hỗ trợ',
       email: 'Email không hợp lệ',
-      newpassword: 'Mật khẩu mới không hợp lệ'
+      newpassword: 'Mật khẩu mới không hợp lệ',
+      channel: 'Kênh không hỗ trợ. Vui lòng liên hệ admin để được hỗ trợ'
     },
     [ERROR_CODE.E9999]: {
       sendotp: 'Không thể gửi mã xác minh. Vui lòng thử lại.',
+      verifyotp: 'Không thể xác minh mã xác minh. Vui lòng thử lại.',
+      resendotp: 'Không thể gửi lại mã xác minh. Vui lòng thử lại.',
       resetpassword: 'Đặt lại mật khẩu không thành công. Vui lòng thử lại.'
     }
   },
@@ -139,9 +152,9 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
 export function getErrorMessage(errorCode: string, domain: ErrorDomain = 'common', fieldName?: string): string {
   const validErrorCode = errorCode as ErrorCode
   // Nếu có fieldName, tìm message cụ thể cho field đó trong domain
-  // console.log("fieldName: ", fieldName);
-  // console.log("domain: ", domain);
-  // console.log("validErrorCode: ", validErrorCode);
+  // console.log('fieldName: ', fieldName)
+  // console.log('domain: ', domain)
+  // console.log('validErrorCode: ', validErrorCode)
   if (fieldName && domain !== 'common' && FIELD_ERROR_MESSAGES[domain]?.[validErrorCode]?.[fieldName]) {
     // console.log("FIELD_ERROR_MESSAGES: ", FIELD_ERROR_MESSAGES[domain][validErrorCode][fieldName]);
     return FIELD_ERROR_MESSAGES[domain][validErrorCode][fieldName]

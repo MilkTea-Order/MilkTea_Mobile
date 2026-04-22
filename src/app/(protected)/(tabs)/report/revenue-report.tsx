@@ -232,6 +232,11 @@ export default function RevenueReportScreen() {
             </CollapsibleSection>
           )
         }}
+        // removeClippedSubviews={true}
+        // maxToRenderPerBatch={10}
+        // updateCellsBatchingPeriod={50}
+        // initialNumToRender={8}
+        // windowSize={10}
       />
     </View>
   )

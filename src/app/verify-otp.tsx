@@ -16,15 +16,55 @@ export default function VerifyOtpScreen() {
   const { isVisible } = useKeyboardState()
   const insets = useSafeAreaInsets()
   const router = useRouter()
-  const { email } = useLocalSearchParams<{ email: string; expiresAt: string }>()
+  const { email, sessionId } = useLocalSearchParams<{ email: string; expiresAt: string; sessionId: string }>()
 
-  if (!email) {
+  if (!sessionId || !email) {
     return (
-      <View className='flex-1 items-center justify-center'>
-        <Text style={{ color: colors.error }}>Không tìm thấy email</Text>
-        <TouchableOpacity onPress={() => router.replace('/login')} className='mt-4'>
-          <Text style={{ color: colors.primary }}>Quay về đăng nhập</Text>
-        </TouchableOpacity>
+      <View className='flex-1'>
+        {/* Background */}
+        <LoginBackground colors={colors} isDark={isDark} gradients={gradients} />
+
+        <View className='flex-1 items-center justify-center px-8'>
+          <View
+            className='w-full max-w-xs rounded-3xl p-8 items-center'
+            style={{
+              backgroundColor: isDark ? `${colors.surface}B3` : `${colors.surface}E6`,
+              borderWidth: 1,
+              borderColor: isDark ? `${colors.border}66` : `${colors.border}B3`,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 12 },
+              shadowOpacity: isDark ? 0.4 : 0.15,
+              shadowRadius: 30,
+              elevation: isDark ? 15 : 8
+            }}
+          >
+            <View
+              className='w-16 h-16 rounded-full items-center justify-center mb-4'
+              style={{ backgroundColor: `${colors.error}20` }}
+            >
+              <Ionicons name='warning' size={32} color={colors.error} />
+            </View>
+
+            <Text className='text-lg font-semibold text-center mb-2' style={{ color: colors.error }}>
+              Đã xảy ra lỗi
+            </Text>
+
+            <Text className='text-sm text-center mb-6' style={{ color: colors.textSecondary }}>
+              Liên kết không hợp lệ hoặc đã hết hạn.{'\n'}Vui lòng thử lại.
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => router.replace('/login')}
+              className='w-full py-3.5 rounded-2xl items-center'
+              style={{ backgroundColor: colors.primary }}
+              activeOpacity={0.8}
+            >
+              <Text className='text-base font-semibold' style={{ color: '#FFFFFF' }}>
+                Quay về đăng nhập
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     )
   }
@@ -97,7 +137,7 @@ export default function VerifyOtpScreen() {
             elevation: isDark ? 15 : 8
           }}
         >
-          <VerifyOtpForm email={email} onBack={handleBack} onSuccess={handleSuccess} />
+          <VerifyOtpForm email={email} sessionId={Number(sessionId)} onBack={handleBack} onSuccess={handleSuccess} />
         </View>
 
         {/* Footer */}

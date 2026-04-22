@@ -21,10 +21,11 @@ export default function ForgotPasswordScreen() {
     router.back()
   }
 
-  const handleSuccess = (email: string, expiresAt: string) => {
+  const handleSuccess = (email: string, expiresAt: string, sessionId: number) => {
     router.push({
       pathname: '/verify-otp',
-      params: { email, expiresAt }
+      params: { email, expiresAt, sessionId: sessionId.toString() }
+      // params: { email, expiresAt }
     })
   }
 

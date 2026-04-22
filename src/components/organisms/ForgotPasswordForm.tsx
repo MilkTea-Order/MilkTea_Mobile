@@ -7,11 +7,11 @@ import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Formik } from 'formik'
 import React from 'react'
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Keyboard, Text, TouchableOpacity, View } from 'react-native'
 
 export interface ForgotPasswordFormProps {
   onBackToLogin?: () => void
-  onSuccess?: (email: string, expiresAt: string) => void
+  onSuccess?: (email: string, expiresAt: string, sesseionId: number) => void
 }
 
 export function ForgotPasswordForm({ onBackToLogin, onSuccess }: ForgotPasswordFormProps) {
@@ -22,9 +22,12 @@ export function ForgotPasswordForm({ onBackToLogin, onSuccess }: ForgotPasswordF
     values: ForgotPasswordSchema,
     setFieldError: (field: string, message: string) => void
   ) => {
+    Keyboard.dismiss()
     try {
-      const responge = await forgotPasswordMutation.mutateAsync({ email: values.email })
-      onSuccess?.(values.email, responge.data.expiresAt)
+      const responge = await forgotPasswordMutation.mutateAsync({
+        email: values.email
+      })
+      onSuccess?.(values.email, responge.data.expiresAt, responge.data.sessionId)
     } catch (error: any) {
       if (error.fieldErrors) {
         setFormikFieldErrors(setFieldError, error.fieldErrors)

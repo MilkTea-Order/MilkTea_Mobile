@@ -1,4 +1,5 @@
 import {
+  checkIsToday,
   formatDate,
   getTodayDateRange,
   toEndOfDayString,
@@ -53,13 +54,7 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
   useEffect(() => {
     setTempFromDate(toNativeDate(value.fromDate))
     setTempToDate(toNativeDate(value.toDate))
-
-    if (value.fromDate && value.toDate) {
-      const todayRange = getTodayDateRange()
-      setIsTodayPressed(value.fromDate === todayRange.fromDate && value.toDate === todayRange.toDate)
-    } else {
-      setIsTodayPressed(false)
-    }
+    setIsTodayPressed(checkIsToday(value.fromDate, value.toDate))
   }, [value.fromDate, value.toDate])
 
   const handleFromDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {

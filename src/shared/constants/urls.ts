@@ -7,9 +7,9 @@ export const URL = {
   CHANGE_PASSWORD: 'auth/update-password',
 
   // Forgot Password
-  FORGOT_PASSWORD: 'auth/forgot-password',
-  FORGOT_PASSWORD_VERIFY: 'auth/forgot-password/verify',
-  FORGOT_PASSWORD_RESEND: 'auth/forgot-password/resend',
+  FORGOT_PASSWORD: 'auth/otp',
+  FORGOT_PASSWORD_VERIFY: 'auth/otp/',
+  FORGOT_PASSWORD_RESEND: 'auth/otp/',
   FORGOT_PASSWORD_RESET: 'auth/forgot-password/reset',
 
   USER_LIST: 'users',
