@@ -1,12 +1,13 @@
 import { CollapsibleSection } from '@/components/molecules/CollapsibleSection'
+import { InventorySearchInput } from '@/components/organisms/InventorySearchInput'
 import { useInventoryReport } from '@/features/report/hooks/useReport'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrency, formatNumber } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, FlatList, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useCallback, useMemo, useState } from 'react'
+import { ActivityIndicator, FlatList, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function InventoryScreen() {
@@ -17,17 +18,14 @@ export default function InventoryScreen() {
   const [searchText, setSearchText] = useState('')
   const [submittedMaterialName, setSubmittedMaterialName] = useState<string | undefined>(undefined)
 
-  const canSubmitSearch = searchText.trim().length > 0
-
   const { inventory = [], isLoading, isFetching, isRefetching, refetch } = useInventoryReport(submittedMaterialName)
 
   const data = useMemo(() => inventory, [inventory])
-  const searchInputRef = useRef<TextInput>(null)
 
   const handleSubmitSearch = useCallback(() => {
-    if (!canSubmitSearch) return
+    if (!searchText.trim()) return
     setSubmittedMaterialName(searchText.trim())
-  }, [searchText, canSubmitSearch])
+  }, [searchText])
 
   const COL = {
     name: 120,
@@ -74,59 +72,18 @@ export default function InventoryScreen() {
 
       {/* SEARCH INPUT */}
       <View className='px-4 pt-4 pb-2'>
-        <View
-          className='flex-row items-center rounded-2xl px-4 p-3'
-          style={{
-            backgroundColor: colors.card,
-            borderWidth: 1,
-            borderColor: colors.border
+        <InventorySearchInput
+          value={searchText}
+          onChangeText={(text) => {
+            setSearchText(text)
+            if (text.trim().length === 0) {
+              setSubmittedMaterialName(undefined)
+            }
           }}
-        >
-          <TouchableOpacity
-            onPress={() => {
-              if (canSubmitSearch) {
-                handleSubmitSearch()
-                return
-              }
-              searchInputRef.current?.focus()
-            }}
-            disabled={!canSubmitSearch}
-            style={{ opacity: canSubmitSearch ? 1 : 0.5 }}
-          >
-            <Ionicons name='search' size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-          <View className='flex-1 ml-3 flex-row items-center'>
-            <TextInput
-              ref={searchInputRef}
-              value={searchText}
-              onChangeText={(text) => {
-                setSearchText(text)
-                if (text.trim().length === 0) {
-                  setSubmittedMaterialName(undefined)
-                }
-              }}
-              onSubmitEditing={handleSubmitSearch}
-              returnKeyType='search'
-              enablesReturnKeyAutomatically={canSubmitSearch}
-              className='text-base flex-1'
-              style={{ color: colors.textSecondary, opacity: canSubmitSearch ? 1 : 0.5 }}
-              placeholder='Tìm kiếm nguyên liệu...'
-              placeholderTextColor={colors.textSecondary}
-            />
-
-            {searchText.length > 0 && (
-              <TouchableOpacity
-                onPress={() => {
-                  setSearchText('')
-                  setSubmittedMaterialName(undefined)
-                }}
-                className='ml-2'
-              >
-                <Ionicons name='close-circle-sharp' size={24} color={colors.primary} />
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
+          onSubmit={handleSubmitSearch}
+          onClear={() => setSubmittedMaterialName(undefined)}
+          placeholder='Tìm kiếm nguyên liệu...'
+        />
       </View>
 
       {/* CONTENT */}

@@ -1,4 +1,5 @@
 import { Header } from '@/components/layouts/Header'
+import { SearchInputBar } from '@/components/organisms/SearchInputBar'
 import MenuGroupNavV2 from '@/components/molecules/MenuGroupNavV2'
 import MenuItemCardV2 from '@/components/molecules/MenuItemCardV2'
 import { useMenuGroups, useMenusByGroupAndName } from '@/features/order/hooks/useMenu'
@@ -9,18 +10,8 @@ import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Keyboard,
-  Pressable,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
-} from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
+import { ActivityIndicator, Alert, FlatList, Keyboard, Pressable, Text, TouchableOpacity, View } from 'react-native'
 
 export default function SelectMenuScreen() {
   const router = useRouter()
@@ -36,7 +27,6 @@ export default function SelectMenuScreen() {
   const [selectedGroup, setSelectedGroup] = useState<MenuGroup | null>(null)
   const [activeSize, setActiveSize] = useState<{ menuId: number; sizeId: number } | null>(null)
   const [activeMenuId, setActiveMenuId] = useState<number | null>(null)
-  const searchInputRef = useRef<TextInput | null>(null)
   // Search Menu by name
   const [searchQuery, setSearchQuery] = useState('')
   const [submittedSearch, setSubmittedSearch] = useState('')
@@ -236,47 +226,13 @@ export default function SelectMenuScreen() {
           </View>
         }
       >
-        <View
-          className='flex-row items-center px-4 rounded-2xl mx-3 mb-3'
-          style={{
-            height: 48,
-            backgroundColor: colors.card,
-            borderWidth: 1.5,
-            borderColor: colors.border,
-            shadowColor: colors.text,
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.08,
-            shadowRadius: 4,
-            elevation: 3
-          }}
-        >
-          <TouchableOpacity onPress={() => searchInputRef.current?.focus()}>
-            <Ionicons name='search' size={18} color={colors.textSecondary} />
-          </TouchableOpacity>
-          <TextInput
-            ref={searchInputRef}
-            placeholder='Tìm kiếm món ăn'
-            placeholderTextColor={colors.textSecondary + '99'}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onSubmitEditing={handleSearch}
-            returnKeyType='search'
-            className='flex-1 ml-3 text-base'
-            style={{
-              color: colors.text,
-              paddingVertical: 0,
-              textAlignVertical: 'center'
-            }}
-          />
-
-          {searchQuery.length > 0 ? (
-            <View className='flex-row items-center gap-2'>
-              <TouchableOpacity onPress={handleClearSearch} style={{ justifyContent: 'center' }}>
-                <Ionicons name='close-circle-sharp' size={24} color={colors.primary} />
-              </TouchableOpacity>
-            </View>
-          ) : null}
-        </View>
+        <SearchInputBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onSubmit={handleSearch}
+          onClear={handleClearSearch}
+          placeholder='Tìm kiếm món ăn'
+        />
       </Header>
 
       {/* Menu Group Navigation */}

@@ -1,4 +1,5 @@
 import { Header } from '@/components/layouts/Header'
+import { TableCard } from '@/components/organisms/TableCard'
 import { useEmptyTables } from '@/features/order/hooks/useTable'
 import { useOrderStore } from '@/features/order/store/order.store'
 import type { DinnerTable } from '@/features/order/types/table.type'
@@ -6,7 +7,7 @@ import { useTheme } from '@/shared/hooks/useTheme'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useState } from 'react'
-import { ActivityIndicator, Image, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from 'react-native'
 
 export default function SelectTableScreen() {
   const router = useRouter()
@@ -16,7 +17,6 @@ export default function SelectTableScreen() {
   const setTable = useOrderStore((s) => s.setTable)
   const selectedTable = useOrderStore((s) => s.table)
   const { isChangeTable } = useLocalSearchParams<{ isChangeTable: string }>()
-  // const clearOrder = useOrderStore((s) => s.clear)
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
@@ -24,8 +24,6 @@ export default function SelectTableScreen() {
   }, [refetch])
 
   const handleBack = () => {
-    // clearOrder()
-    // router.back()
     if (selectedTable) {
       router.replace('/(protected)/order/select-menu')
     } else {
@@ -35,7 +33,6 @@ export default function SelectTableScreen() {
 
   const handleSelect = (table: DinnerTable) => {
     setTable(table)
-    // router.push('/(protected)/order/select-menu')
     router.replace('/(protected)/order/select-menu')
   }
 
@@ -75,56 +72,9 @@ export default function SelectTableScreen() {
           <View className='flex-row flex-wrap' style={{ gap: 12 }}>
             {availableTables
               .filter((table) => table.id !== selectedTable?.id)
-              .map((table) => {
-                const tableImageUrl = (table as any).emptyImg || null
-                return (
-                  <TouchableOpacity
-                    key={table.id}
-                    onPress={() => handleSelect(table)}
-                    className='rounded-2xl border overflow-hidden'
-                    style={{
-                      width: '31%',
-                      backgroundColor: colors.card,
-                      borderColor: colors.border,
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.05,
-                      shadowRadius: 8,
-                      elevation: 2
-                    }}
-                    activeOpacity={0.85}
-                  >
-                    <View
-                      style={{
-                        width: '100%',
-                        height: 95,
-                        backgroundColor: `${colors.primary}10`
-                      }}
-                    >
-                      {tableImageUrl ? (
-                        <Image
-                          source={{ uri: tableImageUrl }}
-                          style={{ width: '100%', height: '100%' }}
-                          resizeMode='contain'
-                        />
-                      ) : (
-                        <View className='flex-1 items-center justify-center'>
-                          <Ionicons name='restaurant-outline' size={48} color={colors.primary} />
-                        </View>
-                      )}
-                    </View>
-
-                    <View className='p-3'>
-                      <View className='flex-row items-center'>
-                        <Ionicons name='people-outline' size={14} color={colors.textSecondary} />
-                        <Text className='text-xs ml-1' style={{ color: colors.textSecondary }}>
-                          {table.numberOfSeats} ghế
-                        </Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                )
-              })}
+              .map((table) => (
+                <TableCard key={table.id} table={table} onPress={handleSelect} />
+              ))}
           </View>
         )}
       </ScrollView>

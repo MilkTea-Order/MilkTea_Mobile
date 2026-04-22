@@ -1,4 +1,5 @@
 import { ThemeSelector } from '@/components/molecules/ThemeSelector'
+import { ProfileMenuItem } from '@/components/molecules/ProfileMenuItem'
 import { useLogout } from '@/features/auth/hooks/useAuth'
 import { OrderFilter } from '@/features/order/api/order.api'
 import { useOrders } from '@/features/order/hooks/useOrder'
@@ -293,29 +294,13 @@ export default function ProfileScreen() {
             }}
           >
             {menuItems.map((item, index) => (
-              <TouchableOpacity
+              <ProfileMenuItem
                 key={index}
+                icon={item.icon}
+                label={item.label}
                 onPress={item.onPress}
-                className='flex-row items-center px-4 py-4'
-                style={{
-                  borderBottomWidth: index !== menuItems.length - 1 ? 1 : 0,
-                  borderBottomColor: colors.border
-                }}
-                activeOpacity={0.7}
-              >
-                <View
-                  className='rounded-xl p-3 mr-4'
-                  style={{
-                    backgroundColor: `${colors.primary}12`
-                  }}
-                >
-                  <Ionicons name={item.icon as any} size={24} color={colors.primary} />
-                </View>
-                <Text className='flex-1 font-medium' style={{ color: colors.text }}>
-                  {item.label}
-                </Text>
-                <Ionicons name='chevron-forward' size={20} color={colors.textSecondary} />
-              </TouchableOpacity>
+                showBorder={index !== menuItems.length - 1}
+              />
             ))}
           </View>
         </View>

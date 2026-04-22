@@ -2,10 +2,11 @@ import { Header } from '@/components/layouts/Header'
 import { CollapsibleSection } from '@/components/molecules/CollapsibleSection'
 import { OrderCardV2 } from '@/components/molecules/OrderCardV2'
 import { DateFilterPicker } from '@/components/organisms/DateFilterPicker'
+import { PaymentMethodFilter } from '@/components/organisms/PaymentMethodFilter'
 import { Order } from '@/features/order/types/order.type'
 import { useRevenueReport } from '@/features/report/hooks/useReport'
 import { RevenueReportDate } from '@/features/report/types/revenue.type'
-import { PAYMENT_METHOD, PAYMENT_METHODS, PaymentMethod } from '@/shared/constants/payment'
+import { PAYMENT_METHOD, PaymentMethod } from '@/shared/constants/payment'
 import { ORDER_STATUS_OPTIONS, OrderStatus, STATUS } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
@@ -92,76 +93,14 @@ export default function RevenueReportScreen() {
           </View>
         </View>
         {/* 🔥 PAYMENT METHOD FILTER */}
-        <View
-          style={{
-            flexDirection: 'row',
-            gap: 8,
-            marginTop: 12
+        <PaymentMethodFilter
+          selected={filter.paymentMethod}
+          onChange={(method) => {
+            setFilter((prev) => ({ ...prev, paymentMethod: method }))
+            listRef.current?.scrollToOffset({ offset: 0, animated: true })
           }}
-        >
-          {PAYMENT_METHODS.map((method) => {
-            const valueMap = {
-              CASH: statics?.totalAmountCash ?? 0,
-              BANK: statics?.totalAmountBank ?? 0,
-              SHOPEE: statics?.totalAmountShopee ?? 0,
-              GRAB: statics?.totalAmountGrab ?? 0
-            }
-
-            const value = valueMap[method.id]
-            const isActive = filter.paymentMethod === method.id
-
-            return (
-              <TouchableOpacity
-                key={method.id}
-                className='flex items-center px-2 py-1'
-                activeOpacity={0.8}
-                onPress={() => {
-                  setFilter((prev) => ({ ...prev, paymentMethod: method.id }))
-                  listRef.current?.scrollToOffset({ offset: 0, animated: true })
-                }}
-                style={{
-                  width: '23%',
-                  alignItems: 'center',
-                  borderRadius: 14,
-                  backgroundColor: isActive ? method.iconColor : `${method.iconColor}10`,
-                  borderWidth: 1,
-                  borderColor: isActive ? method.iconColor : `${method.iconColor}30`
-                }}
-              >
-                {/* ICON */}
-                <View
-                  style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: 10,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: 6,
-                    backgroundColor: isActive ? 'rgba(255,255,255,0.2)' : `${method.iconColor}20`
-                  }}
-                >
-                  {method.logo ? (
-                    <method.logo width={20} height={20} />
-                  ) : (
-                    <Ionicons name={method.icon as any} size={18} color={isActive ? '#fff' : method.iconColor} />
-                  )}
-                </View>
-
-                {/* VALUE */}
-                <Text
-                  numberOfLines={1}
-                  style={{
-                    fontSize: 12,
-                    fontWeight: '600',
-                    color: isActive ? '#fff' : method.iconColor
-                  }}
-                >
-                  {formatCurrencyVND(value)}
-                </Text>
-              </TouchableOpacity>
-            )
-          })}
-        </View>
+          statics={statics}
+        />
       </View>
 
       {/* 🔥 ORDER LIST - GROUPED BY DATE */}

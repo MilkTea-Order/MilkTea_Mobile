@@ -38,6 +38,17 @@ export interface OrderDetail {
   size: Size
 }
 
+export interface OrderItem {
+  menuId: number
+  sizeId: number
+  quantity: number
+  price: number
+  menuName: string
+  sizeName: string
+  menuImage?: string | null
+  note?: string | null
+}
+
 export type CreateOrderItemPayload = {
   menuID: number
   sizeID: number

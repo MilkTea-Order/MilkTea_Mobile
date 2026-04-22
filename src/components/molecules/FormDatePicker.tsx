@@ -32,9 +32,8 @@ export function FormDatePicker({
   const hasError = touched && error
 
   const committedDate = useMemo(() => {
-    return parseDate(value, 'YYYY-MM-DD') ?? (value ? dayjs(value) : null)
+    return parseDate(value, 'DD/MM/YYYY') ?? (value ? dayjs(value) : null)
   }, [value])
-
   const open = () => !disabled && setShowPicker(true)
   const close = () => {
     setShowPicker(false)
@@ -94,9 +93,7 @@ export function FormDatePicker({
         initialDate={committedDate ?? dayjs()}
         onCancel={close}
         onConfirm={(d) => {
-          // const now = dayjs()
-          // const dateWithTime = d.hour(now.hour()).minute(now.minute()).second(now.second())
-          onChange(formatDate(d, 'YYYY-MM-DD'))
+          onChange(formatDate(d, 'DD/MM/YYYY'))
           close()
         }}
       />

@@ -1,4 +1,5 @@
 import { Header } from '@/components/layouts/Header'
+import { CartItemCard } from '@/components/organisms/CartItemCard'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 import { useAddOrderItems, useCreateOrder } from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
@@ -12,7 +13,7 @@ import { isApiError } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useMemo, useState } from 'react'
-import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 export default function ReviewCartScreen() {
   const router = useRouter()
@@ -213,127 +214,20 @@ export default function ReviewCartScreen() {
             {orderItems.map((item) => {
               const hasError = !!itemErrors[`${item.menuId}-${item.sizeId}`]
               return (
-                <View
+                <CartItemCard
                   key={`${item.menuId}-${item.sizeId}`}
-                  className='rounded-2xl p-3 mb-3 border'
-                  style={{
-                    backgroundColor: colors.card,
-                    borderColor: hasError ? colors.error : colors.border,
-                    borderWidth: hasError ? 2 : 1
+                  item={item}
+                  error={itemErrors[`${item.menuId}-${item.sizeId}`]}
+                  onIncrement={(menuId, sizeId) => orderIncrement(menuId, sizeId)}
+                  onDecrement={(menuId, sizeId) => handleDecrement(menuId, sizeId)}
+                  onEdit={(menuId, sizeId) => {
+                    router.push({
+                      pathname: '/(protected)/order/item-detail',
+                      params: { menuId: String(menuId), sizeId: String(sizeId) }
+                    })
                   }}
-                >
-                  <View className='flex-row items-center justify-between'>
-                    <View
-                      className='rounded-xl mr-3 overflow-hidden items-center justify-center'
-                      style={{ width: 52, height: 52, backgroundColor: `${colors.primary}10` }}
-                    >
-                      {item.menuImage ? (
-                        <Image
-                          source={{ uri: item.menuImage }}
-                          style={{ width: '100%', height: '100%' }}
-                          resizeMode='contain'
-                        />
-                      ) : (
-                        <Ionicons name='restaurant-outline' size={28} color={colors.primary} />
-                      )}
-                    </View>
-
-                    <View className='flex-1 mr-3'>
-                      <View className='flex-row items-center mt-2'>
-                        <Text className='text-lg font-bold mr-2' style={{ color: colors.text }} numberOfLines={2}>
-                          {item.menuName}
-                        </Text>
-                        <View className='px-2 py-1 rounded' style={{ backgroundColor: `${colors.primary}15` }}>
-                          <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
-                            {item.sizeName}
-                          </Text>
-                        </View>
-                      </View>
-
-                      {item.note ? (
-                        <View className='mt-1 flex-row items-start' style={{ gap: 6 }}>
-                          <Ionicons name='chatbubble-ellipses-outline' size={14} color={colors.textSecondary} />
-                          <Text className='flex-1 text-xs' style={{ color: colors.textSecondary }} numberOfLines={2}>
-                            {item.note}
-                          </Text>
-                        </View>
-                      ) : null}
-
-                      <View className='flex-row items-center mt-1'>
-                        <TouchableOpacity
-                          activeOpacity={0.8}
-                          onPress={() =>
-                            router.push({
-                              pathname: '/(protected)/order/item-detail',
-                              params: { menuId: String(item.menuId), sizeId: String(item.sizeId) }
-                            })
-                          }
-                        >
-                          <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
-                            Chỉnh sửa
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-
-                      {itemErrors[`${item.menuId}-${item.sizeId}`] ? (
-                        <View className='mt-1 flex-row items-center'>
-                          <Ionicons name='alert-circle' size={14} color={colors.error} />
-                          <Text className='ml-1.5 text-xs' style={{ color: colors.error }}>
-                            {itemErrors[`${item.menuId}-${item.sizeId}`]}
-                          </Text>
-                        </View>
-                      ) : null}
-                    </View>
-
-                    <View className='items-end'>
-                      <Text className='text-sm font-bold' style={{ color: colors.textSecondary }}>
-                        {formatCurrencyVND(item.price * item.quantity)}
-                      </Text>
-
-                      <View
-                        className='flex-row items-center rounded-full mt-2'
-                        style={{
-                          borderWidth: 1.5,
-                          borderColor: colors.primary,
-                          paddingHorizontal: 6,
-                          paddingVertical: 4
-                        }}
-                      >
-                        <TouchableOpacity
-                          onPress={() => handleDecrement(item.menuId, item.sizeId)}
-                          className='rounded-full'
-                          style={{
-                            width: 26,
-                            height: 26,
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          activeOpacity={0.8}
-                        >
-                          <Ionicons name='remove' size={16} color={colors.primary} />
-                        </TouchableOpacity>
-
-                        <Text className='text-sm font-bold min-w-[24px] text-center' style={{ color: colors.text }}>
-                          {item.quantity}
-                        </Text>
-
-                        <TouchableOpacity
-                          onPress={() => orderIncrement(item.menuId, item.sizeId)}
-                          className='rounded-full'
-                          style={{
-                            width: 26,
-                            height: 26,
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          activeOpacity={0.8}
-                        >
-                          <Ionicons name='add' size={16} color={colors.primary} />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                </View>
+                  onRemove={(menuId, sizeId) => removeItem(menuId, sizeId)}
+                />
               )
             })}
 
