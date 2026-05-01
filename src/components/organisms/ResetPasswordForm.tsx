@@ -62,9 +62,10 @@ export function ResetPasswordForm({ resetPasswordToken, expiresAt, onSuccess, on
         newPassword: values.newPassword,
         confirmPassword: values.confirmPassword
       })
-      setTimeout(() => {
-        onSuccess?.()
-      }, 2000)
+      // setTimeout(() => {
+      //   onSuccess?.()
+      // }, 2000)
+      onSuccess?.()
     } catch (error: any) {
       if (error.fieldErrors) {
         console.log(error.fieldErrors)

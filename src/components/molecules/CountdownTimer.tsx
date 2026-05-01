@@ -27,7 +27,9 @@ export function CountdownTimer({ seconds = 60, onExpire, autoStart = true, onRes
         if (prev <= 1) {
           clearInterval(timer)
           setIsActive(false)
-          onExpireRef.current()
+          setTimeout(() => {
+            onExpireRef.current()
+          }, 0)
           return 0
         }
         return prev - 1

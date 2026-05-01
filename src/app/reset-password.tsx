@@ -33,7 +33,7 @@ export default function ResetPasswordScreen() {
             Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.
           </Text>
           <TouchableOpacity
-            onPress={() => router.replace('/forgot-password')}
+            onPress={() => router.dismissAll()}
             className='mt-6 px-6 py-3 rounded-2xl'
             style={{ backgroundColor: colors.primary }}
           >
@@ -45,7 +45,7 @@ export default function ResetPasswordScreen() {
   }
 
   const handleSuccess = () => {
-    router.replace('/login')
+    router.dismissAll()
   }
 
   return (
@@ -55,7 +55,7 @@ export default function ResetPasswordScreen() {
 
       {/* Back Button */}
       <TouchableOpacity
-        onPress={() => router.replace('/forgot-password')}
+        onPress={() => router.dismissAll()}
         activeOpacity={0.7}
         className='absolute z-10 rounded-full p-2'
         style={{
@@ -105,7 +105,12 @@ export default function ResetPasswordScreen() {
             elevation: isDark ? 15 : 8
           }}
         >
-          <ResetPasswordForm resetPasswordToken={resetPasswordToken} expiresAt={expiresAt} onSuccess={handleSuccess} />
+          <ResetPasswordForm
+            resetPasswordToken={resetPasswordToken}
+            expiresAt={expiresAt}
+            onSuccess={handleSuccess}
+            onBack={() => router.dismissAll()}
+          />
         </View>
 
         {/* Footer */}

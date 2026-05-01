@@ -34,16 +34,16 @@ export const useApiConfigStore = create<ApiConfigStore>()(
       },
 
       resolveApiBaseUrl: () => {
-        const storeUrl = get().apiBaseUrl
-        if (storeUrl) return storeUrl
-
+        // const storeUrl = get().apiBaseUrl
+        // if (storeUrl) return storeUrl
         const envUrl = BASE_URL
-
         if (envUrl) {
           set({ apiBaseUrl: envUrl })
           return envUrl
+        } else {
+          const storeUrl = get().apiBaseUrl
+          if (storeUrl) return storeUrl
         }
-
         return null
       }
     }),
