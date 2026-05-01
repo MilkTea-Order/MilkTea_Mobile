@@ -31,9 +31,7 @@ export function useForgotPassword() {
       const functionError = fieldErrors.find((field) => field.field === 'function' || field.field === 'sendotp')
       if (fieldErrors.length > 0) {
         if (functionError) {
-          Alert.alert('Thông báo', functionError.message, [
-            { text: 'OK', onPress: () => router.replace('/login' as any) }
-          ])
+          Alert.alert('Thông báo', functionError.message, [{ text: 'OK', onPress: () => router.dismissAll() }])
         }
         error.fieldErrors = fieldErrors.filter((field) => field.field !== 'function' && field.field !== 'sendotp')
       }
