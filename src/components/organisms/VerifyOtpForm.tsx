@@ -43,9 +43,6 @@ export function VerifyOtpForm({ email, sessionId, onBack, onSuccess }: VerifyOtp
     if (!resendOtpKeyRef.current) {
       resendOtpKeyRef.current = generateIdempotencyKey()
     }
-
-    setShowCountdown(true)
-
     resendOtpMutation.mutate(
       {
         payload: { channel: 'EMAIL' as const },
@@ -54,6 +51,7 @@ export function VerifyOtpForm({ email, sessionId, onBack, onSuccess }: VerifyOtp
       {
         onSettled: () => {
           resendOtpKeyRef.current = null
+          setShowCountdown(true)
         }
       }
     )

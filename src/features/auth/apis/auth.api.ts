@@ -41,7 +41,7 @@ export const authApi = {
   ): Promise<AxiosResponse<ForgotPasswordResponse>> {
     return http.post<ForgotPasswordResponse>(`${URL.FORGOT_PASSWORD_RESEND}${sessionId}/resend`, body, {
       headers: {
-        'Idempotency-Key': idempotencyKey
+        // 'Idempotency-Key': idempotencyKey
       }
     })
   },

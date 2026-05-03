@@ -34,26 +34,34 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
   forgotPassword: {
     // Send OTP
     [ERROR_CODE.E0001]: {
-      email: 'Email không tồn tại trong hệ thống',
-      otp: 'OTP không đúng'
+      email: 'Email không đúng hoặc không tồn tại, hãy nhập lại',
+      otpcode: 'OTP không đúng, hãy nhập lại',
+      sessionid: 'Có lỗi xảy ra vui lòng liên hệ admin để được hỗ trợ',
+      idempotencykey: 'Có lỗi xảy ra vui lòng liên hệ admin để được hỗ trợ'
     },
     [ERROR_CODE.E0002]: {
       newpassword: 'Mật khẩu mới không được sử dụng lại mật khẩu đã dùng gần đây',
       confirmpassword: 'Mật khẩu xác nhận không khớp với mật khẩu mới'
     },
-    [ERROR_CODE.E0043]: {
-      otp: 'OTP đã hết hạn'
-    },
-    [ERROR_CODE.E0044]: {
-      otp: 'OTP của bạn không được phép xác thực, hãy liên hệ admin',
-      email: 'Không thể gữi lại vì bạn đã vượt quá số lần cho phép'
-    },
     [ERROR_CODE.E0036]: {
+      function: 'Có lỗi xảy ra vui lòng liên hệ admin để được hỗ trợ',
+      channel: 'Có lỗi xảy ra vui lòng liên hệ admin để được hỗ trợ',
       email: 'Email không hợp lệ',
       newpassword: 'Mật khẩu mới không hợp lệ'
     },
+    [ERROR_CODE.E0042]: {
+      sessionid: 'Phiên đã được xác thực vui lòng tạo một phiên mới để tiếp tục'
+    },
+    [ERROR_CODE.E0043]: {
+      otp: 'OTP đã hết hạn',
+      sessionid: 'Phiên đã hết hạn vui lòng tạo một phiên mới để tiếp tục'
+    },
+    [ERROR_CODE.E0044]: {
+      sessionid: 'Không thể gữi lại mã vì bạn đã vượt quá số lần cho phép'
+    },
     [ERROR_CODE.E9999]: {
       sendotp: 'Không thể gửi mã xác minh. Vui lòng thử lại.',
+      resendotp: 'Gữi lại mã thất bại, vui lòng thử lại.',
       resetpassword: 'Đặt lại mật khẩu không thành công. Vui lòng thử lại.'
     }
   },
