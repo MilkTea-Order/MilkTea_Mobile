@@ -43,6 +43,10 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
       newpassword: 'Mật khẩu mới không được sử dụng lại mật khẩu đã dùng gần đây',
       confirmpassword: 'Mật khẩu xác nhận không khớp với mật khẩu mới'
     },
+    [ERROR_CODE.E0004]: {
+      email: 'Có lỗi xãy ra vui lòng liên hệ admin để được hỗ trợ',
+      phone: 'Có lỗi xãy ra vui lòng liên hệ admin để được hỗ trợ'
+    },
     [ERROR_CODE.E0036]: {
       function: 'Có lỗi xảy ra vui lòng liên hệ admin để được hỗ trợ',
       channel: 'Có lỗi xảy ra vui lòng liên hệ admin để được hỗ trợ',

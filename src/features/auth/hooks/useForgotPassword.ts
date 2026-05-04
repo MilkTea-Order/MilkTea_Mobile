@@ -48,13 +48,18 @@ export function useVerifyOtp(sessionId: number) {
     },
     onError: (error: any) => {
       const fieldErrors = extractFieldErrors(error, 'forgotPassword', {
-        sessionId: 'sessionId',
+        SessionId: 'sessionid',
         OtpCode: 'otp',
         VerifyOtp: 'verifyotp',
-        User: 'user'
+        User: 'user',
+        Email: 'email'
       })
       const criticalError = fieldErrors.find(
-        (field) => field.field === 'sessionId' || field.field === 'verifyotp' || field.field === 'user'
+        (field) =>
+          field.field === 'sessionid' ||
+          field.field === 'verifyotp' ||
+          field.field === 'user' ||
+          field.field === 'email'
       )
       if (criticalError) {
         Alert.alert('Thông báo', criticalError.message, [
@@ -63,7 +68,11 @@ export function useVerifyOtp(sessionId: number) {
       }
       if (fieldErrors.length > 0) {
         error.fieldErrors = fieldErrors.filter(
-          (field) => field.field !== 'sessionId' && field.field !== 'verifyotp' && field.field !== 'user'
+          (field) =>
+            field.field !== 'sessionid' &&
+            field.field !== 'verifyotp' &&
+            field.field !== 'user' &&
+            field.field !== 'email'
         )
       }
     }
@@ -87,14 +96,18 @@ export function useResendOtp(sessionId: number) {
         SessionId: 'sessionid',
         Channel: 'channel',
         IdempotencyKey: 'idempotencykey',
-        ResendOtp: 'resendotp'
+        ResendOtp: 'resendotp',
+        Email: 'email',
+        Phone: 'phone'
       })
       const criticalError = fieldErrors.find(
         (field) =>
           field.field === 'sessionid' ||
           field.field === 'channel' ||
           field.field === 'idempotencykey' ||
-          field.field === 'resendotp'
+          field.field === 'resendotp' ||
+          field.field === 'email' ||
+          field.field === 'phone'
       )
       if (criticalError) {
         Alert.alert('Thông báo', criticalError.message, [
@@ -107,7 +120,9 @@ export function useResendOtp(sessionId: number) {
             field.field !== 'sessionid' &&
             field.field !== 'channel' &&
             field.field !== 'idempotencykey' &&
-            field.field !== 'resendotp'
+            field.field !== 'resendotp' &&
+            field.field !== 'email' &&
+            field.field !== 'phone'
         )
       }
     }
@@ -123,12 +138,10 @@ export function useResetPassword() {
       return response.data
     },
     onError: (error: any) => {
-      const fieldErrors = extractFieldErrors(error, 'forgotPassword', (field) => {
-        // Map API field names to form field names
-        if (field.includes('token')) return 'resetPasswordToken'
-        if (field.includes('NewPassword') && !field.includes('confirm')) return 'newPassword'
-        if (field.includes('ConfirmPassword')) return 'confirmPassword'
-        return field
+      const fieldErrors = extractFieldErrors(error, 'forgotPassword', {
+        ResetPasswordToken: 'resetPasswordToken',
+        NewPassword: 'newPassword',
+        ConfirmPassword: 'confirmPassword'
       })
       if (fieldErrors.length > 0) {
         error.fieldErrors = fieldErrors

@@ -318,6 +318,7 @@ function ContentComponent(props: {
         columnWrapperStyle={{ gap: 12, marginBottom: 8 }}
         ListEmptyComponent={EmptyComponent}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
+        refreshing={refreshing}
         renderItem={({ item }) => (
           <View style={{ flexBasis: '31%', maxWidth: '31%', marginBottom: 8 }}>
             <OrderCard

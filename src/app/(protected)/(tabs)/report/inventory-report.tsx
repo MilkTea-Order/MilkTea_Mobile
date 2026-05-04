@@ -18,7 +18,7 @@ export default function InventoryScreen() {
   const [searchText, setSearchText] = useState('')
   const [submittedMaterialName, setSubmittedMaterialName] = useState<string | undefined>(undefined)
 
-  const { inventory = [], isLoading, isFetching, isRefetching, refetch } = useInventoryReport(submittedMaterialName)
+  const { inventory = [], isLoading, isRefetching, refetch } = useInventoryReport(submittedMaterialName)
 
   const data = useMemo(() => inventory, [inventory])
 
@@ -34,14 +34,6 @@ export default function InventoryScreen() {
     price: 110,
     total: 100,
     status: 90
-  }
-
-  if (isLoading) {
-    return (
-      <View className='flex-1 justify-center items-center'>
-        <ActivityIndicator size='large' color={colors.primary} />
-      </View>
-    )
   }
 
   return (
@@ -99,54 +91,19 @@ export default function InventoryScreen() {
         refreshing={isRefetching}
         onRefresh={refetch}
         ListEmptyComponent={
-          <View
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              paddingHorizontal: 24,
-              marginTop: 40
-            }}
-          >
-            {isFetching ? (
-              <ActivityIndicator size='small' color={colors.primary} />
+          <View className='flex-1 items-center justify-center'>
+            {!isRefetching && isLoading ? (
+              <>
+                <ActivityIndicator size='large' color={colors.primary} />
+                <Text className='mt-3' style={{ color: colors.textSecondary }}>
+                  Đang tải dữ liệu...
+                </Text>
+              </>
             ) : (
               <>
-                <View
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: 32,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: colors.primary + '15',
-                    marginBottom: 16
-                  }}
-                >
-                  <Ionicons name='cube-outline' size={28} color={colors.primary} />
-                </View>
-
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: '600',
-                    color: colors.text,
-                    marginBottom: 6
-                  }}
-                >
-                  Chưa có dữ liệu
-                </Text>
-
-                <Text
-                  style={{
-                    fontSize: 13,
-                    color: colors.textSecondary,
-                    textAlign: 'center',
-                    lineHeight: 18
-                  }}
-                >
-                  Hiện chưa có dữ liệu tồn kho.
-                  {'\n'}Hãy thử kéo xuống để tải lại.
+                <Ionicons name='cube-outline' size={50} color={colors.textSecondary} />
+                <Text className='mt-3 text-base' style={{ color: colors.textSecondary }}>
+                  Không có dữ liệu
                 </Text>
               </>
             )}
@@ -304,19 +261,6 @@ export default function InventoryScreen() {
           </CollapsibleSection>
         )}
       />
-
-      {/* loading nhỏ */}
-      {isFetching && !isRefetching && data.length > 0 && (
-        <View
-          style={{
-            position: 'absolute',
-            top: insets.top + 10,
-            right: 10
-          }}
-        >
-          <ActivityIndicator size='small' color={colors.primary} />
-        </View>
-      )}
     </View>
   )
 }

@@ -97,7 +97,7 @@ export default function RevenueReportScreen() {
           selected={filter.paymentMethod}
           onChange={(method) => {
             setFilter((prev) => ({ ...prev, paymentMethod: method }))
-            listRef.current?.scrollToOffset({ offset: 0, animated: true })
+            listRef.current?.scrollToItem({ item: 0, animated: true })
           }}
           statics={statics}
         />
@@ -115,6 +115,7 @@ export default function RevenueReportScreen() {
           marginTop: 5
         }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
+        refreshing={isRefetching}
         ListEmptyComponent={
           !isRefetching && isLoading ? (
             <View className='flex-1 justify-center items-center mt-20'>
@@ -171,11 +172,6 @@ export default function RevenueReportScreen() {
             </CollapsibleSection>
           )
         }}
-        // removeClippedSubviews={true}
-        // maxToRenderPerBatch={10}
-        // updateCellsBatchingPeriod={50}
-        // initialNumToRender={8}
-        // windowSize={10}
       />
     </View>
   )

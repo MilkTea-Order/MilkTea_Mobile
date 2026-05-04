@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Formik } from 'formik'
 import React, { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from 'react-native'
 
 export interface ResetPasswordFormProps {
   resetPasswordToken: string
@@ -40,7 +40,11 @@ export function ResetPasswordForm({ resetPasswordToken, expiresAt, onSuccess, on
 
       if (remaining <= 0) {
         clearInterval(timer)
-        onBackRef.current?.()
+        Alert.alert(
+          'Link đã hết hạn',
+          'Token đặt lại mật khẩu đã hết hạn. Vui lòng yêu cầu gửi lại email khôi phục mật khẩu.',
+          [{ text: 'OK', onPress: () => onBackRef.current?.() }]
+        )
       }
     }, 1000)
 

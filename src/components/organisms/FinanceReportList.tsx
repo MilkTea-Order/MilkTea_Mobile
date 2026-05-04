@@ -2,7 +2,6 @@ import { DateFilterPicker } from '@/components/organisms/DateFilterPicker'
 import { FinanceDateGroup } from '@/components/organisms/FinanceDateGroup'
 import { FinanceReport } from '@/features/report/types/finance.type'
 import { ColorTheme } from '@/shared/constants/theme'
-import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
 import { Ionicons } from '@expo/vector-icons'
 import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query'
@@ -16,7 +15,6 @@ const COLOR_POSITIVE = '#22c55e'
 function getAmountColor(amount: number) {
   return amount < 0 ? COLOR_NEGATIVE : COLOR_POSITIVE
 }
-
 interface FinanceReportListProps {
   finance: FinanceReport[]
   colors: ColorTheme
@@ -59,6 +57,7 @@ export function FinanceReportList({
         keyExtractor={(item) => item.date}
         contentContainerStyle={{ paddingBottom: 90, flexGrow: 1 }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
+        refreshing={isRefetching}
         ListEmptyComponent={EmptyComponent}
         renderItem={({ item }) => (
           <View className='px-4'>

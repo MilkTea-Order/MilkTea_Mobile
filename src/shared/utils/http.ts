@@ -4,7 +4,7 @@ import { ApiResponse, isErrorResponse } from '@/shared/types/api.type'
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, HttpStatusCode } from 'axios'
 import { Toast } from 'react-native-toast-notifications'
 import { useApiConfigStore } from '../store/apiConfigStore'
-import { isAxiosExpiredTokenError, isAxiosUnauthorizedError } from './utils'
+import { generateIdempotencyKey, isAxiosExpiredTokenError, isAxiosUnauthorizedError } from './utils'
 
 class Http {
   instance: AxiosInstance
@@ -28,9 +28,9 @@ class Http {
           config.headers.Authorization = `Bearer ${tokens.accessToken}`
         }
         config.headers['X-TimeZone'] = Intl.DateTimeFormat().resolvedOptions().timeZone
-        // if (!config.headers['Idempotency-Key']) {
-        //   config.headers['Idempotency-Key'] = generateIdempotencyKey()
-        // }
+        if (!config.headers['Idempotency-Key']) {
+          config.headers['Idempotency-Key'] = generateIdempotencyKey()
+        }
 
         if ((config.url === URL.LOGOUT || config.url?.endsWith(URL.LOGOUT)) && tokens?.refreshToken) {
           config.data = {

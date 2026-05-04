@@ -46,30 +46,32 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
   const config = SIZE_CONFIG[size]
   const [showFromPicker, setShowFromPicker] = useState(false)
   const [showToPicker, setShowToPicker] = useState(false)
-  const [tempFromDate, setTempFromDate] = useState<Date | null>(toNativeDate(value.fromDate))
-  const [tempToDate, setTempToDate] = useState<Date | null>(toNativeDate(value.toDate))
+  const [tempFilter, setTempFilter] = useState({
+    fromDate: toNativeDate(value.fromDate),
+    toDate: toNativeDate(value.toDate)
+  })
 
-  const [isTodayPressed, setIsTodayPressed] = useState(true)
+  const [isTodayPressed, setIsTodayPressed] = useState(false)
 
+  // Check xem có phải hôm nay không khi lần đầu vô
   useEffect(() => {
-    setTempFromDate(toNativeDate(value.fromDate))
-    setTempToDate(toNativeDate(value.toDate))
+    // console.log('init')
+    // setTempFilter({ fromDate: toNativeDate(value.fromDate), toDate: toNativeDate(value.toDate) })
     setIsTodayPressed(checkIsToday(value.fromDate, value.toDate))
   }, [value.fromDate, value.toDate])
 
   const handleFromDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     setIsTodayPressed(false)
-
     if (Platform.OS === 'android') {
       setShowFromPicker(false)
       if (event.type === 'set' && selectedDate) {
-        setTempFromDate(selectedDate)
+        setTempFilter((prev) => ({ ...prev, fromDate: selectedDate }))
       }
       return
     }
 
     if (selectedDate) {
-      setTempFromDate(selectedDate)
+      setTempFilter((prev) => ({ ...prev, fromDate: selectedDate }))
     }
   }
 
@@ -79,13 +81,13 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
     if (Platform.OS === 'android') {
       setShowToPicker(false)
       if (event.type === 'set' && selectedDate) {
-        setTempToDate(selectedDate)
+        setTempFilter((prev) => ({ ...prev, toDate: selectedDate }))
       }
       return
     }
 
     if (selectedDate) {
-      setTempToDate(selectedDate)
+      setTempFilter((prev) => ({ ...prev, toDate: selectedDate }))
     }
   }
 
@@ -100,8 +102,7 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
   const handleTodayPress = () => {
     const { fromDate, toDate } = getTodayDateRange()
 
-    setTempFromDate(toNativeDate(fromDate))
-    setTempToDate(toNativeDate(toDate))
+    setTempFilter({ fromDate: toNativeDate(fromDate), toDate: toNativeDate(toDate) })
     setIsTodayPressed(true)
 
     onChange({
@@ -111,10 +112,11 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
   }
 
   const handleApply = () => {
-    if (tempFromDate && tempToDate && dayjs(tempFromDate).isAfter(dayjs(tempToDate), 'day')) return
+    if (tempFilter.fromDate && tempFilter.toDate && dayjs(tempFilter.fromDate).isAfter(dayjs(tempFilter.toDate), 'day'))
+      return
     onChange({
-      fromDate: toStartOfDayString(tempFromDate),
-      toDate: toEndOfDayString(tempToDate)
+      fromDate: toStartOfDayString(tempFilter.fromDate),
+      toDate: toEndOfDayString(tempFilter.toDate)
     })
   }
 
@@ -162,7 +164,7 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
         activeOpacity={0.7}
       >
         <Text className={`${config.textSize} font-medium`} style={{ color: colors.text }}>
-          {formatDate(tempFromDate, 'DD/MM/YYYY')}
+          {formatDate(tempFilter.fromDate, 'DD/MM/YYYY')}
         </Text>
       </TouchableOpacity>
 
@@ -183,7 +185,7 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
         activeOpacity={0.7}
       >
         <Text className={`${config.textSize} font-medium`} style={{ color: colors.text }}>
-          {formatDate(tempToDate, 'DD/MM/YYYY')}
+          {formatDate(tempFilter.toDate, 'DD/MM/YYYY')}
         </Text>
       </TouchableOpacity>
 
@@ -228,10 +230,10 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
               </View>
 
               <DateTimePicker
-                value={tempFromDate ?? new Date()}
+                value={tempFilter.fromDate ?? new Date()}
                 mode='date'
                 locale='vi'
-                maximumDate={tempToDate ?? undefined}
+                maximumDate={tempFilter.toDate ?? undefined}
                 display='spinner'
                 onChange={handleFromDateChange}
                 textColor={colors.text}
@@ -243,9 +245,9 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
 
       {Platform.OS === 'android' && showFromPicker && (
         <DateTimePicker
-          value={tempFromDate ?? new Date()}
+          value={tempFilter.fromDate ?? new Date()}
           mode='date'
-          maximumDate={tempToDate ?? undefined}
+          maximumDate={tempFilter.toDate ?? undefined}
           display='default'
           onChange={handleFromDateChange}
         />
@@ -273,12 +275,12 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
               </View>
 
               <DateTimePicker
-                value={tempToDate ?? new Date()}
+                value={tempFilter.toDate ?? new Date()}
                 mode='date'
                 locale='vi-VN'
                 display='spinner'
                 maximumDate={new Date()}
-                minimumDate={tempFromDate ?? undefined}
+                minimumDate={tempFilter.fromDate ?? undefined}
                 onChange={handleToDateChange}
                 textColor={colors.text}
               />
@@ -289,11 +291,11 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
 
       {Platform.OS === 'android' && showToPicker && (
         <DateTimePicker
-          value={tempToDate ?? new Date()}
+          value={tempFilter.toDate ?? new Date()}
           mode='date'
           display='default'
           maximumDate={new Date()}
-          minimumDate={tempFromDate ?? undefined}
+          minimumDate={tempFilter.fromDate ?? undefined}
           onChange={handleToDateChange}
         />
       )}
