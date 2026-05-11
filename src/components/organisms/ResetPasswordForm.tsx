@@ -6,85 +6,38 @@ import { setFormikFieldErrors } from '@/shared/utils/formErrors'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Formik } from 'formik'
-import React, { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from 'react-native'
+import React from 'react'
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
 
 export interface ResetPasswordFormProps {
-  resetPasswordToken: string
-  expiresAt: string
+  email: string
   onSuccess?: () => void
   onBack?: () => void
 }
 
-export function ResetPasswordForm({ resetPasswordToken, expiresAt, onSuccess, onBack }: ResetPasswordFormProps) {
+export function ResetPasswordForm({ email, onSuccess, onBack }: ResetPasswordFormProps) {
   const resetPasswordMutation = useResetPassword()
   const { colors, gradients } = useTheme()
-
-  // Calculate remaining seconds from expiresAt - now
-  const getRemainingSeconds = React.useCallback(() => {
-    const now = Date.now()
-    const expiry = new Date(expiresAt).getTime()
-    return Math.max(0, Math.floor((expiry - now) / 1000))
-  }, [expiresAt])
-
-  const [remainingSeconds, setRemainingSeconds] = useState(() => getRemainingSeconds())
-  const onBackRef = useRef(onBack)
-  onBackRef.current = onBack
-
-  useEffect(() => {
-    if (!expiresAt) return
-
-    const timer = setInterval(() => {
-      const remaining = getRemainingSeconds()
-      setRemainingSeconds(remaining)
-
-      if (remaining <= 0) {
-        clearInterval(timer)
-        Alert.alert(
-          'Link đã hết hạn',
-          'Token đặt lại mật khẩu đã hết hạn. Vui lòng yêu cầu gửi lại email khôi phục mật khẩu.',
-          [{ text: 'OK', onPress: () => onBackRef.current?.() }]
-        )
-      }
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [expiresAt, getRemainingSeconds])
-
-  const formatTime = (secs: number) => {
-    const minutes = Math.floor(secs / 60)
-      .toString()
-      .padStart(2, '0')
-    const seconds = (secs % 60).toString().padStart(2, '0')
-    return `${minutes}:${seconds}`
-  }
 
   const handleSubmit = async (values: ResetPasswordSchema, setFieldError: (field: string, message: string) => void) => {
     try {
       await resetPasswordMutation.mutateAsync({
-        resetPasswordToken,
+        email: values.email,
         newPassword: values.newPassword,
         confirmPassword: values.confirmPassword
       })
-      // setTimeout(() => {
-      //   onSuccess?.()
-      // }, 2000)
       onSuccess?.()
     } catch (error: any) {
       if (error.fieldErrors) {
-        console.log(error.fieldErrors)
         setFormikFieldErrors(setFieldError, error.fieldErrors)
       }
     }
   }
 
-  const isExpired = remainingSeconds <= 0
-  const isUrgent = remainingSeconds > 0 && remainingSeconds <= 60
-
   return (
     <Formik
       initialValues={{
-        resetPasswordToken,
+        email,
         newPassword: '',
         confirmPassword: ''
       }}
@@ -94,20 +47,13 @@ export function ResetPasswordForm({ resetPasswordToken, expiresAt, onSuccess, on
     >
       {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isValid, dirty }) => (
         <View>
-          {/* Countdown Display */}
-          <View
-            className='rounded-xl px-4 py-3 mb-5 flex-row items-center'
-            style={{
-              backgroundColor: isExpired ? `${colors.error}15` : isUrgent ? `${colors.error}30` : `${colors.warning}15`
-            }}
-          >
-            <Ionicons name='time-outline' size={18} color={isExpired || isUrgent ? colors.error : colors.warning} />
-            <Text
-              className='text-xs ml-2 font-semibold'
-              style={{ color: isExpired || isUrgent ? colors.error : colors.warning }}
-            >
-              {isExpired ? 'Liên kết đã hết hạn' : `Token hết hạn sau: ${formatTime(remainingSeconds)}`}
-            </Text>
+          {/* Email Display */}
+          <View className='items-center mb-6'>
+            <View className='rounded-2xl px-4 py-2' style={{ backgroundColor: `${colors.primary}15` }}>
+              <Text className='text-sm font-medium' style={{ color: colors.primary }}>
+                {email}
+              </Text>
+            </View>
           </View>
 
           {/* New Password Field */}
@@ -142,9 +88,9 @@ export function ResetPasswordForm({ resetPasswordToken, expiresAt, onSuccess, on
 
           <TouchableOpacity
             onPress={() => handleSubmit()}
-            disabled={resetPasswordMutation.isPending || !dirty || !isValid || isExpired}
+            disabled={resetPasswordMutation.isPending || !dirty || !isValid}
             activeOpacity={0.9}
-            style={{ opacity: resetPasswordMutation.isPending || !dirty || !isValid || isExpired ? 0.7 : 1 }}
+            style={{ opacity: resetPasswordMutation.isPending || !dirty || !isValid ? 0.7 : 1 }}
           >
             <View
               className='rounded-2xl overflow-hidden'

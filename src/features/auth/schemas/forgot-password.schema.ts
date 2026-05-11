@@ -25,7 +25,10 @@ export type VerifyOtpSchema = Yup.InferType<typeof verifyOtpValidationSchema>
 // ─── Reset Password Schema ────────────────────────────────────────────────
 
 export const resetPasswordValidationSchema = Yup.object({
-  resetPasswordToken: Yup.string().required('Token không hợp lệ'),
+  email: Yup.string()
+    .trim()
+    .required('Vui lòng nhập email.')
+    .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Email không hợp lệ.'),
 
   newPassword: Yup.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự').required('Vui lòng nhập mật khẩu mới'),
 

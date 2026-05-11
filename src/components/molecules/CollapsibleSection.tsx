@@ -1,11 +1,17 @@
 import { useTheme } from '@/shared/hooks/useTheme'
 import { Ionicons } from '@expo/vector-icons'
-import React, { useEffect, useRef, useState } from 'react'
-import { Animated, LayoutAnimation, Platform, Text, TouchableOpacity, UIManager, View } from 'react-native'
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true)
-}
+import React, { useState } from 'react'
+import { Text, TouchableOpacity, View } from 'react-native'
+import Animated, {
+  CurvedTransition,
+  FadeIn,
+  FadeOut,
+  interpolate,
+  LinearTransition,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring
+} from 'react-native-reanimated'
 
 interface CollapsibleSectionProps {
   title?: string
@@ -24,39 +30,23 @@ export function CollapsibleSection({
 }: CollapsibleSectionProps) {
   const { colors } = useTheme()
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
-  const rotateAnim = useRef(new Animated.Value(defaultExpanded ? 1 : 0)).current
+  const rotateAnim = useSharedValue(defaultExpanded ? 1 : 0)
 
   const toggleSection = () => {
-    LayoutAnimation.configureNext({
-      duration: 300,
-      create: { type: 'easeInEaseOut', property: 'opacity' },
-      update: { type: 'easeInEaseOut' },
-      delete: { type: 'easeInEaseOut', property: 'opacity' }
+    const newValue = !isExpanded
+    rotateAnim.value = withSpring(newValue ? 1 : 0, {
+      damping: 15,
+      stiffness: 100
     })
-
-    const toValue = isExpanded ? 0 : 1
-    Animated.spring(rotateAnim, {
-      toValue,
-      useNativeDriver: true,
-      tension: 50,
-      friction: 7
-    }).start()
-    setIsExpanded(!isExpanded)
+    setIsExpanded(newValue)
   }
 
-  useEffect(() => {
-    if (defaultExpanded) {
-      rotateAnim.setValue(1)
-    }
-  }, [defaultExpanded, rotateAnim])
-
-  const rotateInterpolate = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '180deg']
-  })
+  const chevronStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${interpolate(rotateAnim.value, [0, 1], [0, 180])}deg` }]
+  }))
 
   return (
-    <View
+    <Animated.View
       className='mb-2 rounded-2xl overflow-hidden'
       style={{
         backgroundColor: colors.card,
@@ -68,6 +58,15 @@ export function CollapsibleSection({
         shadowRadius: 8,
         elevation: isExpanded ? 4 : 2
       }}
+      layout={
+        // LinearTransition.springify().duration(300)
+        CurvedTransition.duration(300)
+        // .easingX(Easing.inOut(Easing.quad))
+        // .easingY(Easing.out(Easing.exp))
+        // .easingWidth(Easing.in(Easing.ease))
+        // .easingHeight(Easing.out(Easing.ease))
+        // .reduceMotion(ReduceMotion.System)
+      }
     >
       <TouchableOpacity
         onPress={toggleSection}
@@ -98,20 +97,24 @@ export function CollapsibleSection({
             </>
           )}
         </View>
-        <Animated.View
-          style={{
-            transform: [{ rotate: rotateInterpolate }]
-          }}
-        >
+        <Animated.View style={chevronStyle}>
           <Ionicons name='chevron-down' size={24} color={colors.primary} />
         </Animated.View>
       </TouchableOpacity>
 
-      {isExpanded && (
-        <View className='px-3 mt-1' style={{ backgroundColor: colors.card }}>
-          {children}
-        </View>
-      )}
-    </View>
+      <Animated.View layout={LinearTransition.springify()} style={{ overflow: 'hidden' }}>
+        {isExpanded && (
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(200)}
+            layout={LinearTransition.springify()}
+            className='px-3 mt-1'
+            style={{ backgroundColor: colors.card }}
+          >
+            {children}
+          </Animated.View>
+        )}
+      </Animated.View>
+    </Animated.View>
   )
 }

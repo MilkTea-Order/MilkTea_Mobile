@@ -1,5 +1,5 @@
-import { ThemeSelector } from '@/components/molecules/ThemeSelector'
 import { ProfileMenuItem } from '@/components/molecules/ProfileMenuItem'
+import { ThemeSelector } from '@/components/molecules/ThemeSelector'
 import { useLogout } from '@/features/auth/hooks/useAuth'
 import { OrderFilter } from '@/features/order/api/order.api'
 import { useOrders } from '@/features/order/hooks/useOrder'
@@ -149,6 +149,7 @@ export default function ProfileScreen() {
         style={{ backgroundColor: colors.background }}
         contentContainerStyle={{ paddingBottom: 20 }}
         scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
       >
         {/* Profile Card - Separated from header */}
         <View className='px-6 mt-8'>

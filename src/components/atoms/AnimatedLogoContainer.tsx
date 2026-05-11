@@ -1,13 +1,6 @@
 import React from 'react'
 import { ViewStyle } from 'react-native'
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming
-} from 'react-native-reanimated'
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated'
 
 interface AnimatedLogoContainerProps {
   size?: number
@@ -25,14 +18,7 @@ export function AnimatedLogoContainer({ size = 110, isDark, colors, style, child
   const scale = useSharedValue(1)
 
   React.useEffect(() => {
-    scale.value = withRepeat(
-      withSequence(
-        withTiming(1.05, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    )
+    scale.value = withRepeat(withTiming(1.05, { duration: 2000, easing: Easing.inOut(Easing.ease) }), -1, true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

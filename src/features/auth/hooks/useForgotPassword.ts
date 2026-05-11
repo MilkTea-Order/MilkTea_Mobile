@@ -139,12 +139,18 @@ export function useResetPassword() {
     },
     onError: (error: any) => {
       const fieldErrors = extractFieldErrors(error, 'forgotPassword', {
-        ResetPasswordToken: 'resetPasswordToken',
+        User: 'user',
         NewPassword: 'newPassword',
         ConfirmPassword: 'confirmPassword'
       })
+      const criticalError = fieldErrors.find((field) => field.field === 'user')
+      if (criticalError) {
+        Alert.alert('Thông báo', criticalError.message, [
+          { text: 'OK', onPress: () => router.replace('/login' as any) }
+        ])
+      }
       if (fieldErrors.length > 0) {
-        error.fieldErrors = fieldErrors
+        error.fieldErrors = fieldErrors.filter((field) => field.field !== 'user')
       }
     }
   })

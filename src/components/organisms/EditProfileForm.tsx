@@ -13,20 +13,15 @@ import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Formik } from 'formik'
 import React, { useRef } from 'react'
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
-} from 'react-native'
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Text, TouchableOpacity, View } from 'react-native'
+import Animated, { LinearTransition } from 'react-native-reanimated'
 
 interface EditProfileFormProps {
   userProfile: User
   onSuccess?: () => void
 }
+
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity)
 
 export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps) {
   const updateProfileMutation = useUpdateProfile()
@@ -176,7 +171,7 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
           dirty,
           isValid
         }) => (
-          <ScrollView
+          <Animated.ScrollView
             contentContainerStyle={{
               flexGrow: 1,
               paddingHorizontal: 20,
@@ -189,223 +184,226 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
             showsVerticalScrollIndicator={false}
             bounces={false}
           >
-            {/* Personal Information Section */}
-            <CollapsibleSection title='Thông tin cá nhân' icon='person-outline' defaultExpanded={true}>
-              {/* User name */}
-              <FormTextField
-                label='Tên đăng nhập'
-                icon='person-outline'
-                value={userProfile.userName || ''}
-                editable={false}
-                disabled
-                placeholder='Tên đăng nhập'
-              />
+            <Animated.View layout={LinearTransition.duration(300)}>
+              {/* Personal Information Section */}
+              <CollapsibleSection title='Thông tin cá nhân' icon='person-outline' defaultExpanded={true}>
+                {/* User name */}
+                <FormTextField
+                  label='Tên đăng nhập'
+                  icon='person-outline'
+                  value={userProfile.userName || ''}
+                  editable={false}
+                  disabled
+                  placeholder='Tên đăng nhập'
+                />
 
-              {/* Full name */}
-              <FormTextField
-                label='Họ và tên'
-                icon='person-outline'
-                value={values.fullName ?? ''}
-                onChangeText={(text) => {
-                  handleChange('fullName')(text)
-                }}
-                onBlur={handleBlur('fullName')}
-                error={errors.fullName}
-                touched={touched.fullName}
-                required
-                placeholder='Nhập họ và tên'
-              />
+                {/* Full name */}
+                <FormTextField
+                  label='Họ và tên'
+                  icon='person-outline'
+                  value={values.fullName ?? ''}
+                  onChangeText={(text) => {
+                    handleChange('fullName')(text)
+                  }}
+                  onBlur={handleBlur('fullName')}
+                  error={errors.fullName}
+                  touched={touched.fullName}
+                  required
+                  placeholder='Nhập họ và tên'
+                />
 
-              {/* Gender */}
-              <FormSelectField
-                label='Giới tính'
-                value={values.genderID!}
-                options={GENDER_OPTIONS}
-                onChange={(value) => {
-                  setFieldValue('genderID', Number(value))
-                  setFieldTouched('genderID', true, false)
-                }}
-                error={errors.genderID}
-                touched={touched.genderID}
-                required
-                icon='people-outline'
-              />
+                {/* Gender */}
+                <FormSelectField
+                  label='Giới tính'
+                  value={values.genderID!}
+                  options={GENDER_OPTIONS}
+                  onChange={(value) => {
+                    setFieldValue('genderID', Number(value))
+                    setFieldTouched('genderID', true, false)
+                  }}
+                  error={errors.genderID}
+                  touched={touched.genderID}
+                  required
+                  icon='people-outline'
+                />
 
-              <FormDatePicker
-                label='Ngày sinh'
-                value={values.birthDay ?? ''}
-                onChange={(date) => {
-                  handleChange('birthDay')(date)
-                  setFieldTouched('birthDay', true, false)
-                }}
-                error={errors.birthDay}
-                touched={touched.birthDay}
-                required
-              />
+                <FormDatePicker
+                  label='Ngày sinh'
+                  value={values.birthDay ?? ''}
+                  onChange={(date) => {
+                    handleChange('birthDay')(date)
+                    setFieldTouched('birthDay', true, false)
+                  }}
+                  error={errors.birthDay}
+                  touched={touched.birthDay}
+                  required
+                />
 
-              <FormTextField
-                label='Số CMND/CCCD'
-                icon='card-outline'
-                value={values.identityCode ?? ''}
-                onChangeText={(text) => {
-                  handleChange('identityCode')(text)
-                }}
-                onBlur={handleBlur('identityCode')}
-                error={errors.identityCode}
-                touched={touched.identityCode}
-                required
-                placeholder='Nhập số CMND/CCCD'
-                keyboardType='numeric'
-              />
-            </CollapsibleSection>
+                <FormTextField
+                  label='Số CMND/CCCD'
+                  icon='card-outline'
+                  value={values.identityCode ?? ''}
+                  onChangeText={(text) => {
+                    handleChange('identityCode')(text)
+                  }}
+                  onBlur={handleBlur('identityCode')}
+                  error={errors.identityCode}
+                  touched={touched.identityCode}
+                  required
+                  placeholder='Nhập số CMND/CCCD'
+                  keyboardType='numeric'
+                />
+              </CollapsibleSection>
 
-            {/* Contact Information Section */}
-            <CollapsibleSection title='Thông tin liên hệ' icon='call-outline' defaultExpanded={true}>
-              {/* Email */}
-              <FormTextField
-                label='Email'
-                icon='mail-outline'
-                value={values.email ?? ''}
-                onChangeText={(text) => {
-                  handleChange('email')(text)
-                }}
-                onBlur={handleBlur('email')}
-                error={errors.email}
-                touched={touched.email}
-                placeholder='Nhập email'
-                keyboardType='email-address'
-                autoCapitalize='none'
-              />
-              {/* Cell phone */}
-              <FormTextField
-                label='Số điện thoại'
-                icon='call-outline'
-                value={values.cellPhone ?? ''}
-                onChangeText={(text) => {
-                  handleChange('cellPhone')(text)
-                }}
-                onBlur={handleBlur('cellPhone')}
-                error={errors.cellPhone}
-                touched={touched.cellPhone}
-                required
-                placeholder='Nhập số điện thoại'
-                keyboardType='phone-pad'
-              />
+              {/* Contact Information Section */}
+              <CollapsibleSection title='Thông tin liên hệ' icon='call-outline' defaultExpanded={true}>
+                {/* Email */}
+                <FormTextField
+                  label='Email'
+                  icon='mail-outline'
+                  value={values.email ?? ''}
+                  onChangeText={(text) => {
+                    handleChange('email')(text)
+                  }}
+                  onBlur={handleBlur('email')}
+                  error={errors.email}
+                  touched={touched.email}
+                  placeholder='Nhập email'
+                  keyboardType='email-address'
+                  autoCapitalize='none'
+                />
+                {/* Cell phone */}
+                <FormTextField
+                  label='Số điện thoại'
+                  icon='call-outline'
+                  value={values.cellPhone ?? ''}
+                  onChangeText={(text) => {
+                    handleChange('cellPhone')(text)
+                  }}
+                  onBlur={handleBlur('cellPhone')}
+                  error={errors.cellPhone}
+                  touched={touched.cellPhone}
+                  required
+                  placeholder='Nhập số điện thoại'
+                  keyboardType='phone-pad'
+                />
 
-              <FormTextField
-                label='Địa chỉ'
-                icon='location-outline'
-                value={values.address}
-                onChangeText={(text) => {
-                  handleChange('address')(text)
-                }}
-                onBlur={handleBlur('address')}
-                error={errors.address}
-                touched={touched.address}
-                placeholder='Nhập địa chỉ'
-                multiline
-                numberOfLines={3}
-                textAlignVertical='top'
-              />
-            </CollapsibleSection>
+                <FormTextField
+                  label='Địa chỉ'
+                  icon='location-outline'
+                  value={values.address}
+                  onChangeText={(text) => {
+                    handleChange('address')(text)
+                  }}
+                  onBlur={handleBlur('address')}
+                  error={errors.address}
+                  touched={touched.address}
+                  placeholder='Nhập địa chỉ'
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical='top'
+                />
+              </CollapsibleSection>
 
-            {/* Bank Information Section */}
-            <CollapsibleSection title='Thông tin ngân hàng' icon='card-outline' defaultExpanded={true}>
-              <FormTextField
-                label='Tên ngân hàng'
-                icon='business-outline'
-                value={values.bankName ?? ''}
-                onChangeText={(text) => {
-                  handleChange('bankName')(text)
-                }}
-                onBlur={handleBlur('bankName')}
-                error={errors.bankName}
-                touched={touched.bankName}
-                placeholder='Nhập tên ngân hàng'
-              />
+              {/* Bank Information Section */}
+              <CollapsibleSection title='Thông tin ngân hàng' icon='card-outline' defaultExpanded={true}>
+                <FormTextField
+                  label='Tên ngân hàng'
+                  icon='business-outline'
+                  value={values.bankName ?? ''}
+                  onChangeText={(text) => {
+                    handleChange('bankName')(text)
+                  }}
+                  onBlur={handleBlur('bankName')}
+                  error={errors.bankName}
+                  touched={touched.bankName}
+                  placeholder='Nhập tên ngân hàng'
+                />
 
-              <FormTextField
-                label='Tên chủ tài khoản'
-                icon='person-outline'
-                value={values.bankAccountName ?? ''}
-                onChangeText={(text) => {
-                  handleChange('bankAccountName')(text)
-                }}
-                onBlur={handleBlur('bankAccountName')}
-                error={errors.bankAccountName}
-                touched={touched.bankAccountName}
-                placeholder='Nhập tên chủ tài khoản'
-              />
+                <FormTextField
+                  label='Tên chủ tài khoản'
+                  icon='person-outline'
+                  value={values.bankAccountName ?? ''}
+                  onChangeText={(text) => {
+                    handleChange('bankAccountName')(text)
+                  }}
+                  onBlur={handleBlur('bankAccountName')}
+                  error={errors.bankAccountName}
+                  touched={touched.bankAccountName}
+                  placeholder='Nhập tên chủ tài khoản'
+                />
 
-              <FormTextField
-                label='Số tài khoản'
-                icon='card-outline'
-                value={values.bankAccountNumber ?? ''}
-                onChangeText={(text) => {
-                  handleChange('bankAccountNumber')(text)
-                }}
-                onBlur={handleBlur('bankAccountNumber')}
-                error={errors.bankAccountNumber}
-                touched={touched.bankAccountNumber}
-                placeholder='Nhập số tài khoản'
-                keyboardType='numeric'
-              />
+                <FormTextField
+                  label='Số tài khoản'
+                  icon='card-outline'
+                  value={values.bankAccountNumber ?? ''}
+                  onChangeText={(text) => {
+                    handleChange('bankAccountNumber')(text)
+                  }}
+                  onBlur={handleBlur('bankAccountNumber')}
+                  error={errors.bankAccountNumber}
+                  touched={touched.bankAccountNumber}
+                  placeholder='Nhập số tài khoản'
+                  keyboardType='numeric'
+                />
 
-              <FormFilePicker
-                label='Mã QR Code ngân hàng'
-                value={values.bankQRCode ?? null}
-                onChange={(file) => {
-                  setFieldValue('bankQRCode', file)
-                  setFieldTouched('bankQRCode', true, false)
-                }}
-                error={typeof errors.bankQRCode === 'string' ? errors.bankQRCode : undefined}
-                touched={typeof touched.bankQRCode === 'boolean' ? touched.bankQRCode : false}
-                placeholder='Mã QR code ngân hàng'
-              />
-            </CollapsibleSection>
+                <FormFilePicker
+                  label='Mã QR Code ngân hàng'
+                  value={values.bankQRCode ?? null}
+                  onChange={(file) => {
+                    setFieldValue('bankQRCode', file)
+                    setFieldTouched('bankQRCode', true, false)
+                  }}
+                  error={typeof errors.bankQRCode === 'string' ? errors.bankQRCode : undefined}
+                  touched={typeof touched.bankQRCode === 'boolean' ? touched.bankQRCode : false}
+                  placeholder='Mã QR code ngân hàng'
+                />
+              </CollapsibleSection>
 
-            {/* Save Button */}
-            <TouchableOpacity
-              onPress={() => handleSubmitFormik()}
-              disabled={updateProfileMutation.isPending || !dirty || !isValid}
-              activeOpacity={0.9}
-              style={{
-                opacity: updateProfileMutation.isPending || !dirty || !isValid ? 0.6 : 1,
-                marginTop: 12
-              }}
-            >
-              <View
-                className='rounded-2xl overflow-hidden'
+              {/* Save Button */}
+              <AnimatedTouchableOpacity
+                layout={LinearTransition.springify()}
+                onPress={() => handleSubmitFormik()}
+                disabled={updateProfileMutation.isPending || !dirty || !isValid}
+                activeOpacity={0.9}
                 style={{
-                  shadowColor: colors.primary,
-                  shadowOffset: { width: 0, height: 6 },
-                  shadowOpacity: 0.4,
-                  shadowRadius: 12,
-                  elevation: 10
+                  opacity: updateProfileMutation.isPending || !dirty || !isValid ? 0.6 : 1,
+                  marginTop: 12
                 }}
               >
-                <LinearGradient
-                  colors={gradients.header as any}
-                  className='items-center justify-center'
+                <View
+                  className='rounded-2xl overflow-hidden'
                   style={{
-                    height: 56,
-                    paddingVertical: 16
+                    shadowColor: colors.primary,
+                    shadowOffset: { width: 0, height: 6 },
+                    shadowOpacity: 0.4,
+                    shadowRadius: 12,
+                    elevation: 10
                   }}
                 >
-                  {updateProfileMutation.isPending ? (
-                    <ActivityIndicator color='white' size='small' />
-                  ) : (
-                    <View className='flex-row items-center justify-center'>
-                      <Text className='text-white text-lg font-bold mr-2'>Lưu thay đổi</Text>
-                      <View className='rounded-full bg-white/20 p-1 ml-1'>
-                        <Ionicons name='checkmark' size={18} color='white' />
+                  <LinearGradient
+                    colors={gradients.header as any}
+                    className='items-center justify-center'
+                    style={{
+                      height: 56,
+                      paddingVertical: 16
+                    }}
+                  >
+                    {updateProfileMutation.isPending ? (
+                      <ActivityIndicator color='white' size='small' />
+                    ) : (
+                      <View className='flex-row items-center justify-center'>
+                        <Text className='text-white text-lg font-bold mr-2'>Lưu thay đổi</Text>
+                        <View className='rounded-full bg-white/20 p-1 ml-1'>
+                          <Ionicons name='checkmark' size={18} color='white' />
+                        </View>
                       </View>
-                    </View>
-                  )}
-                </LinearGradient>
-              </View>
-            </TouchableOpacity>
-          </ScrollView>
+                    )}
+                  </LinearGradient>
+                </View>
+              </AnimatedTouchableOpacity>
+            </Animated.View>
+          </Animated.ScrollView>
         )}
       </Formik>
     </KeyboardAvoidingView>

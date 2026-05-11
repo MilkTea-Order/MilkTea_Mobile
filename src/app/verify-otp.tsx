@@ -73,10 +73,10 @@ export default function VerifyOtpScreen() {
     router.back()
   }
 
-  const handleSuccess = (resetPasswordToken: string, expiresAt: string) => {
+  const handleSuccess = () => {
     router.replace({
       pathname: '/reset-password',
-      params: { resetPasswordToken, expiresAt }
+      params: { email }
     })
   }
 

@@ -34,6 +34,7 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
   forgotPassword: {
     // Send OTP
     [ERROR_CODE.E0001]: {
+      user: 'Có lỗi xảy ra với tài khoản của bạn hãy liên hệ admin để được hỗ trợ',
       email: 'Email không đúng hoặc không tồn tại, hãy nhập lại',
       otpcode: 'OTP không đúng, hãy nhập lại',
       sessionid: 'Có lỗi xảy ra vui lòng liên hệ admin để được hỗ trợ',

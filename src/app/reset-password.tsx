@@ -16,12 +16,11 @@ export default function ResetPasswordScreen() {
   const { isVisible } = useKeyboardState()
   const insets = useSafeAreaInsets()
   const router = useRouter()
-  const { resetPasswordToken, expiresAt } = useLocalSearchParams<{
-    resetPasswordToken: string
-    expiresAt: string
+  const { email } = useLocalSearchParams<{
+    email: string
   }>()
 
-  if (!resetPasswordToken) {
+  if (!email) {
     return (
       <View className='flex-1 items-center justify-center'>
         <View className='items-center'>
@@ -30,7 +29,7 @@ export default function ResetPasswordScreen() {
             Liên kết không hợp lệ
           </Text>
           <Text className='text-sm mt-2 text-center px-8' style={{ color: colors.textSecondary }}>
-            Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.
+            Liên kết đặt lại mật khẩu không hợp lệ.
           </Text>
           <TouchableOpacity
             onPress={() => router.dismissAll()}
@@ -105,12 +104,7 @@ export default function ResetPasswordScreen() {
             elevation: isDark ? 15 : 8
           }}
         >
-          <ResetPasswordForm
-            resetPasswordToken={resetPasswordToken}
-            expiresAt={expiresAt}
-            onSuccess={handleSuccess}
-            onBack={() => router.dismissAll()}
-          />
+          <ResetPasswordForm email={email} onSuccess={handleSuccess} onBack={() => router.dismissAll()} />
         </View>
 
         {/* Footer */}

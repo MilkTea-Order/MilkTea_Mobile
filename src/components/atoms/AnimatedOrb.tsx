@@ -1,13 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient'
 import React from 'react'
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming
-} from 'react-native-reanimated'
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated'
 
 interface AnimatedOrbProps {
   size: number
@@ -18,18 +11,19 @@ interface AnimatedOrbProps {
 }
 
 export function AnimatedOrb({ size, position, gradientColors, isDark, delay = 0 }: AnimatedOrbProps) {
-  const translateY = useSharedValue(0)
+  const translateY = useSharedValue(-15)
 
   React.useEffect(() => {
     const duration = 3000 + delay
-    translateY.value = withRepeat(
-      withSequence(
-        withTiming(15, { duration, easing: Easing.inOut(Easing.ease) }),
-        withTiming(-15, { duration, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    )
+    // translateY.value = withRepeat(
+    //   withSequence(
+    //     withTiming(15, { duration, easing: Easing.inOut(Easing.ease) }),
+    //     withTiming(-15, { duration, easing: Easing.inOut(Easing.ease) })
+    //   ),
+    //   -1,
+    //   true
+    // )
+    translateY.value = withRepeat(withTiming(15, { duration, easing: Easing.inOut(Easing.ease) }), -1, true)
   }, [delay, translateY])
 
   const animatedStyle = useAnimatedStyle(() => ({

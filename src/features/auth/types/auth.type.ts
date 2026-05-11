@@ -37,7 +37,7 @@ export interface VerifyOtpPayload {
 }
 
 export interface ResetPasswordPayload {
-  resetPasswordToken: string
+  email: string
   newPassword: string
   confirmPassword: string
 }

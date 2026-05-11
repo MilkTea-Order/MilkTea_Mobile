@@ -55,7 +55,7 @@ export function LoginForm({ onForgotPassword }: LoginFormProps) {
     <Formik
       initialValues={initialValues}
       validationSchema={loginValidationSchema}
-      validateOnMount
+      // validateOnMount
       validateOnBlur
       validateOnChange
       onSubmit={(values, { setFieldError }) => handleLogin(values, setFieldError)}

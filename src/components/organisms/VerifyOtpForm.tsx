@@ -10,12 +10,11 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { Formik } from 'formik'
 import React, { useCallback, useRef, useState } from 'react'
 import { ActivityIndicator, Keyboard, Text, TouchableOpacity, View } from 'react-native'
-
 export interface VerifyOtpFormProps {
   email: string
   sessionId: number
   onBack?: () => void
-  onSuccess?: (resetPasswordToken: string, expiresAt: string) => void
+  onSuccess?: () => void
 }
 
 export function VerifyOtpForm({ email, sessionId, onBack, onSuccess }: VerifyOtpFormProps) {
@@ -28,8 +27,8 @@ export function VerifyOtpForm({ email, sessionId, onBack, onSuccess }: VerifyOtp
   const handleVerify = async (values: VerifyOtpSchema, setFieldError: (field: string, message: string) => void) => {
     try {
       Keyboard.dismiss()
-      const response = await verifyOtpMutation.mutateAsync({ otpCode: values.otp })
-      onSuccess?.(response.data.resetPasswordToken, response.data.expiresAt)
+      await verifyOtpMutation.mutateAsync({ otpCode: values.otp })
+      onSuccess?.()
     } catch (error: any) {
       if (error.fieldErrors) {
         setFormikFieldErrors(setFieldError, error.fieldErrors)

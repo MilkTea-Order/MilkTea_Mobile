@@ -1,7 +1,15 @@
 import { useTheme } from '@/shared/hooks/useTheme'
 import React, { useEffect } from 'react'
 import { View } from 'react-native'
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated'
+import Animated, {
+  Easing,
+  Extrapolation,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming
+} from 'react-native-reanimated'
 import Logo from '~/assets/images/logo.svg'
 
 interface SplashScreenProps {
@@ -20,16 +28,14 @@ export function SplashScreen({ isVisible = true }: SplashScreenProps) {
         duration: 2000,
         easing: Easing.linear
       }),
-      -1,
-      false
+      -1
     )
     rotationReverse.value = withRepeat(
       withTiming(-360, {
         duration: 1500,
         easing: Easing.linear
       }),
-      -1,
-      false
+      -1
     )
   }, [rotation, rotationReverse])
 
@@ -41,19 +47,31 @@ export function SplashScreen({ isVisible = true }: SplashScreenProps) {
         easing: Easing.out(Easing.ease)
       })
     } else {
-      opacity.value = 1
+      opacity.value = withTiming(1, {
+        duration: 2000,
+        easing: Easing.in(Easing.ease)
+      })
     }
-  }, [isVisible, opacity])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isVisible])
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ rotate: `${rotation.value}deg` }]
+      transform: [
+        { rotate: `${rotation.value}deg` }
+        // { scale: interpolate(rotation.value, [0, 360], [1, 1.2], Extrapolation.CLAMP) }
+      ],
+      opacity: interpolate(rotation.value, [0, 360], [1, 0.6], Extrapolation.CLAMP)
     }
   })
 
   const animatedStyleReverse = useAnimatedStyle(() => {
     return {
-      transform: [{ rotate: `${rotationReverse.value}deg` }]
+      transform: [
+        { rotate: `${rotationReverse.value}deg` }
+        // { scale: interpolate(rotationReverse.value, [-360, 0], [1, 1.1], Extrapolation.CLAMP) }
+      ],
+      opacity: interpolate(rotationReverse.value, [-360, 0], [0.4, 0.8], Extrapolation.CLAMP)
     }
   })
 
@@ -114,3 +132,13 @@ export function SplashScreen({ isVisible = true }: SplashScreenProps) {
     </Animated.View>
   )
 }
+// useEffect(() => {
+//   if (!isVisible) {
+//     opacity.value = withTiming(0, {
+//       duration: 500,
+//       easing: Easing.out(Easing.ease)
+//     })
+//   } else {
+//     opacity.value = 1
+//   }
+// }, [isVisible, opacity])
