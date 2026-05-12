@@ -2,7 +2,7 @@ import withFloatingButton from '@/components/hoc/withFloatingButton'
 import { Header } from '@/components/layouts/Header'
 import { DateFilterPicker } from '@/components/organisms/DateFilterPicker'
 import { OrderCard } from '@/components/organisms/OrderCard'
-import { OrderFilterChips } from '@/components/organisms/OrderFilterChips'
+import { FilterChip } from '@/components/organisms/OrderFilterChips'
 import type { OrderFilter } from '@/features/order/api/order.api'
 import { PaymentMethodModal } from '@/features/order/components/organisms/PaymentMethodModal'
 import { TransferTableModal } from '@/features/order/components/organisms/TransferTableModal'
@@ -10,7 +10,7 @@ import { useChangeTable, useOrders, usePayment } from '@/features/order/hooks/us
 import { Order } from '@/features/order/types/order.type'
 import { useMe } from '@/features/user/hooks/useUser'
 import { PaymentMethod } from '@/shared/constants/payment'
-import { ORDER_STATUS_LABEL, STATUS, type OrderStatus } from '@/shared/constants/status'
+import { ORDER_STATUS_LABEL, ORDER_STATUS_OPTIONS, STATUS, type OrderStatus } from '@/shared/constants/status'
 import { ColorTheme } from '@/shared/constants/theme'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { formatCurrencyVND } from '@/shared/utils/currency'
@@ -38,7 +38,6 @@ export default function HomeScreen() {
   const { data: meData, isPending: isLoadingUser } = useMe()
   const { orders, isLoading: isLoadingOrders, isRefetching, refetch } = useOrders(orderFilter)
 
-  // Mutation
   const changeTableMutation = useChangeTable(selectedOrder?.orderID!, {
     onSuccess: () => {
       setShowTransferModal(false)
@@ -210,7 +209,23 @@ export default function HomeScreen() {
           </TouchableOpacity>
         }
       >
-        <OrderFilterChips selected={orderFilter.statusId} onChange={handleChangeStatus} colors={colors} />
+        <FilterChip
+          options={ORDER_STATUS_OPTIONS}
+          selected={orderFilter.statusId}
+          onChange={handleChangeStatus}
+          selectedStyle={{
+            backgroundColor: colors.primary,
+            borderColor: colors.primary,
+            textColor: 'white',
+            iconColor: 'white'
+          }}
+          unselectedStyle={{
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            borderColor: 'rgba(255,255,255,0.4)',
+            textColor: 'white',
+            iconColor: 'white'
+          }}
+        />
       </Header>
       <ContentWithFab
         orders={orders}

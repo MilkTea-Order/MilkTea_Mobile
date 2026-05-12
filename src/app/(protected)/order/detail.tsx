@@ -118,7 +118,7 @@ export default function OrderDetailScreen() {
     if (!item) return
     Alert.alert(
       'Xác nhận',
-      order?.orderDetails.length === 1
+      order?.items.length === 1
         ? `Bạn muốn huỷ món "${item.menu.name} (${item.size.name})"?\n\nĐây là món cuối cùng. Huỷ món này sẽ huỷ luôn đơn hàng.`
         : `Bạn muốn huỷ món "${item.menu.name} (${item.size.name})"?`,
       [
@@ -174,7 +174,7 @@ export default function OrderDetailScreen() {
 
   const orderStatus = String(order?.status.id ?? '') as OrderStatus
   const statusName = isLoading ? 'Đang tải...' : (ORDER_STATUS_LABEL[orderStatus] ?? '')
-  const totalQty = order?.orderDetails?.reduce((sum, d) => sum + (d.quantity ?? 0), 0) ?? 0
+  const totalQty = order?.items?.reduce((sum, d) => sum + (d.quantity ?? 0), 0) ?? 0
 
   return (
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
@@ -255,7 +255,7 @@ export default function OrderDetailScreen() {
 
         {/* Order Items Section */}
         <OrderItemsSection
-          items={order?.orderDetails ?? []}
+          items={order?.items ?? []}
           canActionButton={filterMode === 'placed' && Number(order?.status.id ?? 0) === Number(STATUS.ORDER.UNPAID)}
           totalQty={totalQty}
           isLoading={isLoading}
@@ -264,7 +264,7 @@ export default function OrderDetailScreen() {
           onCancelItem={handleCancelItem}
           cancellingItemId={cancellingItemId}
           onUpdateItem={(orderDetailId) => {
-            const detail = (order?.orderDetails ?? []).find((d: any) => Number(d.id) === Number(orderDetailId))
+            const detail = (order?.items ?? []).find((d: any) => Number(d.id) === Number(orderDetailId))
             if (!detail || !orderIdNumber) return
             useOrderStore.getState().clear()
 

@@ -40,6 +40,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name='kitchen'
+        options={{
+          title: 'Quản lý món',
+          tabBarIcon: ({ color, size }) => <Ionicons name='restaurant-outline' size={size} color={color} />
+        }}
+      />
+      <Tabs.Screen
         name='report'
         options={{
           title: 'Báo cáo',

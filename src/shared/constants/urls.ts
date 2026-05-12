@@ -17,6 +17,7 @@ export const URL = {
   UPDATE_PROFILE: 'users/me/update-profile',
 
   ORDERS: 'orders',
+  ORDERS_KITCHEN: 'orders/kitchen',
 
   TABLES: 'catalog/tables',
   TABLES_EMPTY: 'catalog/tables/empty',

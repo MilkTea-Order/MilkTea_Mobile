@@ -75,7 +75,7 @@ export function extractErrorDetails(
   //     details.push({ code: errorCode, field: targetField, message: errorMessage })
   //   })
   // })
-  const meta = errorData.meta as unknown as Record<string, object> | undefined
+  const meta = errorData.meta as unknown as Record<string, object | object[]> | undefined
   Object.keys(errorData)
     .filter((key) => key !== 'meta')
     .forEach((errorCode) => {
@@ -86,12 +86,23 @@ export function extractErrorDetails(
         const normalizedForMessage = String(raw).toLowerCase()
         const errorMessage = getErrorMessage(errorCode, domain, normalizedForMessage)
         const targetField = mapFieldName(String(raw))
+        const currentMeta = meta?.[errorCode]
+        const filteredMeta = Array.isArray(currentMeta)
+          ? currentMeta.filter((item) => {
+              if (typeof item !== 'object' || item === null) return false
 
+              const obj = item as Record<string, unknown>
+
+              const key = 'key'
+
+              return !(key in obj) || obj[key] === raw
+            })
+          : []
         const detail: ErrorDetail = {
           code: errorCode,
           field: targetField,
           message: errorMessage,
-          meta: meta?.[errorCode]
+          meta: filteredMeta
         }
 
         details.push(detail)

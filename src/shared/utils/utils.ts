@@ -87,3 +87,8 @@ export const generateIdempotencyKey = (): string => {
   const randomPart = Math.random().toString(36).substring(2, 15)
   return `${timestamp}-${randomPart}`
 }
+
+export const getKeyByValue = <T extends Record<string, string | number>>(
+  obj: T,
+  value: string | number
+): keyof T | undefined => Object.keys(obj).find((key) => obj[key as keyof T] === value) as keyof T | undefined

@@ -5,37 +5,43 @@ import { DinnerTable } from './table.type'
 
 export interface Order {
   orderID: number
+  dinnerTable: DinnerTable
+  status: Status
+  note: string | null
+  totalAmount: number
+  items: OrderDetail[]
+
   orderDate: string
   orderBy: number
+
   createdDate: string
   createdBy: number
+
   paymentMethod: PaymentMethod | null
   paymentDate: string | null
   paymentBy: number | null
+
   actionDate: string | null
   actionBy: number | null
+
   cancelledDate: string | null
   cancelledBy: number | null
-  note: string | null
-  totalAmount: number
-  dinnerTable: DinnerTable
-  status: Status
-  orderDetails: OrderDetail[]
 }
 export interface OrderDetail {
   id: number
-  orderID: number
+  menu: Menu
+  size: Size
   quantity: number
+  status: Status
   price: number
+  note: string | null
+  kindOfHotpot1ID: number | null
+  kindOfHotpot2ID: number | null
+
   createdBy: number
   createdDate: string
   cancelledBy: number | null
   cancelledDate: string | null
-  note: string | null
-  kindOfHotpot1ID: number | null
-  kindOfHotpot2ID: number | null
-  menu: Menu
-  size: Size
 }
 
 export interface OrderItem {
