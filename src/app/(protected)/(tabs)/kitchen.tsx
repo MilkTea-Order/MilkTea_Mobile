@@ -4,7 +4,15 @@ import { CancelItemModal } from '@/features/order/components/organisms/CancelIte
 import { KitchenOrderSection } from '@/features/order/components/organisms/KitchenOrderSection'
 import { useKitchenOrders, useUpdateOrderDetailStatus } from '@/features/order/hooks/useKitchenOrder'
 import type { OrderDetail } from '@/features/order/types/order.type'
-import { ORDER_ITEM_STATUS, ORDER_ITEM_STATUS_OPTIONS, STATUS, type OrderItemStatus } from '@/shared/constants/status'
+import { getAvailableTransitions, type TransitionAction } from '@/shared/constants/orderItemTransitions'
+import {
+  ORDER_DETAIL_STATUS_ICON,
+  ORDER_ITEM_STATUS,
+  ORDER_ITEM_STATUS_LABEL,
+  ORDER_ITEM_STATUS_OPTIONS,
+  STATUS,
+  type OrderItemStatus
+} from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { getKeyByValue } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
@@ -16,7 +24,6 @@ export default function KitchenScreen() {
   const [selectedStatus, setSelectedStatus] = useState<OrderItemStatus>(ORDER_ITEM_STATUS.PENDING)
   const [checkedItems, setCheckedItems] = useState<Map<number, Set<number>>>(new Map())
   const [cancelModalVisible, setCancelModalVisible] = useState(false)
-  console.log('check', checkedItems)
   const filter = useMemo(() => getKeyByValue(STATUS.ORDER_ITEM, selectedStatus), [selectedStatus])
 
   const { orders, isLoading, isRefetching, refetch } = useKitchenOrders(filter)
@@ -83,52 +90,38 @@ export default function KitchenScreen() {
   const handleCancelConfirm = (reason: string) => {
     handleUpdateStatus(ORDER_ITEM_STATUS.CANCELLED, reason)
   }
+  const getAvailableActions = useCallback((): TransitionAction[] => {
+    const actions: TransitionAction[] = []
+    const seenStatuses = new Set<OrderItemStatus>()
 
-  const canUpdateToInProgress = useMemo(() => {
     for (const [orderId, itemSet] of checkedItems) {
-      const order = orders.find((o) => o.orderID === orderId)
-      if (!order) continue
+      const matchingOrders = orders.filter((o) => o.orderID === orderId)
 
       for (const itemId of itemSet) {
+        const order = matchingOrders.find((o) => o.items.some((i) => i.id === itemId))
+        if (!order) continue
+
         const item = order.items.find((i) => i.id === itemId)
-        if (item?.status.id === ORDER_ITEM_STATUS.PENDING) {
-          return true
+        if (!item) continue
+        const currentStatus = item.status.id as OrderItemStatus
+        const available = getAvailableTransitions(currentStatus)
+        for (const targetStatus of available) {
+          if (!seenStatuses.has(targetStatus)) {
+            seenStatuses.add(targetStatus)
+            actions.push({
+              status: currentStatus,
+              label: ORDER_ITEM_STATUS_LABEL[targetStatus],
+              icon: ORDER_DETAIL_STATUS_ICON[targetStatus],
+              nextStatus: targetStatus
+            })
+          }
         }
       }
     }
-    return false
+    return actions
   }, [checkedItems, orders])
 
-  const canUpdateToCompleted = useMemo(() => {
-    for (const [orderId, itemSet] of checkedItems) {
-      const order = orders.find((o) => o.orderID === orderId)
-      if (!order) continue
-
-      for (const itemId of itemSet) {
-        const item = order.items.find((i) => i.id === itemId)
-        if (item?.status.id === ORDER_ITEM_STATUS.INPROGRESS) {
-          return true
-        }
-      }
-    }
-    return false
-  }, [checkedItems, orders])
-
-  const canUpdateToCancelled = useMemo(() => {
-    for (const [orderId, itemSet] of checkedItems) {
-      const order = orders.find((o) => o.orderID === orderId)
-      if (!order) continue
-
-      for (const itemId of itemSet) {
-        const item = order.items.find((i) => i.id === itemId)
-        if (item?.status.id === ORDER_ITEM_STATUS.PENDING) {
-          return true
-        }
-      }
-    }
-    return false
-  }, [checkedItems, orders])
-
+  const availableActions = useMemo(() => getAvailableActions(), [getAvailableActions])
   const canCheck = selectedStatus === ORDER_ITEM_STATUS.PENDING || selectedStatus === ORDER_ITEM_STATUS.INPROGRESS
 
   const renderEmptyState = () => {
@@ -181,7 +174,7 @@ export default function KitchenScreen() {
 
       <FlatList
         data={orders}
-        keyExtractor={(item) => item.orderID.toString()}
+        keyExtractor={(item) => `${item.orderID}-${item.items?.[0]?.createdDate}`}
         contentContainerStyle={{
           padding: 16,
           paddingBottom: getTotalCheckedCount() > 0 ? 120 : 32
@@ -222,63 +215,31 @@ export default function KitchenScreen() {
             </Text>
           </TouchableOpacity>
 
-          {(canUpdateToInProgress || canUpdateToCompleted) && (
-            <>
-              {canUpdateToInProgress && (
+          {availableActions.length > 0 &&
+            availableActions.map((action) => {
+              const isCancelAction = action.nextStatus === ORDER_ITEM_STATUS.CANCELLED
+              const buttonColor = isCancelAction ? '#EF4444' : colors.primary
+              const iconName = isCancelAction ? 'close-outline' : action.icon
+
+              return (
                 <TouchableOpacity
-                  onPress={() => handleUpdateStatus(ORDER_ITEM_STATUS.INPROGRESS)}
+                  key={action.nextStatus}
+                  onPress={isCancelAction ? handleCancelItems : () => handleUpdateStatus(action.nextStatus)}
                   disabled={updateStatusMutation.isPending}
                   className='flex-1 py-4 rounded-xl items-center flex-row justify-center gap-2'
-                  style={{ backgroundColor: colors.primary }}
+                  style={{ backgroundColor: buttonColor }}
                 >
                   {updateStatusMutation.isPending ? (
                     <ActivityIndicator size='small' color='white' />
                   ) : (
                     <>
-                      <Ionicons name='play-outline' size={18} color='white' />
-                      <Text className='font-semibold text-white'>Bắt đầu làm</Text>
+                      <Ionicons name={iconName} size={18} color='white' />
+                      <Text className='font-semibold text-white'>{action.label}</Text>
                     </>
                   )}
                 </TouchableOpacity>
-              )}
-
-              {canUpdateToCompleted && (
-                <TouchableOpacity
-                  onPress={() => handleUpdateStatus(ORDER_ITEM_STATUS.COMPLETED)}
-                  disabled={updateStatusMutation.isPending}
-                  className='flex-1 py-4 rounded-xl items-center flex-row justify-center gap-2'
-                  style={{ backgroundColor: '#22C55E' }}
-                >
-                  {updateStatusMutation.isPending ? (
-                    <ActivityIndicator size='small' color='white' />
-                  ) : (
-                    <>
-                      <Ionicons name='checkmark-outline' size={18} color='white' />
-                      <Text className='font-semibold text-white'>Hoàn thành</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-              )}
-            </>
-          )}
-
-          {canUpdateToCancelled && (
-            <TouchableOpacity
-              onPress={handleCancelItems}
-              disabled={updateStatusMutation.isPending}
-              className='flex-1 py-4 rounded-xl items-center flex-row justify-center gap-2'
-              style={{ backgroundColor: '#EF4444' }}
-            >
-              {updateStatusMutation.isPending ? (
-                <ActivityIndicator size='small' color='white' />
-              ) : (
-                <>
-                  <Ionicons name='close-outline' size={18} color='white' />
-                  <Text className='font-semibold text-white'>Hủy món</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          )}
+              )
+            })}
         </View>
       )}
 
