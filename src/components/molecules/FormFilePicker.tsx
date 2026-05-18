@@ -58,7 +58,7 @@ export function FormFilePicker({
   return (
     <View className='mb-4'>
       {label && (
-        <View className='flex-row items-center mb-2'>
+        <View className='mb-2 flex-row items-center'>
           <Ionicons
             name='cloud-upload-outline'
             size={16}
@@ -115,7 +115,7 @@ export function FormFilePicker({
               {placeholder}
             </Text>
 
-            <View className='flex-row mt-2'>
+            <View className='mt-2 flex-row'>
               {isPicking ? (
                 <ActivityIndicator size='small' color={colors.primary} />
               ) : (
@@ -141,9 +141,9 @@ export function FormFilePicker({
       </View>
 
       {hasError && (
-        <View className='flex-row items-center mt-1.5 ml-1'>
+        <View className='ml-1 mt-1.5 flex-row items-center'>
           <Ionicons name='alert-circle' size={14} color={colors.error || '#ef4444'} />
-          <Text className='text-xs ml-1.5' style={{ color: colors.error || '#ef4444' }}>
+          <Text className='ml-1.5 text-xs' style={{ color: colors.error || '#ef4444' }}>
             {error}
           </Text>
         </View>

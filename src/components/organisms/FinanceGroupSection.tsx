@@ -27,7 +27,7 @@ export function FinanceGroupSection({ group }: FinanceGroupSectionProps) {
     <CollapsibleSection
       icon={group.totalAmount < 0 ? 'arrow-down-circle' : 'arrow-up-circle'}
       headerContent={
-        <View className='flex-row items-center flex-1'>
+        <View className='flex-1 flex-row items-center'>
           <View className='flex-1'>
             <Text className='text-base font-bold' style={{ color: colors.text }}>
               {group.name}
@@ -36,7 +36,7 @@ export function FinanceGroupSection({ group }: FinanceGroupSectionProps) {
               {group.items.length} biến động
             </Text>
           </View>
-          <Text className='text-base font-bold mr-2' style={{ color }}>
+          <Text className='mr-2 text-base font-bold' style={{ color }}>
             {formatCurrencyVND(group.totalAmount)}
           </Text>
         </View>

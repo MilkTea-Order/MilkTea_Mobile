@@ -52,7 +52,7 @@ export function OrderItemsSection({
 
   return (
     <View
-      className='rounded-3xl p-6 border-2'
+      className='rounded-3xl border-2 p-6'
       style={{
         maxHeight: SCREEN_HEIGHT * 0.63,
         backgroundColor: colors.card,
@@ -66,11 +66,11 @@ export function OrderItemsSection({
     >
       <View className='mb-3'>
         <View className='flex-row items-center'>
-          <View className='rounded-xl p-2 mr-3' style={{ backgroundColor: `${colors.primary}15` }}>
+          <View className='mr-3 rounded-xl p-2' style={{ backgroundColor: `${colors.primary}15` }}>
             <Ionicons name='list-outline' size={24} color={colors.primary} />
           </View>
           <View className='flex-1'>
-            <Text className='text-xl font-bold mb-1' style={{ color: colors.text }}>
+            <Text className='mb-1 text-xl font-bold' style={{ color: colors.text }}>
               Danh sách món - Số lượng: {totalQty}
             </Text>
             {/* Filter dropdown dưới chữ Danh sách món */}
@@ -99,9 +99,9 @@ export function OrderItemsSection({
       </View>
 
       {isLoading ? (
-        <View className='py-10 items-center justify-center'>
+        <View className='items-center justify-center py-10'>
           <ActivityIndicator size='large' color={colors.primary} />
-          <Text className='text-base mt-3' style={{ color: colors.textSecondary }}>
+          <Text className='mt-3 text-base' style={{ color: colors.textSecondary }}>
             Đang tải danh sách món...
           </Text>
         </View>

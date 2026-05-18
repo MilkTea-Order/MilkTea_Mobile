@@ -18,10 +18,6 @@ export const menuApi = {
     })
   },
 
-  getMenusByGroup(groupId: number): Promise<AxiosResponse<ApiResponse<Menu[]>>> {
-    return http.get<ApiResponse<Menu[]>>(`${URL.MENUS_GROUP_BASE}/${groupId}/items/available`)
-  },
-
   getMenuSizes(menuId: number): Promise<AxiosResponse<ApiResponse<MenuSize[]>>> {
     return http.get<ApiResponse<MenuSize[]>>(`${URL.MENU_SIZES_BASE}/${menuId}/sizes`)
   }

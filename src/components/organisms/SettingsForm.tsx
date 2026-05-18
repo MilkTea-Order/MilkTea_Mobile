@@ -39,18 +39,18 @@ export function SettingsForm({ onSuccess }: SettingsFormProps) {
           marginBottom: 8
         }}
       >
-        <Text className='text-sm mb-2' style={{ color: colors.textSecondary }}>
+        <Text className='mb-2 text-sm' style={{ color: colors.textSecondary }}>
           API Base URL hiện tại:
         </Text>
         <Text
-          className='text-sm font-medium mb-4'
+          className='mb-4 text-sm font-medium'
           style={{ color: apiBaseUrl ? colors.primary : colors.textSecondary }}
           numberOfLines={1}
         >
           {apiBaseUrl || 'Chưa cấu hình'}
         </Text>
 
-        <Text className='text-sm mb-2' style={{ color: colors.textSecondary }}>
+        <Text className='mb-2 text-sm' style={{ color: colors.textSecondary }}>
           Nhập API Base URL mới:
         </Text>
         <TextInput
@@ -58,7 +58,7 @@ export function SettingsForm({ onSuccess }: SettingsFormProps) {
           onChangeText={setApiUrlInput}
           placeholder='https://api.example.com'
           placeholderTextColor={colors.textSecondary}
-          className='border rounded-lg px-4 py-3 mb-4'
+          className='mb-4 rounded-lg border px-4 py-3'
           style={{
             borderColor: colors.border,
             color: colors.text,
@@ -72,10 +72,10 @@ export function SettingsForm({ onSuccess }: SettingsFormProps) {
         <TouchableOpacity
           onPress={handleSaveApiUrl}
           activeOpacity={0.7}
-          className='rounded-lg py-3 items-center'
+          className='items-center rounded-lg py-3'
           style={{ backgroundColor: colors.primary }}
         >
-          <Text className='text-white font-semibold'>Lưu API URL</Text>
+          <Text className='font-semibold text-white'>Lưu API URL</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

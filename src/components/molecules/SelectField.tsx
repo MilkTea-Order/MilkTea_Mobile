@@ -43,7 +43,7 @@ export function SelectField({
   return (
     <View className='mb-5'>
       {label && (
-        <Text className='text-sm font-semibold mb-2 ml-1' style={{ color: colors.text }}>
+        <Text className='mb-2 ml-1 text-sm font-semibold' style={{ color: colors.text }}>
           {label}
           {required && <Text style={{ color: colors.error || '#ef4444' }}> *</Text>}
         </Text>
@@ -78,7 +78,7 @@ export function SelectField({
       </TouchableOpacity>
 
       {hasError && (
-        <Text className='text-sm mt-1 ml-2' style={{ color: colors.error || '#ef4444' }}>
+        <Text className='ml-2 mt-1 text-sm' style={{ color: colors.error || '#ef4444' }}>
           {error}
         </Text>
       )}
@@ -90,11 +90,11 @@ export function SelectField({
           onPress={() => setShowModal(false)}
         >
           <View
-            className='bg-white rounded-t-3xl p-4'
+            className='rounded-t-3xl bg-white p-4'
             style={{ backgroundColor: colors.card }}
             onStartShouldSetResponder={() => true}
           >
-            <View className='flex-row justify-between items-center mb-4'>
+            <View className='mb-4 flex-row items-center justify-between'>
               <Text className='text-lg font-bold' style={{ color: colors.text }}>
                 {label || 'Chọn'}
               </Text>
@@ -113,7 +113,7 @@ export function SelectField({
                       onChange(option.value)
                       setShowModal(false)
                     }}
-                    className='flex-row items-center py-4 px-2'
+                    className='flex-row items-center px-2 py-4'
                     style={{
                       borderBottomWidth: 1,
                       borderBottomColor: colors.border

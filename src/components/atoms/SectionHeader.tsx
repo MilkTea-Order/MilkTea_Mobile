@@ -11,7 +11,7 @@ export function SectionHeader({ title, className = '' }: SectionHeaderProps) {
   const { colors } = useTheme()
 
   return (
-    <Text className={`text-lg font-bold mb-4 ${className}`} style={{ color: colors.text }}>
+    <Text className={`mb-4 text-lg font-bold ${className}`} style={{ color: colors.text }}>
       {title}
     </Text>
   )

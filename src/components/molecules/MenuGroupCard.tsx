@@ -19,7 +19,7 @@ export const MenuGroupCard: React.FC<Props> = ({ name, quantity, onPress, colors
   return (
     <TouchableOpacity
       onPress={onPress}
-      className='rounded-3xl p-5 border-2'
+      className='rounded-3xl border-2 p-5'
       style={{
         backgroundColor: colors.card,
         borderColor: colors.border,
@@ -32,10 +32,10 @@ export const MenuGroupCard: React.FC<Props> = ({ name, quantity, onPress, colors
       }}
       activeOpacity={0.85}
     >
-      <View className='rounded-2xl p-3 mb-3 self-start' style={{ backgroundColor: `${colors.primary}20` }}>
+      <View className='mb-3 self-start rounded-2xl p-3' style={{ backgroundColor: `${colors.primary}20` }}>
         <Ionicons name='grid-outline' size={24} color={colors.primary} />
       </View>
-      <Text className='text-lg font-bold mb-1' style={{ color: colors.text }}>
+      <Text className='mb-1 text-lg font-bold' style={{ color: colors.text }}>
         {name}
       </Text>
       <Text className='text-sm' style={{ color: colors.textSecondary }}>

@@ -62,12 +62,12 @@ export default function ForgotPasswordScreen() {
         keyboardShouldPersistTaps='handled'
       >
         {/* Logo + Title */}
-        <View className='items-center pb-6 mt-20' style={{ paddingTop: 8 }}>
+        <View className='mt-20 items-center pb-6' style={{ paddingTop: 8 }}>
           <AnimatedLogoContainer colors={colors} isDark={isDark}>
             <AppLogo size='large' showText={false} />
           </AnimatedLogoContainer>
 
-          <Text className='text-3xl font-bold tracking-wide mt-4' style={{ color: colors.text }}>
+          <Text className='mt-4 text-3xl font-bold tracking-wide' style={{ color: colors.text }}>
             Quên mật khẩu
           </Text>
         </View>

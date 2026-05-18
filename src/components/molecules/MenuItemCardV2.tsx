@@ -82,7 +82,7 @@ export default function MenuItemCardV2({
 
   return (
     <View
-      className='rounded-2xl mb-3 border overflow-hidden'
+      className='mb-3 overflow-hidden rounded-2xl border'
       style={{
         backgroundColor: colors.card,
         borderColor: isActive ? colors.primary : colors.border,
@@ -143,7 +143,7 @@ export default function MenuItemCardV2({
                   <Ionicons name='remove' size={14} color='white' />
                 </TouchableOpacity>
                 {/* Quantity */}
-                <Text className='text-sm font-bold text-white min-w-[24px] text-center'>
+                <Text className='min-w-[24px] text-center text-sm font-bold text-white'>
                   {getQuantityReactive(menu.id, expandedBadgeSizeId)}
                 </Text>
                 {/* Increment */}
@@ -195,11 +195,11 @@ export default function MenuItemCardV2({
 
       {/* Size Row */}
       {isLoading ? (
-        <View className='p-3 items-center'>
+        <View className='items-center p-3'>
           <ActivityIndicator color={colors.primary} size='small' />
         </View>
       ) : sizes && sizes.length > 0 ? (
-        <View className='px-2 pt-2 pb-1'>
+        <View className='px-2 pb-1 pt-2'>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className='flex-row' style={{ gap: 8 }}>
               {sizes.map((size) => {
@@ -230,7 +230,7 @@ export default function MenuItemCardV2({
                   <TouchableOpacity
                     key={size.id}
                     onPress={() => handleSizePress(size)}
-                    className='px-3 py-2 rounded-lg'
+                    className='rounded-lg px-3 py-2'
                     style={{
                       backgroundColor: sizeStyle.backgroundColor,
                       borderWidth: isSelected || quantity > 0 ? 1.5 : 1,
@@ -239,7 +239,7 @@ export default function MenuItemCardV2({
                     activeOpacity={0.7}
                   >
                     {/* Size và Quantity */}
-                    <View className='flex-row items-center mb-1' style={{ gap: 6 }}>
+                    <View className='mb-1 flex-row items-center' style={{ gap: 6 }}>
                       <Text
                         className='text-sm font-bold'
                         style={{ color: isSelected ? '#fff' : quantity > 0 ? colors.primary : colors.text }}

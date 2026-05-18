@@ -69,7 +69,7 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
             <View className='flex-1'>
               {/* Info Card */}
               <View
-                className='rounded-2xl p-4 mb-6'
+                className='mb-6 rounded-2xl p-4'
                 style={{
                   backgroundColor: `${colors.primary}10`,
                   borderWidth: 1,
@@ -78,7 +78,7 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
               >
                 <View className='flex-row items-start'>
                   <View
-                    className='rounded-xl p-2 mr-3'
+                    className='mr-3 rounded-xl p-2'
                     style={{
                       backgroundColor: `${colors.primary}20`
                     }}
@@ -86,7 +86,7 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
                     <Ionicons name='information-circle' size={20} color={colors.primary} />
                   </View>
                   <View className='flex-1'>
-                    <Text className='text-sm font-semibold mb-1' style={{ color: colors.text }}>
+                    <Text className='mb-1 text-sm font-semibold' style={{ color: colors.text }}>
                       Lưu ý khi đổi mật khẩu
                     </Text>
                     <Text className='text-xs leading-5' style={{ color: colors.textSecondary }}>
@@ -157,7 +157,7 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
                 }}
               >
                 <View
-                  className='rounded-2xl overflow-hidden'
+                  className='overflow-hidden rounded-2xl'
                   style={{
                     shadowColor: colors.primary,
                     shadowOffset: { width: 0, height: 6 },
@@ -178,8 +178,8 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
                       <ActivityIndicator color='white' size='small' />
                     ) : (
                       <View className='flex-row items-center justify-center'>
-                        <Text className='text-white text-lg font-bold mr-2'>Đổi mật khẩu</Text>
-                        <View className='rounded-full bg-white/20 p-1 ml-1'>
+                        <Text className='mr-2 text-lg font-bold text-white'>Đổi mật khẩu</Text>
+                        <View className='ml-1 rounded-full bg-white/20 p-1'>
                           <Ionicons name='checkmark' size={18} color='white' />
                         </View>
                       </View>

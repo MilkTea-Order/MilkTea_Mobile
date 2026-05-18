@@ -93,11 +93,11 @@ export function LoginForm({ onForgotPassword }: LoginFormProps) {
           {/* Remember Username Checkbox */}
           <TouchableOpacity
             onPress={() => setRememberUsernameState(!rememberUsername)}
-            className='flex-row items-center mb-6'
+            className='mb-6 flex-row items-center'
             activeOpacity={0.7}
           >
             <View
-              className='w-5 h-5 rounded border-2 items-center justify-center mr-3'
+              className='mr-3 h-5 w-5 items-center justify-center rounded border-2'
               style={{
                 borderColor: rememberUsername ? colors.primary : colors.border,
                 backgroundColor: rememberUsername ? colors.primary : 'transparent'
@@ -112,7 +112,7 @@ export function LoginForm({ onForgotPassword }: LoginFormProps) {
 
           {/* Forgot Password */}
           {onForgotPassword && (
-            <TouchableOpacity onPress={onForgotPassword} className='self-end mb-6' activeOpacity={0.7}>
+            <TouchableOpacity onPress={onForgotPassword} className='mb-6 self-end' activeOpacity={0.7}>
               <Text className='text-sm font-semibold' style={{ color: colors.primary }}>
                 Quên mật khẩu?
               </Text>
@@ -134,7 +134,7 @@ export function LoginForm({ onForgotPassword }: LoginFormProps) {
             style={{ opacity: loginMutation.isPending || !dirty || !isValid ? 0.7 : 1 }}
           >
             <View
-              className='rounded-2xl overflow-hidden'
+              className='overflow-hidden rounded-2xl'
               style={{
                 shadowColor: colors.primary,
                 shadowOffset: { width: 0, height: 6 },
@@ -155,8 +155,8 @@ export function LoginForm({ onForgotPassword }: LoginFormProps) {
                   <ActivityIndicator color='white' size='small' />
                 ) : (
                   <View className='flex-row items-center justify-center'>
-                    <Text className='text-white text-lg font-bold mr-2'>Đăng nhập</Text>
-                    <View className='rounded-full bg-white/20 p-1 ml-1'>
+                    <Text className='mr-2 text-lg font-bold text-white'>Đăng nhập</Text>
+                    <View className='ml-1 rounded-full bg-white/20 p-1'>
                       <Ionicons name='arrow-forward' size={18} color='white' />
                     </View>
                   </View>

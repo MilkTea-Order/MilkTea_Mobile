@@ -6,7 +6,7 @@ import { extractErrorDetails } from '@/shared/utils/formErrors'
 import { isApiError } from '@/shared/utils/utils'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { router, useRouter } from 'expo-router'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Alert } from 'react-native'
 import { Toast } from 'react-native-toast-notifications'
 import { orderApi, OrderFilter } from '../api/order.api'
@@ -38,9 +38,13 @@ export function useOrders(filter: OrderFilter) {
       return response.data.data ?? []
     },
     staleTime: 30 * 1000
-    // placeholderData: keepPreviousData
   })
-
+  useEffect(() => {
+    if (query.isError) {
+      const details = extractErrorDetails(query.error, 'order')
+      Alert.alert('Lỗi lấy đơn hàng', details.map((d) => d.message).join('\n'))
+    }
+  }, [query.isError, query.error])
   return {
     orders: query.data ?? [],
     isLoading: query.isPending,
@@ -49,28 +53,6 @@ export function useOrders(filter: OrderFilter) {
     refetch: query.refetch
   }
 }
-
-export function useOrderDetail(orderId: number | null, isCancelled: boolean = false) {
-  const query = useQuery({
-    queryKey: orderKeys.detail(orderId ?? 0, isCancelled),
-    queryFn: async () => {
-      if (!orderId) return null
-      const response = await orderApi.getOrderDetail(orderId, isCancelled)
-      return response.data.data ?? null
-    },
-    enabled: !!orderId,
-    staleTime: 30 * 1000,
-    placeholderData: keepPreviousData
-  })
-
-  return {
-    order: query.data ?? null,
-    isLoading: query.isPending,
-    isRefetching: query.isRefetching,
-    refetch: query.refetch
-  }
-}
-
 export function useCreateOrder() {
   const queryClient = useQueryClient()
 
@@ -85,46 +67,14 @@ export function useCreateOrder() {
         { queryKey: orderKeys.list({ statusId: STATUS.ORDER.UNPAID } as OrderFilter), exact: false },
         (old: Order[] | undefined) => {
           const prev = old ?? []
-          const withoutDup = prev.filter((o) => o.orderID !== data.data.orderID)
+          const withoutDup = prev.filter((o) => o.orderId !== data.data.orderId)
           return [data.data, ...withoutDup]
         }
       )
-    }
-  })
-}
-
-export function useCancelOrderItems(
-  orderId: number,
-  options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }
-) {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationKey: [...orderKeys.all, 'cancel-items', orderId] as const,
-    mutationFn: async (orderDetailId: number) => {
-      const res = await orderApi.cancelOrderItems(orderId, orderDetailId)
-      return res.data
     },
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
-      await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
-      options?.onSuccess?.(data)
-      return data
-    },
-    onError: (error) => {
+    onError: (error: any) => {
       const details = extractErrorDetails(error, 'order')
-      if (details.some((error) => [ERROR_CODE.E0042].includes(error.code as any))) {
-        Alert.alert('Lỗi', error.message)
-        return
-      }
-      if (details.some((error) => [ERROR_CODE.E0001, ERROR_CODE.E0036].includes(error.code as any))) {
-        Alert.alert('Lỗi', error.message, [{ text: 'OK', onPress: () => router.replace('/(protected)/(tabs)') }])
-        return
-      }
-      if (details.some((error) => [ERROR_CODE.E9999].includes(error.code as any))) {
-        Alert.alert('Lỗi', error.message)
-        return
-      }
-      options?.onError?.(error)
+      Alert.alert('Lỗi tạo đơn hàng', details.map((d) => d.message).join('\n'))
     }
   })
 }
@@ -145,7 +95,7 @@ export function usePayment(
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
       await queryClient.invalidateQueries({
-        queryKey: orderKeys.list({ statusId: STATUS.ORDER.NO_COLLECTED } as OrderFilter)
+        queryKey: orderKeys.list({ statusId: STATUS.ORDER.NOTCOLLECTED } as OrderFilter)
       })
       await queryClient.invalidateQueries({
         queryKey: orderKeys.list({ statusId: STATUS.ORDER.UNPAID } as OrderFilter)
@@ -154,7 +104,7 @@ export function usePayment(
       router.replace({
         pathname: '/(protected)/(tabs)',
         params: {
-          filter: STATUS.ORDER.NO_COLLECTED
+          filter: STATUS.ORDER.NOTCOLLECTED
         }
       })
 
@@ -204,10 +154,6 @@ export function useCollectedOrder(
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
       await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
-      // Toast.show('Thu tiền thành công', {
-      //   type: 'success',
-      //   placement: 'top'
-      // })
       router.replace({
         pathname: '/(protected)/(tabs)',
         params: {
@@ -234,7 +180,6 @@ export function useCollectedOrder(
       }
       const e0041 = details.find((e) => e.code === ERROR_CODE.E0041)
       if (e0041) {
-        console.log(e0041)
         const materialMessages = Array.isArray(e0041.meta)
           ? (e0041.meta as {
               materialName: string
@@ -279,7 +224,7 @@ export function useCancelOrder(options?: { onSuccess?: (data: any) => void; onEr
       router.replace({
         pathname: '/(protected)/(tabs)',
         params: {
-          filter: STATUS.ORDER.CANCELED
+          filter: STATUS.ORDER.CANCELLED
         }
       })
       options?.onSuccess?.(data)
@@ -313,87 +258,6 @@ export function useCancelOrder(options?: { onSuccess?: (data: any) => void; onEr
   })
 }
 
-export function useUpdateOrderItem(
-  orderId: number,
-  orderDetailId: number,
-  options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }
-) {
-  const queryClient = useQueryClient()
-  const router = useRouter()
-
-  return useMutation({
-    mutationKey: [...orderKeys.all, 'update-item', orderId, orderDetailId] as const,
-    mutationFn: async ({ quantity, note }: { quantity?: number; note?: string | null }) => {
-      const res = await orderApi.updateOrderItem(orderId, orderDetailId, { quantity, note })
-      return res.data
-    },
-    onSuccess: async (data) => {
-      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
-      await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
-      options?.onSuccess?.(data)
-      return data
-    },
-    onError: (error: any) => {
-      const details = extractErrorDetails(error, 'order')
-      const byField = (field: string) => details.find((e) => e.field?.toLowerCase() === field.toLowerCase())
-
-      const orderIdError = byField('orderid')
-      if (orderIdError) {
-        if (orderIdError.code === ERROR_CODE.E0001 || orderIdError.code === ERROR_CODE.E0036) {
-          Toast.show(orderIdError.message, {
-            type: 'danger',
-            placement: 'top',
-            duration: 3000,
-            onClose: () => router.replace('/(protected)/(tabs)')
-          })
-          return
-        }
-
-        if (orderIdError.code === ERROR_CODE.E0042) {
-          Toast.show(orderIdError.message, {
-            type: 'danger',
-            placement: 'top'
-          })
-          return
-        }
-      }
-
-      const orderDetailIdError = byField('orderdetailid')
-      if (orderDetailIdError) {
-        Toast.show(orderDetailIdError.message, {
-          type: 'danger',
-          placement: 'top',
-          onClose: () => router.back()
-        })
-        return
-      }
-
-      const quantityError = byField('quantity')
-      if (quantityError?.code === ERROR_CODE.E0036) {
-        Toast.show(quantityError.message, {
-          type: 'warning',
-          placement: 'top'
-        })
-        return
-      }
-
-      const systemError = byField('updateorderdetail')
-      if (systemError?.code === ERROR_CODE.E9999) {
-        Toast.show(systemError.message, {
-          type: 'danger',
-          placement: 'top'
-        })
-        return
-      }
-
-      Toast.show('Đã xảy ra lỗi. Vui lòng thử lại', {
-        type: 'danger',
-        placement: 'top'
-      })
-    }
-  })
-}
-
 export function useMergeTable(
   orderId: number,
   options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }
@@ -408,9 +272,10 @@ export function useMergeTable(
     },
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
+      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, true) })
       await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
-      // await queryClient.invalidateQueries({ queryKey: tableKeys.listEmpty(true) })
-      // Alert.alert('Thành công', 'Gộp bàn thành công')
+      await queryClient.invalidateQueries({ queryKey: tableKeys.listEmpty(false) })
+
       options?.onSuccess?.(data)
     },
     onError: (error: any) => {
@@ -452,23 +317,22 @@ export function useChangeTable(
     },
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
+      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, true) })
       await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
       await queryClient.invalidateQueries({ queryKey: tableKeys.listEmpty(true) })
-      // Alert.alert('Thành công', 'Chuyển bàn thành công')
       options?.onSuccess?.(data)
     },
     onError: (error: any) => {
       options?.onError?.(error)
       const details = extractErrorDetails(error, 'order')
-      console.log('details', details)
       const e0042 = details.find((e) => e.code === ERROR_CODE.E0042)
       if (e0042) {
         Alert.alert('Lỗi', e0042.message ?? 'Không thể chuyển bàn ở trạng thái hiện tại')
         return
       }
-      const e0001Or0036 = details.find((e) => [ERROR_CODE.E0001, ERROR_CODE.E0036].includes(e.code as any))
-      if (e0001Or0036) {
-        Alert.alert('Lỗi', e0001Or0036.message ?? 'Đơn hàng không tồn tại')
+      const e0001or0036 = details.find((e) => [ERROR_CODE.E0001, ERROR_CODE.E0036].includes(e.code as any))
+      if (e0001or0036) {
+        Alert.alert('Lỗi', e0001or0036.message ?? 'Đơn hàng không tồn tại')
         return
       }
       Alert.alert('Lỗi', 'Không thể chuyển bàn. Vui lòng thử lại')
@@ -546,6 +410,127 @@ export function useAddOrderItems(
           return
         }
       }
+      options?.onError?.(error)
+    }
+  })
+}
+
+export function useOrderDetail(orderId: number | null, isCancelled: boolean = false) {
+  const query = useQuery({
+    queryKey: orderKeys.detail(orderId ?? 0, isCancelled),
+    queryFn: async () => {
+      if (!orderId) return null
+      const response = await orderApi.getOrderDetail(orderId, isCancelled)
+      return response.data.data ?? null
+    },
+    enabled: !!orderId,
+    staleTime: 30 * 1000,
+    placeholderData: keepPreviousData
+  })
+
+  return {
+    order: query.data ?? null,
+    isLoading: query.isPending,
+    isRefetching: query.isRefetching,
+    refetch: query.refetch
+  }
+}
+export function useCancelOrderItems(
+  orderId: number,
+  options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }
+) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationKey: [...orderKeys.all, 'cancel-items', orderId] as const,
+    mutationFn: async (orderDetailId: number) => {
+      const res = await orderApi.cancelOrderItems(orderId, orderDetailId)
+      return res.data
+    },
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
+      await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      options?.onSuccess?.(data)
+      return data
+    },
+    onError: (error) => {
+      const details = extractErrorDetails(error, 'order')
+      if (details.some((error) => [ERROR_CODE.E0042].includes(error.code as any))) {
+        Alert.alert('Lỗi', error.message)
+        return
+      }
+      if (details.some((error) => [ERROR_CODE.E0001, ERROR_CODE.E0036].includes(error.code as any))) {
+        Alert.alert('Lỗi', error.message, [{ text: 'OK', onPress: () => router.replace('/(protected)/(tabs)') }])
+        return
+      }
+      if (details.some((error) => [ERROR_CODE.E9999].includes(error.code as any))) {
+        Alert.alert('Lỗi', error.message)
+        return
+      }
+      options?.onError?.(error)
+    }
+  })
+}
+
+export function useUpdateOrderItem(
+  orderId: number,
+  orderDetailId: number,
+  options?: { onSuccess?: (data: any) => void; onError?: (error: any) => void }
+) {
+  const queryClient = useQueryClient()
+  const router = useRouter()
+
+  return useMutation({
+    mutationKey: [...orderKeys.all, 'update-item', orderId, orderDetailId] as const,
+    mutationFn: async ({ quantity, note }: { quantity?: number; note?: string | null }) => {
+      const res = await orderApi.updateOrderItem(orderId, orderDetailId, { quantity, note })
+      return res.data
+    },
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: orderKeys.detail(orderId, false) })
+      await queryClient.invalidateQueries({ queryKey: orderKeys.lists() })
+      options?.onSuccess?.(data)
+      return data
+    },
+    onError: (error: any) => {
+      const details = extractErrorDetails(error, 'order')
+      const byField = (field: string) => details.find((e) => e.field?.toLowerCase() === field.toLowerCase())
+
+      const orderIdError = byField('orderid')
+      if (orderIdError) {
+        if (orderIdError.code === ERROR_CODE.E0001 || orderIdError.code === ERROR_CODE.E0036) {
+          Alert.alert('Lỗi', orderIdError.message ?? 'Đơn hàng không tồn tại', [
+            { text: 'OK', onPress: () => router.replace('/(protected)/(tabs)') }
+          ])
+          return
+        }
+
+        if (orderIdError.code === ERROR_CODE.E0042) {
+          Alert.alert('Lỗi', orderIdError.message ?? 'Không thể cập nhật ở trạng thái hiện tại')
+          return
+        }
+      }
+
+      const orderDetailIdError = byField('orderdetailid')
+      if (orderDetailIdError) {
+        Alert.alert('Lỗi', orderDetailIdError.message ?? 'Chi tiết đơn hàng không tồn tại', [
+          { text: 'OK', onPress: () => router.back() }
+        ])
+        return
+      }
+
+      const quantityError = byField('quantity')
+      if (quantityError?.code === ERROR_CODE.E0036) {
+        Alert.alert('Lỗi', quantityError.message ?? 'Số lượng không hợp lệ')
+        return
+      }
+
+      const systemError = byField('updateorderdetail')
+      if (systemError?.code === ERROR_CODE.E9999) {
+        Alert.alert('Lỗi', systemError.message ?? 'Đã xảy ra lỗi hệ thống')
+        return
+      }
+
+      Alert.alert('Lỗi', 'Không thể cập nhật. Vui lòng thử lại')
       options?.onError?.(error)
     }
   })

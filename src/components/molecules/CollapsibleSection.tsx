@@ -47,7 +47,7 @@ export function CollapsibleSection({
 
   return (
     <Animated.View
-      className='mb-2 rounded-2xl overflow-hidden'
+      className='mb-2 overflow-hidden rounded-2xl'
       style={{
         backgroundColor: colors.card,
         borderWidth: 1.5,
@@ -76,14 +76,14 @@ export function CollapsibleSection({
           backgroundColor: isExpanded ? `${colors.primary}08` : 'transparent'
         }}
       >
-        <View className='flex-row items-center flex-1'>
+        <View className='flex-1 flex-row items-center'>
           {headerContent ? (
             headerContent
           ) : (
             <>
               {icon && (
                 <View
-                  className='rounded-xl p-2.5 mr-3'
+                  className='mr-3 rounded-xl p-2.5'
                   style={{
                     backgroundColor: `${colors.primary}20`
                   }}
@@ -91,7 +91,7 @@ export function CollapsibleSection({
                   <Ionicons name={icon} size={18} color={colors.primary} />
                 </View>
               )}
-              <Text className='text-lg font-bold flex-1' style={{ color: colors.text }}>
+              <Text className='flex-1 text-lg font-bold' style={{ color: colors.text }}>
                 {title}
               </Text>
             </>
@@ -108,7 +108,7 @@ export function CollapsibleSection({
             entering={FadeIn.duration(200)}
             exiting={FadeOut.duration(200)}
             layout={LinearTransition.springify()}
-            className='px-3 mt-1'
+            className='mt-1 px-3'
             style={{ backgroundColor: colors.card }}
           >
             {children}

@@ -4,7 +4,6 @@ import { useEmptyTables } from '@/features/order/hooks/useTable'
 import { useOrderStore } from '@/features/order/store/order.store'
 import type { DinnerTable } from '@/features/order/types/table.type'
 import { useTheme } from '@/shared/hooks/useTheme'
-import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useState } from 'react'
 import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from 'react-native'
@@ -54,7 +53,7 @@ export default function SelectTableScreen() {
           />
         }
       >
-        <View className='flex-row items-center justify-between mb-4'>
+        <View className='mb-4 flex-row items-center justify-between'>
           <View>
             <Text className='text-xl font-bold' style={{ color: colors.text }}>
               Chọn bàn {isChangeTable === 'true' ? 'để chuyển' : 'để bắt đầu tạo đơn'}
@@ -63,7 +62,7 @@ export default function SelectTableScreen() {
         </View>
 
         {isLoading || isRefetching ? (
-          <View className='py-6 items-center'>
+          <View className='items-center py-6'>
             <ActivityIndicator color={colors.primary} />
           </View>
         ) : availableTables.length === 0 ? (

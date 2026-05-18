@@ -74,7 +74,7 @@ export function OrderActionChips({ actions, colors }: OrderActionChipsProps) {
               }
             />
             <Text
-              className='ml-2 font-bold text-sm'
+              className='ml-2 text-sm font-bold'
               style={{
                 color: isPrimary
                   ? 'white'

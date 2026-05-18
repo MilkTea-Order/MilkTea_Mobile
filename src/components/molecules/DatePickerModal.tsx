@@ -135,7 +135,7 @@ export function DatePickerModal({ visible, initialDate, onCancel, onConfirm }: D
         >
           {/* Header */}
           <View
-            className='flex-row justify-between items-center px-5 py-4 border-b'
+            className='flex-row items-center justify-between border-b px-5 py-4'
             style={{ borderBottomColor: colors.border }}
           >
             <TouchableOpacity onPress={onCancel}>

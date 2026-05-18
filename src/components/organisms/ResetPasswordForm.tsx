@@ -48,7 +48,7 @@ export function ResetPasswordForm({ email, onSuccess, onBack }: ResetPasswordFor
       {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isValid, dirty }) => (
         <View>
           {/* Email Display */}
-          <View className='items-center mb-6'>
+          <View className='mb-6 items-center'>
             <View className='rounded-2xl px-4 py-2' style={{ backgroundColor: `${colors.primary}15` }}>
               <Text className='text-sm font-medium' style={{ color: colors.primary }}>
                 {email}
@@ -93,7 +93,7 @@ export function ResetPasswordForm({ email, onSuccess, onBack }: ResetPasswordFor
             style={{ opacity: resetPasswordMutation.isPending || !dirty || !isValid ? 0.7 : 1 }}
           >
             <View
-              className='rounded-2xl overflow-hidden'
+              className='overflow-hidden rounded-2xl'
               style={{
                 shadowColor: colors.primary,
                 shadowOffset: { width: 0, height: 6 },
@@ -111,7 +111,7 @@ export function ResetPasswordForm({ email, onSuccess, onBack }: ResetPasswordFor
                   <ActivityIndicator color='white' size='small' />
                 ) : (
                   <View className='flex-row items-center justify-center'>
-                    <Text className='text-white text-base font-bold mr-2'>Đặt lại mật khẩu</Text>
+                    <Text className='mr-2 text-base font-bold text-white'>Đặt lại mật khẩu</Text>
                     <View className='rounded-full bg-white/20 p-1'>
                       <Ionicons name='refresh' size={16} color='white' />
                     </View>
@@ -123,9 +123,9 @@ export function ResetPasswordForm({ email, onSuccess, onBack }: ResetPasswordFor
 
           {/* Back Link */}
           {onBack && (
-            <TouchableOpacity onPress={onBack} className='self-center mt-6 flex-row items-center' activeOpacity={0.7}>
+            <TouchableOpacity onPress={onBack} className='mt-6 flex-row items-center self-center' activeOpacity={0.7}>
               <Ionicons name='arrow-back' size={16} color={colors.primary} />
-              <Text className='text-sm font-semibold ml-1' style={{ color: colors.primary }}>
+              <Text className='ml-1 text-sm font-semibold' style={{ color: colors.primary }}>
                 Quay lại
               </Text>
             </TouchableOpacity>

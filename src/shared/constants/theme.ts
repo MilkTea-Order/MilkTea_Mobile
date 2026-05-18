@@ -88,7 +88,7 @@ type StatusColor = {
 }
 
 export const statusColors: Record<OrderStatus, StatusColor> = {
-  [STATUS.ORDER.CANCELED]: {
+  [STATUS.ORDER.CANCELLED]: {
     [THEME_VARIANT.LIGHT]: {
       bg: '#FEE2E2', // Red-100
       border: '#FCA5A5', // Red-300
@@ -133,7 +133,7 @@ export const statusColors: Record<OrderStatus, StatusColor> = {
     },
     icon: '#10B981' // Emerald-500
   },
-  [STATUS.ORDER.NO_COLLECTED]: {
+  [STATUS.ORDER.NOTCOLLECTED]: {
     [THEME_VARIANT.LIGHT]: {
       bg: '#DBEAFE', // Blue-100
       border: '#93C5FD', // Blue-300

@@ -25,7 +25,7 @@ export function InputField({ label, error, touched, ...baseInputProps }: InputFi
       }}
     >
       {label && (
-        <Text className='text-sm font-semibold mb-2 ml-1' style={{ color: colors.text }}>
+        <Text className='mb-2 ml-1 text-sm font-semibold' style={{ color: colors.text }}>
           {label}
         </Text>
       )}
@@ -48,7 +48,7 @@ export function InputField({ label, error, touched, ...baseInputProps }: InputFi
       </View>
 
       {hasError && (
-        <Text className='text-sm mt-1 ml-2' style={{ color: colors.error || '#ef4444' }}>
+        <Text className='ml-2 mt-1 text-sm' style={{ color: colors.error || '#ef4444' }}>
           {error}
         </Text>
       )}

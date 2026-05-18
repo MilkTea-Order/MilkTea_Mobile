@@ -28,7 +28,7 @@ export function FinanceDateGroup({ dateGroup }: FinanceDateGroupProps) {
     <CollapsibleSection
       icon={dateGroup.totalAmount < 0 ? 'arrow-down-circle-outline' : 'arrow-up-circle-outline'}
       headerContent={
-        <View className='flex-row items-center flex-1'>
+        <View className='flex-1 flex-row items-center'>
           <View className='flex-1'>
             <Text className='text-sm font-bold' style={{ color: colors.text }}>
               {formatDate(dayjs(dateGroup.date), 'DD/MM/YYYY')}
@@ -37,7 +37,7 @@ export function FinanceDateGroup({ dateGroup }: FinanceDateGroupProps) {
               {dateGroup.groups.reduce<number>((sum, g) => sum + g.items.length, 0)} biến động
             </Text>
           </View>
-          <Text className='text-sm font-bold mr-2' style={{ color }}>
+          <Text className='mr-2 text-sm font-bold' style={{ color }}>
             {formatCurrencyVND(dateGroup.totalAmount)}
           </Text>
         </View>

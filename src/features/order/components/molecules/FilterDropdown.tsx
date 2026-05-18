@@ -57,7 +57,7 @@ export function FilterDropdown<T extends string>({
         }}
       >
         <Ionicons name={icon} size={14} color={colors.primary} />
-        <Text className='text-sm ml-1.5 font-medium' style={{ color: colors.text }}>
+        <Text className='ml-1.5 text-sm font-medium' style={{ color: colors.text }}>
           {selectedOption?.label || placeholder}
         </Text>
         <Ionicons
@@ -109,7 +109,7 @@ export function FilterDropdown<T extends string>({
                   justifyContent: 'space-between'
                 }}
               >
-                <View className='flex-row items-center flex-1'>
+                <View className='flex-1 flex-row items-center'>
                   {option.icon && (
                     <Ionicons
                       name={option.icon}

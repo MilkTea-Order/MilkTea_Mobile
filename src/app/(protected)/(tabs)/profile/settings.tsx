@@ -28,7 +28,7 @@ export default function SettingsScreen() {
       >
         <TouchableOpacity
           onPress={() => router.back()}
-          className='absolute bg-white/20 rounded-full p-2'
+          className='absolute rounded-full bg-white/20 p-2'
           style={{
             top: insets.top + 16,
             left: 20,
@@ -38,7 +38,7 @@ export default function SettingsScreen() {
         >
           <Ionicons name='arrow-back' size={24} color='white' />
         </TouchableOpacity>
-        <Text className='text-white text-2xl font-bold text-center mt-2'>Cấu hình</Text>
+        <Text className='mt-2 text-center text-2xl font-bold text-white'>Cấu hình</Text>
       </LinearGradient>
 
       <SettingsForm />

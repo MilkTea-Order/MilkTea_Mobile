@@ -49,12 +49,12 @@ export default function ReportScreen() {
           paddingHorizontal: 20
         }}
       >
-        <Text className='text-white text-2xl font-bold text-center mt-2'>Báo cáo</Text>
+        <Text className='mt-2 text-center text-2xl font-bold text-white'>Báo cáo</Text>
       </LinearGradient>
 
       <ScrollView className='flex-1' contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
         {/* Report Cards */}
-        <View className='px-6 mt-6 gap-4'>
+        <View className='mt-6 gap-4 px-6'>
           {reportItems.map((item, index) => (
             <TouchableOpacity
               key={index}
@@ -75,7 +75,7 @@ export default function ReportScreen() {
               <View className='flex-row items-center'>
                 {/* Icon */}
                 <View
-                  className='w-14 h-14 rounded-2xl items-center justify-center mr-4'
+                  className='mr-4 h-14 w-14 items-center justify-center rounded-2xl'
                   style={{ backgroundColor: `${item.color}15` }}
                 >
                   {item.iconType === 'ion' ? (
@@ -87,7 +87,7 @@ export default function ReportScreen() {
 
                 {/* Content */}
                 <View className='flex-1'>
-                  <Text className='text-base font-semibold mb-1' style={{ color: colors.text }}>
+                  <Text className='mb-1 text-base font-semibold' style={{ color: colors.text }}>
                     {item.title}
                   </Text>
                   <Text className='text-sm' style={{ color: colors.textSecondary }}>

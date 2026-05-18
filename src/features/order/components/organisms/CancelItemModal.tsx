@@ -29,7 +29,7 @@ export function CancelItemModal({ visible, onClose, onSubmit, itemCount }: Props
 
   return (
     <Modal visible={visible} transparent animationType='none' onRequestClose={onClose}>
-      <Pressable onPress={Keyboard.dismiss} className='flex-1 justify-center items-center'>
+      <Pressable onPress={Keyboard.dismiss} className='flex-1 items-center justify-center'>
         <Pressable onPress={onClose} className='absolute inset-0'>
           <Animated.View
             entering={FadeIn.duration(200)}
@@ -41,11 +41,11 @@ export function CancelItemModal({ visible, onClose, onSubmit, itemCount }: Props
         <Animated.View
           entering={SlideInDown.duration(300).springify()}
           exiting={SlideOutDown.duration(200)}
-          className='w-full max-w-sm mx-5 rounded-3xl overflow-hidden'
+          className='mx-5 w-full max-w-sm overflow-hidden rounded-3xl'
           style={{ backgroundColor: colors.card }}
         >
-          <View className='flex-row justify-between items-center px-5 pt-5 pb-3'>
-            <TouchableOpacity onPress={onClose} className='w-6 h-6 justify-center items-center'>
+          <View className='flex-row items-center justify-between px-5 pb-3 pt-5'>
+            <TouchableOpacity onPress={onClose} className='h-6 w-6 items-center justify-center'>
               <Ionicons name='close' size={24} color={colors.textSecondary} />
             </TouchableOpacity>
 
@@ -57,7 +57,7 @@ export function CancelItemModal({ visible, onClose, onSubmit, itemCount }: Props
           </View>
 
           <View className='px-5 pb-5'>
-            <Text className='text-sm mb-2' style={{ color: colors.textSecondary }}>
+            <Text className='mb-2 text-sm' style={{ color: colors.textSecondary }}>
               Bạn đang hủy {itemCount} món. Vui lòng nhập lý do:
             </Text>
 
@@ -82,14 +82,14 @@ export function CancelItemModal({ visible, onClose, onSubmit, itemCount }: Props
             <TouchableOpacity
               onPress={handleSubmit}
               // disabled={!reason.trim()}
-              className={`flex-row items-center justify-center gap-2 h-12 rounded-2xl mt-4 ${reason.trim() ? 'bg-red-500' : ''}`}
+              className={`mt-4 h-12 flex-row items-center justify-center gap-2 rounded-2xl ${reason.trim() ? 'bg-red-500' : ''}`}
               style={{
                 backgroundColor: reason.trim() ? '#EF4444' : colors.border,
                 opacity: reason.trim() ? 1 : 0.7
               }}
             >
               <Ionicons name='close-circle' size={20} color='white' />
-              <Text className='text-white font-bold text-base'>Hủy món</Text>
+              <Text className='text-base font-bold text-white'>Hủy món</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>

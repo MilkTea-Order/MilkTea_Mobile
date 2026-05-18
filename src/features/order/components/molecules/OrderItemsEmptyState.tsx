@@ -11,9 +11,9 @@ interface OrderItemsEmptyStateProps {
 
 export function OrderItemsEmptyState({ colors, filterMode }: OrderItemsEmptyStateProps) {
   return (
-    <View className='py-8 items-center'>
+    <View className='items-center py-8'>
       <Ionicons name='restaurant-outline' size={48} color={colors.textSecondary} />
-      <Text className='text-base mt-3' style={{ color: colors.textSecondary }}>
+      <Text className='mt-3 text-base' style={{ color: colors.textSecondary }}>
         {filterMode === 'placed' ? 'Chưa có món nào được đặt' : ' Không có món nào bị huỷ'}
       </Text>
     </View>

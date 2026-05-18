@@ -67,7 +67,7 @@ export function ForgotPasswordForm({ onBackToLogin, onSuccess }: ForgotPasswordF
             style={{ opacity: forgotPasswordMutation.isPending || !dirty || !isValid ? 0.7 : 1 }}
           >
             <View
-              className='rounded-2xl overflow-hidden'
+              className='overflow-hidden rounded-2xl'
               style={{
                 shadowColor: colors.primary,
                 shadowOffset: { width: 0, height: 6 },
@@ -85,7 +85,7 @@ export function ForgotPasswordForm({ onBackToLogin, onSuccess }: ForgotPasswordF
                   <ActivityIndicator color='white' size='small' />
                 ) : (
                   <View className='flex-row items-center justify-center'>
-                    <Text className='text-white text-base font-bold mr-2'>Gửi mã xác minh</Text>
+                    <Text className='mr-2 text-base font-bold text-white'>Gửi mã xác minh</Text>
                     <View className='rounded-full bg-white/20 p-1'>
                       <Ionicons name='mail' size={16} color='white' />
                     </View>
@@ -99,11 +99,11 @@ export function ForgotPasswordForm({ onBackToLogin, onSuccess }: ForgotPasswordF
           {onBackToLogin && (
             <TouchableOpacity
               onPress={onBackToLogin}
-              className='self-center mt-6 flex-row items-center'
+              className='mt-6 flex-row items-center self-center'
               activeOpacity={0.7}
             >
               <Ionicons name='arrow-back' size={16} color={colors.primary} />
-              <Text className='text-sm font-semibold ml-1' style={{ color: colors.primary }}>
+              <Text className='ml-1 text-sm font-semibold' style={{ color: colors.primary }}>
                 Quay lại đăng nhập
               </Text>
             </TouchableOpacity>

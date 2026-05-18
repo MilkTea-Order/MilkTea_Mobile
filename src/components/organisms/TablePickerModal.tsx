@@ -40,7 +40,7 @@ export const TablePickerModal: React.FC<Props> = ({ visible, tables, isLoading, 
         }}
       >
         <View
-          className='flex-row items-center justify-between px-5 py-4 border-b'
+          className='flex-row items-center justify-between border-b px-5 py-4'
           style={{ borderBottomColor: colors.border }}
         >
           <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700' }}>Chọn bàn khả dụng</Text>
@@ -50,11 +50,11 @@ export const TablePickerModal: React.FC<Props> = ({ visible, tables, isLoading, 
         </View>
 
         {isLoading ? (
-          <View className='py-8 items-center'>
+          <View className='items-center py-8'>
             <ActivityIndicator color={colors.primary} />
           </View>
         ) : !hasData ? (
-          <View className='py-8 items-center'>
+          <View className='items-center py-8'>
             <Text style={{ color: colors.textSecondary, fontSize: 14 }}>Chưa có bàn khả dụng</Text>
           </View>
         ) : (
@@ -66,7 +66,7 @@ export const TablePickerModal: React.FC<Props> = ({ visible, tables, isLoading, 
               return (
                 <TouchableOpacity
                   onPress={() => setSelectedId(item.id)}
-                  className='px-5 py-3 border-b'
+                  className='border-b px-5 py-3'
                   style={{
                     borderBottomColor: colors.border,
                     backgroundColor: active ? `${colors.primary}12` : colors.card
@@ -84,10 +84,10 @@ export const TablePickerModal: React.FC<Props> = ({ visible, tables, isLoading, 
           />
         )}
 
-        <View className='flex-row justify-end px-5 py-3 gap-3'>
+        <View className='flex-row justify-end gap-3 px-5 py-3'>
           <TouchableOpacity
             onPress={onCancel}
-            className='px-4 py-2 rounded-xl'
+            className='rounded-xl px-4 py-2'
             style={{ backgroundColor: `${colors.textSecondary}12` }}
           >
             <Text style={{ color: colors.text }}>Hủy</Text>
@@ -98,7 +98,7 @@ export const TablePickerModal: React.FC<Props> = ({ visible, tables, isLoading, 
               const chosen = tables.find((t) => t.id === selectedId)
               if (chosen) onSelect(chosen)
             }}
-            className='px-4 py-2 rounded-xl'
+            className='rounded-xl px-4 py-2'
             style={{ backgroundColor: selectedId ? colors.primary : colors.border }}
           >
             <Text style={{ color: 'white', fontWeight: '700' }}>Chọn</Text>

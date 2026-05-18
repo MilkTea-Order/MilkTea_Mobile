@@ -1,7 +1,7 @@
 import { Header } from '@/components/layouts/Header'
-import { SearchInputBar } from '@/components/organisms/SearchInputBar'
 import MenuGroupNavV2 from '@/components/molecules/MenuGroupNavV2'
 import MenuItemCardV2 from '@/components/molecules/MenuItemCardV2'
+import { SearchInputBar } from '@/components/organisms/SearchInputBar'
 import { useMenuGroups, useMenusByGroupAndName } from '@/features/order/hooks/useMenu'
 import { useOrderStore } from '@/features/order/store/order.store'
 import { MenuGroup } from '@/features/order/types/menu.type'
@@ -208,7 +208,7 @@ export default function SelectMenuScreen() {
             {modeValue === ORDER_FLOW_MODE.CREATE && (
               <TouchableOpacity
                 onPress={handleChangeTable}
-                className='bg-white/20 rounded-full p-2'
+                className='rounded-full bg-white/20 p-2'
                 activeOpacity={0.7}
               >
                 <Ionicons name='swap-horizontal' size={20} color='white' />
@@ -217,7 +217,7 @@ export default function SelectMenuScreen() {
             {hasItemsInCart && (
               <TouchableOpacity
                 onPress={handleClearCart}
-                className='bg-white/20 rounded-full p-2 ml-5'
+                className='ml-5 rounded-full bg-white/20 p-2'
                 activeOpacity={0.7}
               >
                 <MaterialCommunityIcons name='cart-remove' size={20} color='white' />
@@ -257,31 +257,31 @@ export default function SelectMenuScreen() {
       {/* Menu Items */}
       {!(selectedGroup?.id != null || submittedSearch.length > 0) ? (
         <Pressable style={{ flex: 1 }} onPress={Keyboard.dismiss}>
-          <View className='items-center py-10 px-6 flex-1'>
+          <View className='flex-1 items-center px-6 py-10'>
             <Ionicons name='options-outline' size={28} color={colors.textSecondary} />
-            <Text className='text-base font-semibold mt-3' style={{ color: colors.text }}>
+            <Text className='mt-3 text-base font-semibold' style={{ color: colors.text }}>
               Chọn tiêu chí tìm kiếm
             </Text>
-            <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
+            <Text className='mt-2 text-center text-sm' style={{ color: colors.textSecondary }}>
               Hãy chọn một nhóm món ở phía trên hoặc tìm kiếm theo tên món bạn muốn.
             </Text>
           </View>
         </Pressable>
       ) : isLoadingMenus || isRefetchingMenus ? (
         <Pressable style={{ flex: 1 }} onPress={Keyboard.dismiss}>
-          <View className='items-center py-10 px-6 flex-1'>
+          <View className='flex-1 items-center px-6 py-10'>
             <ActivityIndicator color={colors.primary} />
           </View>
         </Pressable>
       ) : !menus || menus.length === 0 ? (
         <Pressable style={{ flex: 1 }} onPress={Keyboard.dismiss}>
-          <View className='items-center py-10 px-6 flex-1'>
+          <View className='flex-1 items-center px-6 py-10'>
             <Text className='text-base' style={{ color: colors.textSecondary }}>
               Nhóm này chưa có món khả dụng
             </Text>
             <TouchableOpacity
               onPress={() => refetchMenus()}
-              className='mt-3 px-4 py-2 rounded-xl'
+              className='mt-3 rounded-xl px-4 py-2'
               style={{
                 backgroundColor: `${colors.primary}15`,
                 borderWidth: 1,
@@ -337,7 +337,7 @@ export default function SelectMenuScreen() {
       {/* View Cart Button */}
       {orderItems.length > 0 && (
         <View
-          className='border-t-2 px-5 py-4 mb-2'
+          className='mb-2 border-t-2 px-5 py-4'
           style={{
             backgroundColor: colors.card,
             borderTopColor: colors.border
@@ -353,17 +353,17 @@ export default function SelectMenuScreen() {
                 }
               })
             }}
-            className='rounded-2xl py-4 flex-row items-center justify-between p-5 mb-4'
+            className='mb-4 flex-row items-center justify-between rounded-2xl p-5 py-4'
             style={{ backgroundColor: colors.primary }}
             activeOpacity={0.8}
           >
             <View className='flex-row items-center justify-between'>
               <Ionicons name='cart' size={24} color='white' />
-              <Text className='text-white text-center text-lg font-bold ml-2'>
+              <Text className='ml-2 text-center text-lg font-bold text-white'>
                 Giỏ hàng • Số lượng: {orderItems.reduce((sum, item) => sum + item.quantity, 0)}
               </Text>
             </View>
-            <Text className='text-white text-center text-lg font-bold ml-2'> {formatCurrencyVND(totalPrice)}</Text>
+            <Text className='ml-2 text-center text-lg font-bold text-white'> {formatCurrencyVND(totalPrice)}</Text>
           </TouchableOpacity>
         </View>
       )}

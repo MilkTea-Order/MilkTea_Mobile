@@ -38,11 +38,11 @@ export function Header({ title, subtitle, onBack, rightContent, children, showBa
       }}
     >
       <View className='flex-row items-center justify-between'>
-        <View className='flex-row items-center flex-1'>
+        <View className='flex-1 flex-row items-center'>
           {showBackButton && (
             <TouchableOpacity
               onPress={handleBack}
-              className='bg-white/20 rounded-full p-2 mr-2'
+              className='mr-2 rounded-full bg-white/20 p-2'
               style={{
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
@@ -56,11 +56,11 @@ export function Header({ title, subtitle, onBack, rightContent, children, showBa
             </TouchableOpacity>
           )}
           <View className='flex-1'>
-            <Text className='text-white text-xl font-bold' numberOfLines={1}>
+            <Text className='text-xl font-bold text-white' numberOfLines={1}>
               {title}
             </Text>
             {subtitle && (
-              <Text className='text-white/85 text-base font-semibold mt-1' numberOfLines={1}>
+              <Text className='mt-1 text-base font-semibold text-white/85' numberOfLines={1}>
                 {subtitle}
               </Text>
             )}

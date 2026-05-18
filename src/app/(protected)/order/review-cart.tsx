@@ -3,13 +3,10 @@ import { CartItemCard } from '@/components/organisms/CartItemCard'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 import { useAddOrderItems, useCreateOrder } from '@/features/order/hooks/useOrder'
 import { useOrderStore } from '@/features/order/store/order.store'
-import { parseOrderError } from '@/features/order/utils/parseOrderError'
 import { ORDER_FLOW_MODE, OrderFlowMode } from '@/shared/constants/other'
 import { STATUS } from '@/shared/constants/status'
 import { useTheme } from '@/shared/hooks/useTheme'
-import { ApiErrorResponse } from '@/shared/types/api.type'
 import { formatCurrencyVND } from '@/shared/utils/currency'
-import { isApiError } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useMemo, useState } from 'react'
@@ -148,11 +145,8 @@ export default function ReviewCartScreen() {
         })
       },
       onError: (error) => {
-        if (isApiError(error)) {
-          const result = parseOrderError(error as ApiErrorResponse)
-          Alert.alert('Lỗi', result.message)
-          router.replace('/(protected)/(tabs)')
-        }
+        clearOrder()
+        router.replace('/(protected)/(tabs)')
       }
     })
   }
@@ -180,22 +174,22 @@ export default function ReviewCartScreen() {
         {/* Cart Items */}
         {orderItems.length === 0 ? (
           <View className='items-center py-16'>
-            <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
+            <View className='mb-4 rounded-full p-6' style={{ backgroundColor: `${colors.primary}10` }}>
               <Ionicons name='cart-outline' size={64} color={colors.primary} />
             </View>
-            <Text className='text-xl font-bold mb-2' style={{ color: colors.text }}>
+            <Text className='mb-2 text-xl font-bold' style={{ color: colors.text }}>
               Giỏ hàng trống
             </Text>
-            <Text className='text-sm text-center mb-6' style={{ color: colors.textSecondary }}>
+            <Text className='mb-6 text-center text-sm' style={{ color: colors.textSecondary }}>
               Hãy thêm món vào giỏ hàng để tiếp tục
             </Text>
             <TouchableOpacity
               onPress={() => router.back()}
-              className='px-8 py-3 rounded-xl'
+              className='rounded-xl px-8 py-3'
               style={{ backgroundColor: colors.primary }}
               activeOpacity={0.8}
             >
-              <Text className='text-white font-semibold text-base'>Tiếp tục mua hàng</Text>
+              <Text className='text-base font-semibold text-white'>Tiếp tục mua hàng</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -212,7 +206,6 @@ export default function ReviewCartScreen() {
             </View>
 
             {orderItems.map((item) => {
-              const hasError = !!itemErrors[`${item.menuId}-${item.sizeId}`]
               return (
                 <CartItemCard
                   key={`${item.menuId}-${item.sizeId}`}
@@ -233,7 +226,7 @@ export default function ReviewCartScreen() {
 
             {/* Total Summary */}
             <View
-              className='rounded-2xl p-5 border mt-2'
+              className='mt-2 rounded-2xl border p-5'
               style={{
                 backgroundColor: colors.card,
                 borderColor: colors.border,
@@ -245,18 +238,18 @@ export default function ReviewCartScreen() {
               }}
             >
               <View
-                className='flex-row items-center justify-between mb-3 pb-3 border-b'
+                className='mb-3 flex-row items-center justify-between border-b pb-3'
                 style={{ borderBottomColor: colors.border }}
               >
                 <View className='flex-row items-center'>
                   <Ionicons name='receipt-outline' size={20} color={colors.textSecondary} />
-                  <Text className='text-base font-semibold ml-2' style={{ color: colors.text }}>
+                  <Text className='ml-2 text-base font-semibold' style={{ color: colors.text }}>
                     Tổng kết
                   </Text>
                 </View>
               </View>
 
-              <View className='flex-row items-center justify-between mb-2'>
+              <View className='mb-2 flex-row items-center justify-between'>
                 <Text className='text-base' style={{ color: colors.textSecondary }}>
                   Tổng số lượng
                 </Text>
@@ -266,7 +259,7 @@ export default function ReviewCartScreen() {
               </View>
 
               <View
-                className='flex-row items-center justify-between pt-2 border-t'
+                className='flex-row items-center justify-between border-t pt-2'
                 style={{ borderTopColor: colors.border }}
               >
                 <Text className='text-xl font-bold' style={{ color: colors.text }}>
@@ -284,7 +277,7 @@ export default function ReviewCartScreen() {
       {/* Create Order Button */}
       {orderItems.length > 0 && (
         <View
-          className='border-t-2 px-5 py-4 mb-5'
+          className='mb-5 border-t-2 px-5 py-4'
           style={{
             backgroundColor: colors.card,
             borderTopColor: colors.border,
@@ -296,7 +289,7 @@ export default function ReviewCartScreen() {
           }}
         >
           <TouchableOpacity
-            className='rounded-2xl py-4 flex-row items-center justify-center'
+            className='flex-row items-center justify-center rounded-2xl py-4'
             style={{
               backgroundColor:
                 createOrderMutation.isPending || addItemsMutation.isPending ? `${colors.primary}60` : colors.primary,
@@ -322,7 +315,7 @@ export default function ReviewCartScreen() {
             ) : (
               <>
                 <Ionicons name='checkmark-circle-outline' size={24} color='white' />
-                <Text className='text-white text-center text-lg font-bold ml-2'>
+                <Text className='ml-2 text-center text-lg font-bold text-white'>
                   {modeValue === ORDER_FLOW_MODE.CREATE ? 'Tạo đơn hàng' : 'Thêm món'}
                 </Text>
               </>

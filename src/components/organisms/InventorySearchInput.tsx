@@ -35,7 +35,7 @@ export function InventorySearchInput({
 
   return (
     <View
-      className='flex-row items-center rounded-2xl px-4 p-3'
+      className='flex-row items-center rounded-2xl p-3 px-4'
       style={{
         backgroundColor: colors.card,
         borderWidth: 1,
@@ -45,7 +45,7 @@ export function InventorySearchInput({
       <TouchableOpacity onPress={handleSubmit} disabled={!canSubmit} style={{ opacity: canSubmit ? 1 : 0.5 }}>
         <Ionicons name='search' size={20} color={colors.textSecondary} />
       </TouchableOpacity>
-      <View className='flex-1 ml-3 flex-row items-center'>
+      <View className='ml-3 flex-1 flex-row items-center'>
         <TextInput
           ref={inputRef}
           value={value}
@@ -53,7 +53,7 @@ export function InventorySearchInput({
           onSubmitEditing={handleSubmit}
           returnKeyType='search'
           enablesReturnKeyAutomatically={canSubmit}
-          className='text-base flex-1'
+          className='flex-1 text-base'
           style={{ color: colors.textSecondary, opacity: canSubmit ? 1 : 0.5 }}
           placeholder={placeholder}
           placeholderTextColor={colors.textSecondary}

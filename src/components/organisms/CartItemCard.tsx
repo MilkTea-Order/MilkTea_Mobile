@@ -26,7 +26,7 @@ export function CartItemCard({ item, onIncrement, onDecrement, onEdit, onRemove,
 
   return (
     <View
-      className='rounded-2xl p-3 mb-3 border'
+      className='mb-3 rounded-2xl border p-3'
       style={{
         backgroundColor: colors.card,
         borderColor: error ? colors.error : colors.border,
@@ -35,7 +35,7 @@ export function CartItemCard({ item, onIncrement, onDecrement, onEdit, onRemove,
     >
       <View className='flex-row items-center justify-between'>
         <View
-          className='rounded-xl mr-3 overflow-hidden items-center justify-center'
+          className='mr-3 items-center justify-center overflow-hidden rounded-xl'
           style={{ width: 52, height: 52, backgroundColor: `${colors.primary}10` }}
         >
           {item.menuImage ? (
@@ -45,12 +45,12 @@ export function CartItemCard({ item, onIncrement, onDecrement, onEdit, onRemove,
           )}
         </View>
 
-        <View className='flex-1 mr-3'>
-          <View className='flex-row items-center mt-2'>
-            <Text className='text-lg font-bold mr-2' style={{ color: colors.text }} numberOfLines={2}>
+        <View className='mr-3 flex-1'>
+          <View className='mt-2 flex-row items-center'>
+            <Text className='mr-2 text-lg font-bold' style={{ color: colors.text }} numberOfLines={2}>
               {item.menuName}
             </Text>
-            <View className='px-2 py-1 rounded' style={{ backgroundColor: `${colors.primary}15` }}>
+            <View className='rounded px-2 py-1' style={{ backgroundColor: `${colors.primary}15` }}>
               <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
                 {item.sizeName}
               </Text>
@@ -66,7 +66,7 @@ export function CartItemCard({ item, onIncrement, onDecrement, onEdit, onRemove,
             </View>
           ) : null}
 
-          <View className='flex-row items-center mt-1'>
+          <View className='mt-1 flex-row items-center'>
             <TouchableOpacity onPress={() => onEdit?.(item.menuId, item.sizeId)} activeOpacity={0.8}>
               <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
                 Chỉnh sửa
@@ -90,7 +90,7 @@ export function CartItemCard({ item, onIncrement, onDecrement, onEdit, onRemove,
           </Text>
 
           <View
-            className='flex-row items-center rounded-full mt-2'
+            className='mt-2 flex-row items-center rounded-full'
             style={{
               borderWidth: 1.5,
               borderColor: colors.primary,
@@ -112,7 +112,7 @@ export function CartItemCard({ item, onIncrement, onDecrement, onEdit, onRemove,
               <Ionicons name='remove' size={16} color={colors.primary} />
             </TouchableOpacity>
 
-            <Text className='text-sm font-bold min-w-[24px] text-center' style={{ color: colors.text }}>
+            <Text className='min-w-[24px] text-center text-sm font-bold' style={{ color: colors.text }}>
               {item.quantity}
             </Text>
 

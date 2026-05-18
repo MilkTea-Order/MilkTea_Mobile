@@ -18,25 +18,25 @@ export function ExpenseEmptyState({ colors, isLoading, isRefetching, hasData }: 
     <View className='flex-1 items-center justify-center'>
       {showLoading ? (
         <>
-          <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
+          <View className='mb-4 rounded-full p-6' style={{ backgroundColor: `${colors.primary}10` }}>
             <Ionicons name='time-outline' size={48} color={colors.primary} />
           </View>
-          <Text className='text-lg font-semibold mt-2' style={{ color: colors.text }}>
+          <Text className='mt-2 text-lg font-semibold' style={{ color: colors.text }}>
             Đang tải dữ liệu...
           </Text>
-          <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
+          <Text className='mt-2 text-center text-sm' style={{ color: colors.textSecondary }}>
             Vui lòng đợi trong giây lát
           </Text>
         </>
       ) : (
         <>
-          <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
+          <View className='mb-4 rounded-full p-6' style={{ backgroundColor: `${colors.primary}10` }}>
             <Ionicons name='receipt-outline' size={48} color={colors.primary} />
           </View>
-          <Text className='text-xl font-bold mt-2' style={{ color: colors.text }}>
+          <Text className='mt-2 text-xl font-bold' style={{ color: colors.text }}>
             Không có dữ liệu
           </Text>
-          <Text className='text-sm mt-2 text-center px-8' style={{ color: colors.textSecondary }}>
+          <Text className='mt-2 px-8 text-center text-sm' style={{ color: colors.textSecondary }}>
             Không có biến động nào trong khoảng thời gian này
           </Text>
         </>

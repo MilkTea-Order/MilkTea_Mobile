@@ -20,7 +20,7 @@ export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props
 
   return (
     <View
-      className={`flex justify-center rounded-xl overflow-hidden mb-1 ${!isLast ? 'border-b' : ''}`}
+      className={`mb-1 flex justify-center overflow-hidden rounded-xl ${!isLast ? 'border-b' : ''}`}
       style={{
         backgroundColor: colors.background,
         borderColor: colors.border
@@ -29,18 +29,18 @@ export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props
       {/* Row header — always visible */}
       <TouchableOpacity
         onPress={() => {
-          onPress?.(order.orderID)
+          onPress?.(order.orderId)
         }}
         activeOpacity={0.75}
       >
         <View className='flex-row items-center px-3 py-[1px]'>
           {/* Thumbnail */}
-          <View className='rounded-xl overflow-hidden mr-3 p-1' style={{ width: 40, height: 40 }}>
+          <View className='mr-3 overflow-hidden rounded-xl p-1' style={{ width: 40, height: 40 }}>
             {tableImg ? (
               <Image source={{ uri: tableImg }} style={{ width: '100%', height: '100%' }} resizeMode='cover' />
             ) : (
               <View
-                className='w-full h-full items-center justify-center'
+                className='h-full w-full items-center justify-center'
                 style={{ backgroundColor: `${colors.primary}15` }}
               >
                 <Ionicons name='restaurant-outline' size={22} color={colors.primary} />
@@ -49,8 +49,8 @@ export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props
           </View>
 
           {/* Info */}
-          <View className='flex-1 mr-2'>
-            <View className='flex-row items-center gap-2 mb-0.5'>
+          <View className='mr-2 flex-1'>
+            <View className='mb-0.5 flex-row items-center gap-2'>
               <Text className='text-sm font-bold' style={{ color: colors.text }} numberOfLines={1}>
                 {order.dinnerTable.name}
               </Text>
@@ -76,7 +76,7 @@ export function OrderCardV2({ order, isLast = false, onPress }: OrderCardV2Props
 
           {/* Amount + chevron */}
           <View className='items-end'>
-            <Text className='text-sm font-bold mb-2' style={{ color: colors.primary }}>
+            <Text className='mb-2 text-sm font-bold' style={{ color: colors.primary }}>
               {formatCurrencyVND(order.totalAmount ?? 0)}
             </Text>
           </View>

@@ -33,15 +33,15 @@ export function FinanceItemRow({ item, isLast, amount, isCollected }: FinanceIte
         borderBottomColor: colors.border
       }}
     >
-      <View className='flex-1 mr-3'>
+      <View className='mr-3 flex-1'>
         <Text className='text-sm font-medium' style={{ color: colors.text }}>
           {item.name}
         </Text>
-        <Text className='text-xs mt-0.5' style={{ color: colors.textSecondary }}>
+        <Text className='mt-0.5 text-xs' style={{ color: colors.textSecondary }}>
           Giờ {isCollected ? 'thu' : 'chi'}: {formatDate(dayjs(item.actionDate), 'HH:mm')}
         </Text>
         {item.note && (
-          <Text className='text-xs mt-0.5' style={{ color: colors.textSecondary }}>
+          <Text className='mt-0.5 text-xs' style={{ color: colors.textSecondary }}>
             Ghi chú: {item.note}
           </Text>
         )}

@@ -8,6 +8,7 @@ interface KitchenItemRowProps {
   isChecked: boolean
   onToggleCheck: (item: OrderDetail) => void
   canCheck: boolean
+  showCheckbox?: boolean
   colors: {
     text: string
     textSecondary: string
@@ -17,56 +18,63 @@ interface KitchenItemRowProps {
   }
 }
 
-export function KitchenItemRow({ item, isChecked, onToggleCheck, canCheck, colors }: KitchenItemRowProps) {
+export function KitchenItemRow({
+  item,
+  isChecked,
+  onToggleCheck,
+  canCheck,
+  showCheckbox = true,
+  colors
+}: KitchenItemRowProps) {
   return (
     <TouchableOpacity
       activeOpacity={canCheck ? 0.7 : 1}
       onPress={() => canCheck && onToggleCheck(item)}
-      className={`flex-row items-center py-3 px-3 rounded-xl border mb-2 ${isChecked ? 'bg-opacity-10' : ''}`}
+      className={`relative mb-1.5 flex-row items-center rounded-lg border px-3 py-2 ${isChecked ? 'bg-opacity-10' : ''}`}
       style={{
-        backgroundColor: isChecked ? `${colors.primary}15` : colors.card,
+        backgroundColor: isChecked ? `${colors.primary}18` : colors.card,
         borderColor: isChecked ? colors.primary : colors.border
       }}
     >
-      <View
-        className='w-6 h-6 rounded-lg items-center justify-center mr-3'
-        style={{
-          backgroundColor: isChecked ? colors.primary : 'transparent',
-          borderWidth: 2,
-          borderColor: isChecked ? colors.primary : colors.border
-        }}
-      >
-        {isChecked && <Ionicons name='checkmark' size={14} color='white' />}
-      </View>
+      {showCheckbox && (
+        <View
+          className='mr-2.5 h-5 w-5 items-center justify-center rounded-md'
+          style={{
+            backgroundColor: isChecked ? colors.primary : 'transparent',
+            borderWidth: 1.5,
+            borderColor: isChecked ? colors.primary : colors.border
+          }}
+        >
+          {isChecked && <Ionicons name='checkmark' size={11} color='white' />}
+        </View>
+      )}
 
       <View className='flex-1'>
-        <View className='flex-row items-center flex-wrap'>
+        <View className='flex-row items-center justify-between'>
           <Text
-            className='text-base font-semibold mr-2'
+            className='mr-2 flex-1 text-sm font-semibold'
             style={{ color: isChecked ? colors.textSecondary : colors.text }}
+            numberOfLines={1}
           >
             {item.menu.name}
           </Text>
-          {item.size?.name && (
-            <View className='px-2 py-1 rounded-md' style={{ backgroundColor: '#374151' }}>
-              <Text className='text-xs font-medium text-white'>Size: {item.size.name}</Text>
-            </View>
-          )}
-        </View>
 
-        <View className='flex-row items-center mt-2'>
-          <View className='px-3 py-1.5 rounded-lg' style={{ backgroundColor: colors.primary }}>
-            <Text className='text-sm font-bold text-white'>Số lượng: {item.quantity}</Text>
+          <View className='flex-row items-center'>
+            {item.size?.name && (
+              <View className='mr-1.5 rounded px-1.5 py-0.5' style={{ backgroundColor: '#374151' }}>
+                <Text className='text-[10px] font-medium text-white'>{item.size.name}</Text>
+              </View>
+            )}
+            <View className='rounded-md px-2 py-0.5' style={{ backgroundColor: colors.primary }}>
+              <Text className='text-xs font-bold text-white'>x{item.quantity}</Text>
+            </View>
           </View>
         </View>
 
         {item.note && (
-          <View
-            className='flex-row items-center mt-2 px-2 py-1.5 rounded-md self-start'
-            style={{ backgroundColor: `${colors.textSecondary}15` }}
-          >
-            <Ionicons name='chatbox-ellipses-outline' size={12} color={colors.textSecondary} />
-            <Text className='text-xs ml-1.5' style={{ color: colors.textSecondary }}>
+          <View className='mt-1.5 flex-row items-center'>
+            <Ionicons name='chatbox-ellipses-outline' size={10} color={colors.textSecondary} />
+            <Text className='ml-1 text-[10px]' style={{ color: colors.textSecondary }} numberOfLines={1}>
               {item.note}
             </Text>
           </View>

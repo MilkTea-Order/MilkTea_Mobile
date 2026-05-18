@@ -25,18 +25,18 @@ export default function ResetPasswordScreen() {
       <View className='flex-1 items-center justify-center'>
         <View className='items-center'>
           <Ionicons name='warning' size={48} color={colors.error} />
-          <Text className='text-lg font-bold mt-4' style={{ color: colors.error }}>
+          <Text className='mt-4 text-lg font-bold' style={{ color: colors.error }}>
             Liên kết không hợp lệ
           </Text>
-          <Text className='text-sm mt-2 text-center px-8' style={{ color: colors.textSecondary }}>
+          <Text className='mt-2 px-8 text-center text-sm' style={{ color: colors.textSecondary }}>
             Liên kết đặt lại mật khẩu không hợp lệ.
           </Text>
           <TouchableOpacity
             onPress={() => router.dismissAll()}
-            className='mt-6 px-6 py-3 rounded-2xl'
+            className='mt-6 rounded-2xl px-6 py-3'
             style={{ backgroundColor: colors.primary }}
           >
-            <Text className='text-white font-semibold'>Quay lại</Text>
+            <Text className='font-semibold text-white'>Quay lại</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -85,7 +85,7 @@ export default function ResetPasswordScreen() {
             <AppLogo size='large' showText={false} />
           </AnimatedLogoContainer>
 
-          <Text className='text-3xl font-bold tracking-wide mt-4' style={{ color: colors.text }}>
+          <Text className='mt-4 text-3xl font-bold tracking-wide' style={{ color: colors.text }}>
             Đặt lại mật khẩu
           </Text>
         </View>

@@ -31,7 +31,7 @@ export function LoginBackground({ colors, isDark, gradients }: LoginBackgroundPr
       />
 
       {/* Floating Orbs - Animated */}
-      <View className='absolute inset-0 pointer-events-none overflow-hidden'>
+      <View className='pointer-events-none absolute inset-0 overflow-hidden'>
         <AnimatedOrb
           size={width * 0.6}
           position={{ top: -width * 0.2, right: -width * 0.2 }}

@@ -1,11 +1,27 @@
-/.expo
-node_modules
-build
-bin
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.expo/
+
+# Native
+*.native.ts
+
+# Config files (keep these as-is)
+*.config.js
+*.config.ts
+
+# Auto-generated
 expo-env.d.ts
-nativewind-env.d.ts
-package-lock.json
-ios
-android
-babel.config.js
-metro.config.js
+
+# Git files
+.git/
+.husky/
+
+# Lock files
+*.lock
+
+# JSON files (except package.json)
+*.json
+!package.json

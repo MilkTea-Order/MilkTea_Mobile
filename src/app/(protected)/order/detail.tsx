@@ -184,8 +184,8 @@ export default function OrderDetailScreen() {
         subtitle={statusName}
         rightContent={
           <View className='items-end'>
-            <Text className='text-white/85 text-xs font-semibold'>Tổng tiền</Text>
-            <Text className='text-white text-lg font-bold mt-0.5' numberOfLines={1}>
+            <Text className='text-xs font-semibold text-white/85'>Tổng tiền</Text>
+            <Text className='mt-0.5 text-lg font-bold text-white' numberOfLines={1}>
               {formatCurrency(order?.totalAmount ?? 0)}
             </Text>
           </View>
@@ -245,7 +245,7 @@ export default function OrderDetailScreen() {
                 label: 'Đã thu tiền',
                 icon: 'cash-outline',
                 variant: 'primary',
-                visible: order?.status.id === Number(STATUS.ORDER.NO_COLLECTED) && !isReview,
+                visible: order?.status.id === Number(STATUS.ORDER.NOTCOLLECTED) && !isReview,
                 onPress: handleCollectedOrder
               }
             ]}

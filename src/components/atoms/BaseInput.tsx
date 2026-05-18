@@ -44,7 +44,7 @@ export const BaseInput = forwardRef<TextInput, BaseInputProps>(function BaseInpu
   return (
     <View>
       {label && (
-        <Text className='text-sm font-semibold mb-2 ml-1' style={{ color: colors.text }}>
+        <Text className='mb-2 ml-1 text-sm font-semibold' style={{ color: colors.text }}>
           {label}
           {required && <Text style={{ color: '#ef4444' }}> *</Text>}
         </Text>
@@ -62,7 +62,7 @@ export const BaseInput = forwardRef<TextInput, BaseInputProps>(function BaseInpu
       >
         {icon && (
           <View
-            className='rounded-xl p-2.5 mr-4'
+            className='mr-4 rounded-xl p-2.5'
             style={{
               backgroundColor: `${colors.primary}15`
             }}
@@ -99,7 +99,7 @@ export const BaseInput = forwardRef<TextInput, BaseInputProps>(function BaseInpu
         )}
       </View>
       {error && (
-        <Text className='text-xs mt-1 ml-1' style={{ color: '#ef4444' }}>
+        <Text className='ml-1 mt-1 text-xs' style={{ color: '#ef4444' }}>
           {error}
         </Text>
       )}

@@ -24,7 +24,7 @@ export function ProfileMenuItem({ icon, label, onPress, showBorder = true }: Pro
       activeOpacity={0.7}
     >
       <View
-        className='rounded-xl p-3 mr-4'
+        className='mr-4 rounded-xl p-3'
         style={{
           backgroundColor: `${colors.primary}12`
         }}

@@ -41,10 +41,10 @@ export const CartBar: React.FC<Props> = ({
         borderTopColor: colors.border
       }}
     >
-      <View className='flex-row items-center justify-between mb-3'>
+      <View className='mb-3 flex-row items-center justify-between'>
         <View className='flex-row items-center'>
           <Ionicons name='cart-outline' size={24} color={colors.primary} />
-          <Text className='text-lg font-bold ml-2' style={{ color: colors.text }}>
+          <Text className='ml-2 text-lg font-bold' style={{ color: colors.text }}>
             {totalLabel}
           </Text>
         </View>
@@ -57,7 +57,7 @@ export const CartBar: React.FC<Props> = ({
         {items.map((item) => (
           <View
             key={`${item.menuId}-${item.sizeId}`}
-            className='rounded-xl px-3 py-2 mr-2 flex-row items-center'
+            className='mr-2 flex-row items-center rounded-xl px-3 py-2'
             style={{ backgroundColor: `${colors.primary}15` }}
           >
             <View className='mr-2'>
@@ -76,7 +76,7 @@ export const CartBar: React.FC<Props> = ({
               >
                 <Ionicons name='remove' size={12} color='white' />
               </TouchableOpacity>
-              <Text className='text-sm font-bold mx-2' style={{ color: colors.primary }}>
+              <Text className='mx-2 text-sm font-bold' style={{ color: colors.primary }}>
                 {item.quantity}
               </Text>
               <TouchableOpacity
@@ -113,7 +113,7 @@ export const CartBar: React.FC<Props> = ({
         disabled={disabled}
         onPress={onSubmit}
       >
-        <Text className='text-white text-center text-lg font-bold'>
+        <Text className='text-center text-lg font-bold text-white'>
           {isSubmitting ? 'Đang tạo đơn...' : 'Tạo đơn hàng'}
         </Text>
       </TouchableOpacity>

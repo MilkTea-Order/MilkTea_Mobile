@@ -31,6 +31,11 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
       phone: 'Số điện thoại đã tồn tại'
     }
   },
+  menu: {
+    [ERROR_CODE.E0036]: {
+      menuid: 'Không thể lấy size món hãy liên hệ admin để được hổ trợ!'
+    }
+  },
   forgotPassword: {
     // Send OTP
     [ERROR_CODE.E0001]: {
@@ -104,39 +109,54 @@ export const FIELD_ERROR_MESSAGES: Record<ErrorDomain, Partial<Record<ErrorCode,
   order: {
     [ERROR_CODE.E0001]: {
       orderid: 'Đơn hàng không tồn tại',
-      orderdetailid: 'Hủy món không hợp lệ',
-      sourcetableid: 'Bàn muốn gộp không tồn tại'
+      sourcetableid: 'Bàn muốn gộp không tồn tại',
+      orderdetailid: 'Món không tồn tại'
     },
     [ERROR_CODE.E0002]: {
       sourcetableid: 'Không thể gộp bàn vào chính nó.'
     },
     [ERROR_CODE.E0036]: {
-      orderid: 'Đơn hàng không tồn tại',
-      orderdetailid: 'Hủy món không hợp lệ',
+      //create
+      dinnertableid: 'Bàn không không tìm thấy',
+      items: 'Danh sách món trống không thể thực hiện chức năng này',
+      orderedby: 'Thiếu người order nên không thể thực hiện chức năng này',
+      quantity: 'Số lượng của món được nhập không hợp lệ, hay thao tác lại',
+      menu: 'Món được đặt không hợp lệ, hay thao tác lại',
+      //get
+      status: 'Trạng thái đơn hàng không hợp lệ',
+      fromdate: 'Khoảng lọc ngày không hợp lệ',
+      todate: 'Khoảng lọc ngày không hợp lệ',
+
+      //paymnet
+      paymentmethod: 'Phương thức thanh toán không hợp lệ (CASH, BANK, SHOPEE, GRAB)',
+      updateorderdetail: 'Phải cập nhất ít một trường số lượng hay ghi chú',
+
       dinnerTableId: 'Bàn không hợp lệ (không tìm thấy or đang bán)',
+      orderedBy: 'Nếu có giá trị nhưng bé hơn 0'
+    },
+    [ERROR_CODE.E0042]: {
+      dinnertableid: 'Bàn không hợp lệ (không tìm thấy hoặc đang phục vụ tại thời điểm này)',
+      newdinnertableid: 'Bàn không hợp lệ (không tìm thấy hoặc đang phục vụ tại thời điểm này)',
+      orderid: 'Đơn hàng phải có trạng thái chưa thanh toán mới thực hiện thao tác này',
+      sourcetableid: 'Không thể gộp vì bàn muốn gộp không hợp lệ.',
+      orderiteminvalidstatustocancelorder:
+        'Bàn này gần đây có món đang làm hoặc đã hoàn thành nên không thể huỷ bàn này',
+      orderiteminvalidstatustocancelitem: 'Món này gần đây đang được làm hoặc đã hoàn thành nên không thể huỷ món này'
+    },
+    [ERROR_CODE.E9999]: {
+      createorder: 'Tạo đơn hàng không thành công, hãy thử lại',
+      changetable: 'Chuyển bàn thất bại',
+      mergetable: 'Gộp bàn thất bại',
+      cancelorderdetail: 'Hủy món thất bại',
+      paymnetorder: 'Thanh toán đơn hàng không thành công',
+      ordercollected: 'Thu tiền đơn hàng không thành công',
+      updateorderitem: 'Cập nhật món thất bại',
+
       orderedBy: 'Nếu có giá trị nhưng bé hơn 0',
       items: 'danh sách rỗng',
       menu: 'món chọn không hợp lệ',
       quantity: 'món chọn không hợp lệ',
       price: 'món chọn không hợp lệ'
-    },
-    [ERROR_CODE.E0042]: {
-      orderid: 'Đơn hàng phải có trạng thái chưa thanh toán mới thực hiện thao tác này',
-      orderdetailid: 'Món này đã hủy trước đó',
-      newdinnertableid: 'Bàn không hợp lệ (không tìm thấy hoặc đang bán tại thời điểm này)',
-      sourcetableid: 'Không thể gộp vì bàn muốn gộp không hợp lệ.'
-    },
-    [ERROR_CODE.E9999]: {
-      dinnerTableId: 'Bàn không hợp lệ (không tìm thấy hoặc đang bán tại thời điểm này)',
-      orderedBy: 'Nếu có giá trị nhưng bé hơn 0',
-      items: 'danh sách rỗng',
-      menu: 'món chọn không hợp lệ',
-      quantity: 'món chọn không hợp lệ',
-      price: 'món chọn không hợp lệ',
-      createorder: 'Tạo order không thành công',
-      cancelorderdetail: 'Hủy món thất bại',
-      changetable: 'Chuyển bàn thất bại',
-      mergetable: 'Gộp bàn thất bại'
     }
   },
   common: {}

@@ -28,7 +28,7 @@ export function SearchInputBar({
 
   return (
     <View
-      className='flex-row items-center px-4 rounded-2xl mx-3 mb-3'
+      className='mx-3 mb-3 flex-row items-center rounded-2xl px-4'
       style={{
         height: 48,
         backgroundColor: colors.card,
@@ -52,7 +52,7 @@ export function SearchInputBar({
         onChangeText={onChangeText}
         onSubmitEditing={onSubmit}
         returnKeyType='search'
-        className='flex-1 ml-3 text-base'
+        className='ml-3 flex-1 text-base'
         style={{
           color: colors.text,
           paddingVertical: 0,

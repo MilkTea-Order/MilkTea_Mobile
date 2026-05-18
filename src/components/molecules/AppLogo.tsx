@@ -37,7 +37,7 @@ export function AppLogo({ size = 'medium', showText = true, showGlow = false }: 
 
       {/* Logo Container */}
       <View
-        className='rounded-full items-center justify-center'
+        className='items-center justify-center rounded-full'
         style={{
           width: logoSize,
           height: logoSize,

@@ -1,4 +1,4 @@
-export type ErrorDomain = 'auth' | 'user' | 'order' | 'common' | 'forgotPassword'
+export type ErrorDomain = 'auth' | 'user' | 'order' | 'common' | 'forgotPassword' | 'menu'
 
 export const ERROR_CODE = {
   // General Errors (E0001-E0009)

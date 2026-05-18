@@ -26,7 +26,7 @@ export default function VerifyOtpScreen() {
 
         <View className='flex-1 items-center justify-center px-8'>
           <View
-            className='w-full max-w-xs rounded-3xl p-8 items-center'
+            className='w-full max-w-xs items-center rounded-3xl p-8'
             style={{
               backgroundColor: isDark ? `${colors.surface}B3` : `${colors.surface}E6`,
               borderWidth: 1,
@@ -39,23 +39,23 @@ export default function VerifyOtpScreen() {
             }}
           >
             <View
-              className='w-16 h-16 rounded-full items-center justify-center mb-4'
+              className='mb-4 h-16 w-16 items-center justify-center rounded-full'
               style={{ backgroundColor: `${colors.error}20` }}
             >
               <Ionicons name='warning' size={32} color={colors.error} />
             </View>
 
-            <Text className='text-lg font-semibold text-center mb-2' style={{ color: colors.error }}>
+            <Text className='mb-2 text-center text-lg font-semibold' style={{ color: colors.error }}>
               Đã xảy ra lỗi
             </Text>
 
-            <Text className='text-sm text-center mb-6' style={{ color: colors.textSecondary }}>
+            <Text className='mb-6 text-center text-sm' style={{ color: colors.textSecondary }}>
               Liên kết không hợp lệ hoặc đã hết hạn.{'\n'}Vui lòng thử lại.
             </Text>
 
             <TouchableOpacity
               onPress={() => router.replace('/login')}
-              className='w-full py-3.5 rounded-2xl items-center'
+              className='w-full items-center rounded-2xl py-3.5'
               style={{ backgroundColor: colors.primary }}
               activeOpacity={0.8}
             >
@@ -118,7 +118,7 @@ export default function VerifyOtpScreen() {
             <AppLogo size='large' showText={false} />
           </AnimatedLogoContainer>
 
-          <Text className='text-3xl font-bold tracking-wide mt-4' style={{ color: colors.text }}>
+          <Text className='mt-4 text-3xl font-bold tracking-wide' style={{ color: colors.text }}>
             Nhập OTP
           </Text>
         </View>

@@ -59,7 +59,7 @@ export function OTPInput({ length = 6, value, onChange, error, autoFocus = true,
       />
 
       {/* OTP Boxes */}
-      <View className='flex-row justify-between flex-1'>
+      <View className='flex-1 flex-row justify-between'>
         {Array.from({ length }).map((_, index) => {
           const char = charArray[index]
           const isFilled = index < charArray.length

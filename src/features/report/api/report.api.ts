@@ -1,8 +1,9 @@
 import { PaymentMethod } from '@/shared/constants/payment'
-import { OrderStatus } from '@/shared/constants/status'
+import { OrderStatus, STATUS } from '@/shared/constants/status'
 import { URL } from '@/shared/constants/urls'
 import { ApiResponse } from '@/shared/types/api.type'
 import http from '@/shared/utils/http'
+import { getKeyByValue } from '@/shared/utils/utils'
 import { AxiosResponse } from 'axios'
 import { AddFinanceTransactionPayload, FinanceGroupReport, FinanceReport } from '../types/finance.type'
 import { MaterialReport } from '../types/material.inventory.type'
@@ -22,7 +23,14 @@ export const reportApi = {
     toDate: string
     orderStatusId: OrderStatus
   }): Promise<AxiosResponse<ApiResponse<RevenueReport>>> {
-    return http.get<ApiResponse<RevenueReport>>(URL.REVENUE_REPORT, { params: filter })
+    return http.get<ApiResponse<RevenueReport>>(URL.REVENUE_REPORT, {
+      params: {
+        paymentMethod: filter.paymentMethod,
+        status: getKeyByValue(STATUS.ORDER, filter.orderStatusId),
+        fromDate: filter.fromDate,
+        toDate: filter.toDate
+      }
+    })
   },
   getFinanceReport(filter: { fromDate: string; toDate: string }): Promise<AxiosResponse<ApiResponse<FinanceReport[]>>> {
     return http.get<ApiResponse<FinanceReport[]>>(`${URL.FINANCE}/report`, { params: filter })

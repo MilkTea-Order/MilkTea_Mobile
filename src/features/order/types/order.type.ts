@@ -4,7 +4,7 @@ import { Menu } from './menu.type'
 import { DinnerTable } from './table.type'
 
 export interface Order {
-  orderID: number
+  orderId: number
   dinnerTable: DinnerTable
   status: Status
   note: string | null
@@ -35,8 +35,8 @@ export interface OrderDetail {
   status: Status
   price: number
   note: string | null
-  kindOfHotpot1ID: number | null
-  kindOfHotpot2ID: number | null
+  kindOfHotpot1Id: number | null
+  kindOfHotpot2Id: number | null
 
   createdBy: number
   createdDate: string

@@ -32,11 +32,11 @@ export const MenuGroupNav: React.FC<Props> = ({ groups, selectedGroupId, onSelec
         key={group.id}
         onPress={() => onSelectGroup(group)}
         activeOpacity={0.8}
-        className='items-center mr-4'
+        className='mr-4 items-center'
         style={{ width: 80 }}
       >
         <View
-          className='rounded-full p-3 mb-2'
+          className='mb-2 rounded-full p-3'
           style={{
             backgroundColor: isSelected ? colors.primary : `${colors.primary}15`,
             borderWidth: isSelected ? 2 : 1,
@@ -48,13 +48,13 @@ export const MenuGroupNav: React.FC<Props> = ({ groups, selectedGroupId, onSelec
           }}
         >
           {imageUrl ? (
-            <Image source={{ uri: imageUrl }} className='w-full h-full rounded-full' resizeMode='cover' />
+            <Image source={{ uri: imageUrl }} className='h-full w-full rounded-full' resizeMode='cover' />
           ) : (
             <Ionicons name='restaurant-outline' size={32} color={isSelected ? 'white' : colors.primary} />
           )}
         </View>
         <Text
-          className='text-xs text-center'
+          className='text-center text-xs'
           numberOfLines={2}
           style={{
             color: isSelected ? colors.primary : colors.text,

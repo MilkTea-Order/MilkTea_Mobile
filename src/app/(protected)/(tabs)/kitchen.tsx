@@ -1,5 +1,5 @@
 import { Header } from '@/components/layouts/Header'
-import { FilterChip } from '@/components/organisms/OrderFilterChips'
+import { FilterChip } from '@/components/molecules/FilterChip'
 import { CancelItemModal } from '@/features/order/components/organisms/CancelItemModal'
 import { KitchenOrderSection } from '@/features/order/components/organisms/KitchenOrderSection'
 import { useKitchenOrders, useUpdateOrderDetailStatus } from '@/features/order/hooks/useKitchenOrder'
@@ -16,17 +16,29 @@ import {
 import { useTheme } from '@/shared/hooks/useTheme'
 import { getKeyByValue } from '@/shared/utils/utils'
 import { Ionicons } from '@expo/vector-icons'
+import { useFocusEffect } from 'expo-router'
 import { useCallback, useMemo, useState } from 'react'
-import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, FlatList, Text, TouchableOpacity, View } from 'react-native'
+import { RefreshControl } from 'react-native-gesture-handler'
 
 export default function KitchenScreen() {
   const { colors } = useTheme()
   const [selectedStatus, setSelectedStatus] = useState<OrderItemStatus>(ORDER_ITEM_STATUS.PENDING)
   const [checkedItems, setCheckedItems] = useState<Map<number, Set<number>>>(new Map())
   const [cancelModalVisible, setCancelModalVisible] = useState(false)
-  const filter = useMemo(() => getKeyByValue(STATUS.ORDER_ITEM, selectedStatus), [selectedStatus])
 
-  const { orders, isLoading, isRefetching, refetch } = useKitchenOrders(filter)
+  const { orders, isLoading, isRefetching, refetch } = useKitchenOrders({ orderItemStatusId: selectedStatus })
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch()
+
+      return () => {
+        setSelectedStatus(ORDER_ITEM_STATUS.PENDING)
+        setCheckedItems(new Map())
+      }
+    }, [refetch])
+  )
 
   const updateStatusMutation = useUpdateOrderDetailStatus({
     onSuccess: () => {
@@ -67,7 +79,6 @@ export default function KitchenScreen() {
   const handleUpdateStatus = (newStatus: OrderItemStatus, reason?: string) => {
     const totalCount = getTotalCheckedCount()
     if (totalCount === 0) return
-
     const itemsToUpdate = Array.from(checkedItems.entries()).flatMap(([orderId, itemSet]) =>
       Array.from(itemSet).map((itemId) => ({
         orderId,
@@ -95,7 +106,7 @@ export default function KitchenScreen() {
     const seenStatuses = new Set<OrderItemStatus>()
 
     for (const [orderId, itemSet] of checkedItems) {
-      const matchingOrders = orders.filter((o) => o.orderID === orderId)
+      const matchingOrders = orders.filter((o) => o.orderId === orderId)
 
       for (const itemId of itemSet) {
         const order = matchingOrders.find((o) => o.items.some((i) => i.id === itemId))
@@ -121,15 +132,20 @@ export default function KitchenScreen() {
     return actions
   }, [checkedItems, orders])
 
+  const handleChangeFilter = (filter: OrderItemStatus) => {
+    setCheckedItems(new Map())
+    setSelectedStatus(filter)
+  }
+
   const availableActions = useMemo(() => getAvailableActions(), [getAvailableActions])
   const canCheck = selectedStatus === ORDER_ITEM_STATUS.PENDING || selectedStatus === ORDER_ITEM_STATUS.INPROGRESS
 
   const renderEmptyState = () => {
     if (isLoading) {
       return (
-        <View className='flex-1 justify-center items-center py-20'>
+        <View className='flex-1 items-center justify-center'>
           <ActivityIndicator size='large' color={colors.primary} />
-          <Text className='mt-3 text-base' style={{ color: colors.textSecondary }}>
+          <Text className='text-base' style={{ color: colors.textSecondary }}>
             Đang tải...
           </Text>
         </View>
@@ -137,16 +153,25 @@ export default function KitchenScreen() {
     }
 
     return (
-      <View className='flex-1 justify-center items-center py-20 px-8'>
-        <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
+      <View className='flex-1 items-center justify-center px-8 py-20'>
+        <View className='mb-4 rounded-full p-6' style={{ backgroundColor: `${colors.primary}10` }}>
           <Ionicons name='restaurant-outline' size={48} color={colors.primary} />
         </View>
         <Text className='text-lg font-bold' style={{ color: colors.text }}>
-          Không có món cần làm
+          Không có món{' '}
+          {selectedStatus === STATUS.ORDER_ITEM.PENDING
+            ? 'đang cần làm'
+            : selectedStatus === STATUS.ORDER_ITEM.INPROGRESS
+              ? 'đang làm'
+              : selectedStatus === STATUS.ORDER_ITEM.COMPLETED
+                ? 'đã hoàn thành'
+                : selectedStatus === STATUS.ORDER_ITEM.CANCELLED
+                  ? 'đã huỷ'
+                  : 'tồn tại'}
         </Text>
-        <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
+        {/* <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
           Tất cả các món đã được xử lý hoặc không có đơn hàng nào
-        </Text>
+        </Text> */}
       </View>
     )
   }
@@ -156,7 +181,7 @@ export default function KitchenScreen() {
         <FilterChip
           options={ORDER_ITEM_STATUS_OPTIONS}
           selected={selectedStatus}
-          onChange={setSelectedStatus}
+          onChange={handleChangeFilter}
           selectedStyle={{
             backgroundColor: colors.primary,
             borderColor: colors.primary,
@@ -174,10 +199,12 @@ export default function KitchenScreen() {
 
       <FlatList
         data={orders}
-        keyExtractor={(item) => `${item.orderID}-${item.items?.[0]?.createdDate}`}
+        extraData={[orders, checkedItems]}
+        keyExtractor={(item) => `${item.orderId}-${item.items?.[0]?.createdDate}`}
         contentContainerStyle={{
+          flexGrow: 1,
           padding: 16,
-          paddingBottom: getTotalCheckedCount() > 0 ? 120 : 32
+          paddingBottom: 32
         }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.primary} />}
         refreshing={isRefetching}
@@ -186,8 +213,8 @@ export default function KitchenScreen() {
         renderItem={({ item }) => (
           <KitchenOrderSection
             order={item}
-            checkedItems={checkedItems.get(item.orderID) || new Set()}
-            onToggleCheck={(orderItem) => toggleCheckItem(item.orderID, orderItem)}
+            checkedItems={checkedItems.get(item.orderId) || new Set()}
+            onToggleCheck={(orderItem) => toggleCheckItem(item.orderId, orderItem)}
             canCheck={canCheck}
             colors={colors}
           />
@@ -196,7 +223,7 @@ export default function KitchenScreen() {
 
       {getTotalCheckedCount() > 0 && (
         <View
-          className='absolute bottom-0 left-0 right-0 px-4 py-4 gap-3'
+          className='absolute bottom-0 left-0 right-0 gap-3 px-4 py-4'
           style={{
             backgroundColor: colors.card,
             borderTopWidth: 1,
@@ -207,7 +234,7 @@ export default function KitchenScreen() {
         >
           <TouchableOpacity
             onPress={() => setCheckedItems(new Map())}
-            className='flex-1 py-4 rounded-xl items-center'
+            className='flex-1 items-center rounded-xl py-4'
             style={{ backgroundColor: colors.border }}
           >
             <Text className='font-semibold' style={{ color: colors.text }}>
@@ -226,7 +253,7 @@ export default function KitchenScreen() {
                   key={action.nextStatus}
                   onPress={isCancelAction ? handleCancelItems : () => handleUpdateStatus(action.nextStatus)}
                   disabled={updateStatusMutation.isPending}
-                  className='flex-1 py-4 rounded-xl items-center flex-row justify-center gap-2'
+                  className='flex-1 flex-row items-center justify-center gap-2 rounded-xl py-4'
                   style={{ backgroundColor: buttonColor }}
                 >
                   {updateStatusMutation.isPending ? (

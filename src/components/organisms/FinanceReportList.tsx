@@ -49,7 +49,7 @@ export function FinanceReportList({
 
   return (
     <View className='flex-1'>
-      <View className='flex mt-2 px-4 pb-3'>
+      <View className='mt-2 flex px-4 pb-3'>
         <DateFilterPicker value={filter} onChange={(range: any) => setFilter(range)} colors={colors} size='lg' />
       </View>
       <FlatList

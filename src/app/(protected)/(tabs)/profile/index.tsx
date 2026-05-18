@@ -1,3 +1,4 @@
+import { AnimatedCounter } from '@/components/molecules/AnimatedCounter'
 import { ProfileMenuItem } from '@/components/molecules/ProfileMenuItem'
 import { ThemeSelector } from '@/components/molecules/ThemeSelector'
 import { useLogout } from '@/features/auth/hooks/useAuth'
@@ -14,7 +15,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useFocusEffect, useRouter } from 'expo-router'
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { ActivityIndicator, Alert, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -26,17 +27,24 @@ export default function ProfileScreen() {
   const { colors, gradients } = useTheme()
   const insets = useSafeAreaInsets()
   const scrollViewRef = useRef<ScrollView>(null)
+  const [trigger, setTrigger] = useState(0)
   const { fromDate, toDate } = getTodayDateRange()
-  const { orders, isLoading: isLoadingOrders } = useOrders({
-    statusId: STATUS.ORDER.NO_COLLECTED,
+  const {
+    orders,
+    isLoading: isLoadingOrders,
+    refetch
+  } = useOrders({
+    statusId: STATUS.ORDER.NOTCOLLECTED,
     fromDate,
     toDate
   } as OrderFilter)
 
   useFocusEffect(
     useCallback(() => {
+      setTrigger(Date.now())
+      refetch()
       scrollViewRef.current?.scrollTo({ y: 0, animated: false })
-    }, [])
+    }, [refetch])
   )
 
   const updateProfileMutation = useUpdateProfile()
@@ -80,7 +88,6 @@ export default function ProfileScreen() {
 
           updateProfileMutation.mutate(formData, {
             onError: (error) => {
-              console.error(error)
               Alert.alert('Lỗi', 'Không thể cập nhật ảnh đại diện')
             }
           })
@@ -140,7 +147,7 @@ export default function ProfileScreen() {
           paddingHorizontal: 20
         }}
       >
-        <Text className='text-white text-2xl font-bold text-center mt-2'>Hồ sơ</Text>
+        <Text className='mt-2 text-center text-2xl font-bold text-white'>Hồ sơ</Text>
       </LinearGradient>
 
       <ScrollView
@@ -152,7 +159,7 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Profile Card - Separated from header */}
-        <View className='px-6 mt-8'>
+        <View className='mt-8 px-6'>
           <View
             className='rounded-3xl p-6'
             style={{
@@ -167,7 +174,7 @@ export default function ProfileScreen() {
             }}
           >
             {/* <Text>{user?.avatar}</Text> */}
-            <View className='items-center mb-6'>
+            <View className='mb-6 items-center'>
               {/* Avatar Container */}
               <View className='relative mb-4'>
                 <View
@@ -177,11 +184,11 @@ export default function ProfileScreen() {
                   }}
                 >
                   {user?.avatar ? (
-                    <Image source={{ uri: user.avatar }} className='w-24 h-24 rounded-full' resizeMode='contain' />
+                    <Image source={{ uri: user.avatar }} className='h-24 w-24 rounded-full' resizeMode='contain' />
                   ) : (
                     <LinearGradient
                       colors={gradients.header as any}
-                      className='w-24 h-24 rounded-full items-center justify-center'
+                      className='h-24 w-24 items-center justify-center rounded-full'
                     >
                       <Ionicons name='person' size={48} color='white' />
                     </LinearGradient>
@@ -192,7 +199,7 @@ export default function ProfileScreen() {
                 <TouchableOpacity
                   onPress={pickImage}
                   disabled={updateProfileMutation.isPending}
-                  className='absolute bottom-0 right-0 w-10 h-10 rounded-full items-center justify-center'
+                  className='absolute bottom-0 right-0 h-10 w-10 items-center justify-center rounded-full'
                   style={{
                     backgroundColor: colors.primary,
                     borderWidth: 3,
@@ -207,12 +214,12 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
               </View>
 
-              <Text className='text-2xl font-bold mb-1' style={{ color: colors.text }}>
+              <Text className='mb-1 text-2xl font-bold' style={{ color: colors.text }}>
                 {isLoadingUser ? 'Đang tải...' : user?.fullName || 'Nhân viên'}
               </Text>
               <Text style={{ color: colors.textSecondary }}>{isLoadingUser ? '' : user?.email || ''}</Text>
               {user?.positionName && (
-                <Text className='text-sm mt-1' style={{ color: colors.textSecondary }}>
+                <Text className='mt-1 text-sm' style={{ color: colors.textSecondary }}>
                   {user.positionName}
                 </Text>
               )}
@@ -221,42 +228,44 @@ export default function ProfileScreen() {
             {/* Stats */}
             <View className='flex-row gap-4 pt-4' style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
               <View className='flex-1 items-center'>
-                <Text className='text-2xl font-bold' style={{ color: colors.text }}>
-                  {isLoadingOrders ? 'Đang tải' : orders ? (orders as Order[]).length : 0}
-                </Text>
-                <Text className='text-xs mt-1' style={{ color: colors.textSecondary }}>
+                <AnimatedCounter
+                  trigger={trigger}
+                  endValue={isLoadingOrders ? 0 : orders ? (orders as Order[]).length : 0}
+                  duration={800}
+                  className='text-2xl font-bold'
+                  color={colors.text}
+                />
+                <Text className='mt-1 text-xs' style={{ color: colors.textSecondary }}>
                   Đơn đã thanh toán hôm nay
                 </Text>
               </View>
               <View className='w-px' style={{ backgroundColor: colors.border }} />
               <View className='flex-1 items-center'>
-                <Text className='text-2xl font-bold' style={{ color: colors.text }}>
-                  {isLoadingOrders
-                    ? 'Đang tải'
-                    : !orders
+                <AnimatedCounter
+                  trigger={trigger}
+                  endValue={
+                    isLoadingOrders
                       ? 0
-                      : formatCurrencyVND((orders as Order[]).reduce((sum, item) => sum + (item.totalAmount ?? 0), 0))}
-                </Text>
-                <Text className='text-xs mt-1' style={{ color: colors.textSecondary }}>
+                      : orders
+                        ? (orders as Order[]).reduce((sum, item) => sum + (item.totalAmount ?? 0), 0)
+                        : 0
+                  }
+                  duration={800}
+                  formatter={formatCurrencyVND}
+                  className='text-2xl font-bold'
+                  color={colors.text}
+                />
+                <Text className='mt-1 text-xs' style={{ color: colors.textSecondary }}>
                   Tổng doanh thu
                 </Text>
               </View>
-              {/* <View className='w-px' style={{ backgroundColor: colors.border }} />
-              <View className='flex-1 items-center'>
-                <Text className='text-2xl font-bold' style={{ color: colors.text }}>
-                  4.8
-                </Text>
-                <Text className='text-xs mt-1' style={{ color: colors.textSecondary }}>
-                  Đánh giá
-                </Text>
-              </View> */}
             </View>
           </View>
         </View>
 
         {/* Theme Settings */}
-        <View className='px-6 mt-6'>
-          <Text className='text-lg font-bold mb-3' style={{ color: colors.text }}>
+        <View className='mt-6 px-6'>
+          <Text className='mb-3 text-lg font-bold' style={{ color: colors.text }}>
             Giao diện
           </Text>
           <View
@@ -273,16 +282,16 @@ export default function ProfileScreen() {
             }}
           >
             <ThemeSelector />
-            <Text className='text-xs mt-3 text-center' style={{ color: colors.textSecondary }}>
+            <Text className='mt-3 text-center text-xs' style={{ color: colors.textSecondary }}>
               Chọn chế độ hiển thị phù hợp với bạn
             </Text>
           </View>
         </View>
 
         {/* Menu Items */}
-        <View className='px-6 mt-6'>
+        <View className='mt-6 px-6'>
           <View
-            className='rounded-2xl overflow-hidden'
+            className='overflow-hidden rounded-2xl'
             style={{
               backgroundColor: colors.card,
               shadowColor: '#000',
@@ -307,10 +316,10 @@ export default function ProfileScreen() {
         </View>
 
         {/* Logout Button */}
-        <View className='px-6 mt-6 mb-8'>
+        <View className='mb-8 mt-6 px-6'>
           <TouchableOpacity
             onPress={handleLogout}
-            className='rounded-2xl p-4 items-center'
+            className='items-center rounded-2xl p-4'
             style={{
               backgroundColor: colors.error,
               shadowColor: colors.error,
@@ -323,7 +332,7 @@ export default function ProfileScreen() {
           >
             <View className='flex-row items-center'>
               <Ionicons name='log-out-outline' size={24} color='white' />
-              <Text className='text-white font-bold text-lg ml-2'>Đăng xuất</Text>
+              <Text className='ml-2 text-lg font-bold text-white'>Đăng xuất</Text>
             </View>
           </TouchableOpacity>
         </View>

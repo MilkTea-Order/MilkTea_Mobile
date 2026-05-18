@@ -28,7 +28,7 @@ export function AnimatedLogoContainer({ size = 110, isDark, colors, style, child
 
   return (
     <Animated.View
-      className='rounded-full items-center justify-center mb-5'
+      className='mb-5 items-center justify-center rounded-full'
       style={[
         {
           width: size,

@@ -49,7 +49,7 @@ export default function InventoryScreen() {
       >
         <TouchableOpacity
           onPress={() => router.back()}
-          className='absolute bg-white/20 rounded-full p-2'
+          className='absolute rounded-full bg-white/20 p-2'
           style={{
             top: insets.top + 16,
             left: 20,
@@ -59,11 +59,11 @@ export default function InventoryScreen() {
           <Ionicons name='arrow-back' size={24} color='white' />
         </TouchableOpacity>
 
-        <Text className='text-white text-2xl font-bold text-center mt-2'>Báo cáo tồn kho</Text>
+        <Text className='mt-2 text-center text-2xl font-bold text-white'>Báo cáo tồn kho</Text>
       </LinearGradient>
 
       {/* SEARCH INPUT */}
-      <View className='px-4 pt-4 pb-2'>
+      <View className='px-4 pb-2 pt-4'>
         <InventorySearchInput
           value={searchText}
           onChangeText={(text) => {
@@ -115,7 +115,7 @@ export default function InventoryScreen() {
               <View style={{ width: COL.name + 16 }}>
                 {/* HEADER */}
                 <View
-                  className='rounded-l-xl pl-3 py-2.5 mb-2 justify-center'
+                  className='mb-2 justify-center rounded-l-xl py-2.5 pl-3'
                   style={{
                     backgroundColor: colors.primary + '12',
                     borderColor: colors.primary + '30',
@@ -125,7 +125,7 @@ export default function InventoryScreen() {
                     borderBottomLeftRadius: 12
                   }}
                 >
-                  <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                  <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
                     Nguyên liệu
                   </Text>
                 </View>
@@ -133,7 +133,7 @@ export default function InventoryScreen() {
                 {group.materialItems.map((item, index) => (
                   <View
                     key={`fixed-${item.id}`}
-                    className='pl-2 justify-center'
+                    className='justify-center pl-2'
                     style={{
                       height: 44,
                       backgroundColor: index % 2 === 0 ? colors.background : colors.card,
@@ -142,7 +142,7 @@ export default function InventoryScreen() {
                       borderColor: colors.border
                     }}
                   >
-                    <Text className='font-bold text-sm' style={{ color: colors.text }} numberOfLines={1}>
+                    <Text className='text-sm font-bold' style={{ color: colors.text }} numberOfLines={1}>
                       {item.name}
                     </Text>
                   </View>
@@ -153,7 +153,7 @@ export default function InventoryScreen() {
                 <View>
                   {/* HEADER */}
                   <View
-                    className='flex-row items-center py-2.5 mb-2'
+                    className='mb-2 flex-row items-center py-2.5'
                     style={{
                       backgroundColor: colors.primary + '12',
                       borderWidth: 1,
@@ -164,31 +164,31 @@ export default function InventoryScreen() {
                     }}
                   >
                     <View style={{ width: COL.small, alignItems: 'center' }}>
-                      <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                      <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
                         S.Lg tồn
                       </Text>
                     </View>
 
                     <View style={{ width: COL.unit, alignItems: 'center' }}>
-                      <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                      <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
                         ĐVT
                       </Text>
                     </View>
 
                     <View style={{ width: COL.price, alignItems: 'center' }}>
-                      <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                      <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
                         Giá nhập
                       </Text>
                     </View>
 
                     <View style={{ width: COL.total, alignItems: 'center', paddingRight: 20 }}>
-                      <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                      <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
                         Tạm tính
                       </Text>
                     </View>
 
                     <View style={{ width: COL.status, alignItems: 'center' }}>
-                      <Text className='font-semibold text-xs' style={{ color: colors.primary }}>
+                      <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
                         Trạng thái
                       </Text>
                     </View>
@@ -236,7 +236,7 @@ export default function InventoryScreen() {
 
                         <View style={{ width: COL.status, alignItems: 'center' }}>
                           <View
-                            className='px-2 py-1 rounded-lg'
+                            className='rounded-lg px-2 py-1'
                             style={{
                               backgroundColor: item.status.id === 1 ? colors.primary + '20' : '#99999920'
                             }}

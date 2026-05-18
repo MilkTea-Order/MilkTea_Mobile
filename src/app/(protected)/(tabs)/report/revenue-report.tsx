@@ -25,7 +25,7 @@ export default function RevenueReportScreen() {
     paymentMethod: PAYMENT_METHOD.CASH as PaymentMethod,
     fromDate: fromDate ?? null,
     toDate: toDate ?? null,
-    orderStatusId: STATUS.ORDER.NO_COLLECTED as OrderStatus
+    orderStatusId: STATUS.ORDER.NOTCOLLECTED as OrderStatus
   })
 
   const listRef = useRef<FlatList>(null)
@@ -52,7 +52,7 @@ export default function RevenueReportScreen() {
     <View className='flex-1' style={{ backgroundColor: colors.background }}>
       <Header title='Báo cáo doanh thu' />
       {/* 🔥 FILTER BAR */}
-      <View className='px-4 mt-2'>
+      <View className='mt-2 px-4'>
         <DateFilterPicker
           value={{ fromDate: filter.fromDate, toDate: filter.toDate }}
           onChange={(range: { fromDate: string | null; toDate: string | null }) =>
@@ -69,7 +69,7 @@ export default function RevenueReportScreen() {
         <View className='mt-3'>
           <View className='flex-row gap-2'>
             {ORDER_STATUS_OPTIONS.filter(
-              (x) => x.value === STATUS.ORDER.NO_COLLECTED || x.value === STATUS.ORDER.PAID
+              (x) => x.value === STATUS.ORDER.NOTCOLLECTED || x.value === STATUS.ORDER.PAID
             ).map((item) => {
               const isActive = filter.orderStatusId === item.value
               return (
@@ -118,14 +118,14 @@ export default function RevenueReportScreen() {
         refreshing={isRefetching}
         ListEmptyComponent={
           !isRefetching && isLoading ? (
-            <View className='flex-1 justify-center items-center mt-20'>
+            <View className='mt-20 flex-1 items-center justify-center'>
               <ActivityIndicator size='large' color={colors.primary} />
               <Text className='mt-3' style={{ color: colors.textSecondary }}>
                 Đang tải dữ liệu...
               </Text>
             </View>
           ) : (
-            <View className='flex-1 justify-center items-center mt-20'>
+            <View className='mt-20 flex-1 items-center justify-center'>
               <Ionicons name='receipt-outline' size={50} color={colors.textSecondary} />
               <Text className='mt-3 text-base' style={{ color: colors.textSecondary }}>
                 Không có dữ liệu
@@ -140,8 +140,8 @@ export default function RevenueReportScreen() {
               defaultExpanded={false}
               headerContent={
                 <View className='flex-row items-center'>
-                  <View className='flex-row flex-1'>
-                    <View className='flex justify-center mr-3'>
+                  <View className='flex-1 flex-row'>
+                    <View className='mr-3 flex justify-center'>
                       <Ionicons name='calendar-outline' size={20} color={colors.primary} />
                     </View>
                     <View>
@@ -153,16 +153,16 @@ export default function RevenueReportScreen() {
                       </Text>
                     </View>
                   </View>
-                  <Text className='text-sm font-bold mr-2' style={{ color: colors.primary }}>
+                  <Text className='mr-2 text-sm font-bold' style={{ color: colors.primary }}>
                     {formatCurrencyVND(group.totalAmount)}
                   </Text>
                 </View>
               }
             >
-              <View className='px-3 pb-3 mt-1'>
+              <View className='mt-1 px-3 pb-3'>
                 {group.orders.map((order: Order, orderIndex: number) => (
                   <OrderCardV2
-                    key={order.orderID}
+                    key={order.orderId}
                     order={order}
                     isLast={orderIndex === group.orders.length - 1}
                     onPress={handleOnPressItem}

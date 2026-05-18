@@ -50,7 +50,7 @@ export function CustomToast({ message, type = 'info' }: CustomToastProps) {
 
   return (
     <View
-      className='rounded-xl p-3.5 mx-4 my-2 min-w-[280px] max-w-[320px] self-end flex-row items-start'
+      className='mx-4 my-2 min-w-[280px] max-w-[320px] flex-row items-start self-end rounded-xl p-3.5'
       style={{
         backgroundColor: config.bg,
         borderLeftColor: config.border,

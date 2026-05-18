@@ -22,7 +22,7 @@ export function ThemeSelector() {
             <TouchableOpacity
               key={option.mode}
               onPress={() => setThemeMode(option.mode)}
-              className='flex-1 rounded-xl py-3 items-center'
+              className='flex-1 items-center rounded-xl py-3'
               style={{
                 backgroundColor: isSelected ? colors.primary : 'transparent',
                 marginHorizontal: index === 1 ? 4 : 0
@@ -35,7 +35,7 @@ export function ThemeSelector() {
                 color={isSelected ? 'white' : colors.textSecondary}
               />
               <Text
-                className='text-xs mt-1 font-semibold'
+                className='mt-1 text-xs font-semibold'
                 style={{
                   color: isSelected ? 'white' : colors.textSecondary
                 }}

@@ -3,21 +3,19 @@ import { ORDER_ITEM_STATUS } from '@/shared/constants/status'
 import { extractErrorDetails } from '@/shared/utils/formErrors'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert } from 'react-native'
-import { orderApi } from '../api/order.api'
+import { KitchenOrderFilter, orderApi } from '../api/order.api'
 
 export const kitchenKeys = {
   all: ['kitchen-orders'] as const,
   lists: () => [...kitchenKeys.all, 'list'] as const,
-  list: (filter: keyof typeof ORDER_ITEM_STATUS | undefined) => [...kitchenKeys.lists(), filter] as const
+  list: (filter: KitchenOrderFilter) => [...kitchenKeys.lists(), filter] as const
 }
 
-export function useKitchenOrders(filter: keyof typeof ORDER_ITEM_STATUS | undefined) {
+export function useKitchenOrders(filter: KitchenOrderFilter) {
   const query = useQuery({
     queryKey: kitchenKeys.list(filter),
     queryFn: async () => {
-      const response = await orderApi.getKitchenOrders({
-        orderItemStatus: filter as any
-      })
+      const response = await orderApi.getKitchenOrders(filter)
       return response.data.data.orders ?? []
     },
     staleTime: 30 * 1000,
@@ -66,8 +64,6 @@ export function useUpdateOrderDetailStatus(options?: {
     },
     onError: (error) => {
       const details = extractErrorDetails(error, 'order')
-
-      console.log(details)
       const e9999 = details.find((e) => e.code === ERROR_CODE.E9999)
       if (e9999) {
         Alert.alert('Lỗi', e9999.message ?? 'Đã xảy ra lỗi hệ thống')

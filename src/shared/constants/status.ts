@@ -10,8 +10,8 @@ export const STATUS = {
   ORDER: {
     UNPAID: '1',
     PAID: '2',
-    CANCELED: '3',
-    NO_COLLECTED: '4'
+    CANCELLED: '3',
+    NOTCOLLECTED: '4'
   } as const,
   DINNER_TABLE: {
     AVAILABLE: 1,
@@ -43,9 +43,9 @@ export type OrderItemStatus = (typeof STATUS.ORDER_ITEM)[keyof typeof STATUS.ORD
  */
 export const ORDER_STATUS_OPTIONS: FilterOption<OrderStatus>[] = [
   { value: STATUS.ORDER.UNPAID, label: 'Chưa thanh toán', icon: 'receipt-outline' },
-  { value: STATUS.ORDER.NO_COLLECTED, label: 'Đã thanh toán', icon: 'hourglass-outline' },
+  { value: STATUS.ORDER.NOTCOLLECTED, label: 'Đã thanh toán', icon: 'hourglass-outline' },
   { value: STATUS.ORDER.PAID, label: 'Đã thu tiền', icon: 'checkmark-circle-outline' },
-  { value: STATUS.ORDER.CANCELED, label: 'Đã hủy', icon: 'close-circle-outline' }
+  { value: STATUS.ORDER.CANCELLED, label: 'Đã hủy', icon: 'close-circle-outline' }
 ]
 
 export const ORDER_STATUS_LABEL = ORDER_STATUS_OPTIONS.reduce(

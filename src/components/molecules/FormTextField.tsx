@@ -55,7 +55,7 @@ export const FormTextField = forwardRef<TextInput, FormTextFieldProps>(
       <View className='mb-4'>
         {/* LABEL */}
         {label && (
-          <View className='flex-row items-center mb-2'>
+          <View className='mb-2 flex-row items-center'>
             {icon && (
               <Ionicons
                 name={icon}
@@ -105,9 +105,9 @@ export const FormTextField = forwardRef<TextInput, FormTextFieldProps>(
 
         {/* ERROR */}
         {hasError && (
-          <View className='flex-row items-center mt-1.5 ml-1'>
+          <View className='ml-1 mt-1.5 flex-row items-center'>
             <Ionicons name='alert-circle' size={14} color={colors.error || '#ef4444'} />
-            <Text className='text-xs ml-1.5' style={{ color: colors.error || '#ef4444' }}>
+            <Text className='ml-1.5 text-xs' style={{ color: colors.error || '#ef4444' }}>
               {error}
             </Text>
           </View>

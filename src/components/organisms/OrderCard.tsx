@@ -32,14 +32,14 @@ export const OrderCard = ({
   const date =
     order.status.id === parseInt(STATUS.ORDER.UNPAID, 10)
       ? order.orderDate
-      : order.status.id === parseInt(STATUS.ORDER.NO_COLLECTED, 10)
+      : order.status.id === parseInt(STATUS.ORDER.NOTCOLLECTED, 10)
         ? order.paymentDate
         : order.status.id === parseInt(STATUS.ORDER.PAID, 10)
           ? order.actionDate
           : order.cancelledDate
   return (
     <TouchableOpacity
-      className='rounded-2xl overflow-hidden'
+      className='overflow-hidden rounded-2xl'
       style={{
         backgroundColor: colors.card,
         borderWidth: 1,
@@ -65,7 +65,7 @@ export const OrderCard = ({
         {imgTable ? (
           <Image source={{ uri: imgTable }} style={{ width: '100%', height: '100%' }} resizeMode='contain' />
         ) : (
-          <View className='w-full h-full items-center justify-center bg-gray-50'>
+          <View className='h-full w-full items-center justify-center bg-gray-50'>
             <Ionicons name='restaurant-outline' size={24} color={colors.primary} />
           </View>
         )}
@@ -74,7 +74,7 @@ export const OrderCard = ({
       {/* Content Section */}
       <View className='p-2.5'>
         {/* Time */}
-        <View className='flex-row items-center mb-1.5'>
+        <View className='mb-1.5 flex-row items-center'>
           <Ionicons name='time-outline' size={10} color={colors.textSecondary} style={{ marginRight: 3 }} />
           <Text className='text-[9px]' style={{ color: colors.textSecondary }} numberOfLines={1}>
             {formatDate(date ? dayjs(date) : null, 'HH:mm DD/MM/YYYY')}
@@ -83,12 +83,12 @@ export const OrderCard = ({
         </View>
 
         {/* Total Amount */}
-        <Text className='text-sm font-bold mb-2' style={{ color: colors.primary }} numberOfLines={1}>
+        <Text className='mb-2 text-sm font-bold' style={{ color: colors.primary }} numberOfLines={1}>
           {formatCurrencyVND(order?.totalAmount ?? 0)}
         </Text>
 
         {/* Action Buttons - Icon */}
-        <View className='flex-row items-center justify-between gap-3 mt-2'>
+        <View className='mt-2 flex-row items-center justify-between gap-3'>
           {onPressPayment && order.status.id === parseInt(STATUS.ORDER.UNPAID, 10) && (
             <TouchableOpacity
               onPress={onPressPayment}

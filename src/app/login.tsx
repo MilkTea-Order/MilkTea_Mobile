@@ -61,7 +61,7 @@ export default function LoginScreen() {
             <AppLogo size='large' showText={false} />
           </AnimatedLogoContainer>
 
-          <Text className='text-3xl font-bold tracking-wide mt-4' style={{ color: colors.text }}>
+          <Text className='mt-4 text-3xl font-bold tracking-wide' style={{ color: colors.text }}>
             Milk Tea
           </Text>
 

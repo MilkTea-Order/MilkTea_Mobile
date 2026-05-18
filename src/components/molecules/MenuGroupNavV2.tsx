@@ -57,11 +57,11 @@ export default function MenuGroupNavV2({ groups, selectedGroupId, onSelectGroup,
         key={group.id}
         onPress={() => onSelectGroup(group)}
         activeOpacity={0.8}
-        className='items-center mr-4'
+        className='mr-4 items-center'
         style={{ width: 80 }}
       >
         <View
-          className='rounded-full p-3 mb-2'
+          className='mb-2 rounded-full p-3'
           style={{
             backgroundColor: isSelected ? colors.primary : `${colors.primary}15`,
             borderWidth: isSelected ? 2 : 1,
@@ -73,13 +73,13 @@ export default function MenuGroupNavV2({ groups, selectedGroupId, onSelectGroup,
           }}
         >
           {imageUrl ? (
-            <Image source={{ uri: imageUrl }} className='w-full h-full rounded-full' resizeMode='cover' />
+            <Image source={{ uri: imageUrl }} className='h-full w-full rounded-full' resizeMode='cover' />
           ) : (
             <Ionicons name='restaurant-outline' size={24} color={isSelected ? 'white' : colors.primary} />
           )}
         </View>
         <Text
-          className='text-xs text-center'
+          className='text-center text-xs'
           numberOfLines={2}
           style={{
             color: isSelected ? colors.primary : colors.text,
@@ -109,9 +109,9 @@ export default function MenuGroupNavV2({ groups, selectedGroupId, onSelectGroup,
         </View>
       </ScrollView>
       {/* Scroll Indicator */}
-      <View className='relative justify-center align-middle mb-[8px] rounded-[1px] h-[2px] w-[120px] mx-auto'>
+      <View className='relative mx-auto mb-[8px] h-[2px] w-[120px] justify-center rounded-[1px] align-middle'>
         <View
-          className='h-full rounded-[1px] absolute w-[24px]'
+          className='absolute h-full w-[24px] rounded-[1px]'
           style={{
             backgroundColor: colors.primary,
             position: 'absolute',

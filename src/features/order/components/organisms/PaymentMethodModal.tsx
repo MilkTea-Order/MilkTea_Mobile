@@ -49,14 +49,14 @@ export function PaymentMethodModal({
       <TouchableOpacity
         key={method.id}
         onPress={() => setSelectedMethod(method.id)}
-        className='flex-row items-center p-4 rounded-xl border-2 mx-6 mb-3'
+        className='mx-6 mb-3 flex-row items-center rounded-xl border-2 p-4'
         style={{
           backgroundColor: isSelected ? `${method.bgColor}` : colors.card,
           borderColor: isSelected ? method.iconColor : colors.border
         }}
         activeOpacity={0.7}
       >
-        <View className='w-12 h-12 rounded-lg items-center justify-center' style={{ backgroundColor: method.bgColor }}>
+        <View className='h-12 w-12 items-center justify-center rounded-lg' style={{ backgroundColor: method.bgColor }}>
           {method.logo ? (
             <method.logo width={24} height={24} />
           ) : (
@@ -64,12 +64,12 @@ export function PaymentMethodModal({
           )}
         </View>
 
-        <Text className='flex-1 ml-4 font-bold text-base' style={{ color: colors.text }}>
+        <Text className='ml-4 flex-1 text-base font-bold' style={{ color: colors.text }}>
           {method.label}
         </Text>
 
         <View
-          className='w-6 h-6 rounded-full border-2 items-center justify-center'
+          className='h-6 w-6 items-center justify-center rounded-full border-2'
           style={{
             borderColor: isSelected ? method.iconColor : colors.border,
             backgroundColor: isSelected ? method.iconColor : 'transparent'
@@ -83,12 +83,12 @@ export function PaymentMethodModal({
 
   return (
     <Modal visible={visible} transparent animationType='fade'>
-      <View className='flex-1 justify-center items-center' style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-        <View className='w-11/12 rounded-2xl overflow-hidden' style={{ backgroundColor: colors.background }}>
+      <View className='flex-1 items-center justify-center' style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+        <View className='w-11/12 overflow-hidden rounded-2xl' style={{ backgroundColor: colors.background }}>
           {/* Header */}
-          <View className='px-6 py-5 border-b' style={{ borderColor: colors.border }}>
+          <View className='border-b px-6 py-5' style={{ borderColor: colors.border }}>
             <View className='flex-row items-center justify-between'>
-              <View className='flex-row items-center flex-1'>
+              <View className='flex-1 flex-row items-center'>
                 <Ionicons name='card-outline' size={24} color={colors.primary} />
                 <Text className='ml-3 text-lg font-bold' style={{ color: colors.text }}>
                   Phương thức thanh toán
@@ -101,11 +101,11 @@ export function PaymentMethodModal({
           </View>
 
           {/* Total Amount */}
-          <View className='px-6 py-4 border-b' style={{ borderColor: colors.border }}>
+          <View className='border-b px-6 py-4' style={{ borderColor: colors.border }}>
             <Text className='text-sm' style={{ color: colors.textSecondary }}>
               Tổng tiền cần thanh toán
             </Text>
-            <Text className='text-2xl font-bold mt-1' style={{ color: colors.primary }}>
+            <Text className='mt-1 text-2xl font-bold' style={{ color: colors.primary }}>
               {totalAmount.toLocaleString('vi-VN')} đ
             </Text>
           </View>
@@ -114,10 +114,10 @@ export function PaymentMethodModal({
           <View className='py-4'>{PAYMENT_METHODS.map(renderPaymentMethod)}</View>
 
           {/* Footer */}
-          <View className='px-6 py-4 border-t flex-row gap-3' style={{ borderColor: colors.border }}>
+          <View className='flex-row gap-3 border-t px-6 py-4' style={{ borderColor: colors.border }}>
             <TouchableOpacity
               onPress={handleClose}
-              className='flex-1 py-3 rounded-lg border items-center'
+              className='flex-1 items-center rounded-lg border py-3'
               style={{ borderColor: colors.border }}
               activeOpacity={0.7}
             >
@@ -129,7 +129,7 @@ export function PaymentMethodModal({
             <TouchableOpacity
               onPress={handleConfirm}
               disabled={!selectedMethod || isSubmitting}
-              className='flex-1 py-3 rounded-lg items-center'
+              className='flex-1 items-center rounded-lg py-3'
               style={{
                 backgroundColor: selectedMethod && !isSubmitting ? colors.primary : `${colors.primary}30`,
                 opacity: selectedMethod && !isSubmitting ? 1 : 0.5

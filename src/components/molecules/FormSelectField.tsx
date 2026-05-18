@@ -44,7 +44,7 @@ export function FormSelectField({
   return (
     <View className='mb-4'>
       {label && (
-        <View className='flex-row items-center mb-2'>
+        <View className='mb-2 flex-row items-center'>
           <Ionicons
             name={icon}
             size={16}

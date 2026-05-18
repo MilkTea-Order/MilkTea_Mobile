@@ -50,7 +50,7 @@ export function WheelColumn<T>({
 
   return (
     <View className='flex-1 px-2'>
-      <Text className='text-center text-sm font-semibold mb-3' style={{ color: colors.textSecondary }}>
+      <Text className='mb-3 text-center text-sm font-semibold' style={{ color: colors.textSecondary }}>
         {title}
       </Text>
 

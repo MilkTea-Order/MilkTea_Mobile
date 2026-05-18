@@ -219,7 +219,7 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
                 paddingBottom: 40
               }}
             >
-              <View className='flex-row justify-between px-4 py-3 border-b' style={{ borderColor: colors.border }}>
+              <View className='flex-row justify-between border-b px-4 py-3' style={{ borderColor: colors.border }}>
                 <TouchableOpacity onPress={() => setShowFromPicker(false)}>
                   <Text style={{ color: colors.textSecondary }}>Hủy</Text>
                 </TouchableOpacity>
@@ -264,7 +264,7 @@ export const DateFilterPicker = ({ value, onChange, disabled = false, colors, si
                 paddingBottom: 40
               }}
             >
-              <View className='flex-row justify-between px-4 py-3 border-b' style={{ borderColor: colors.border }}>
+              <View className='flex-row justify-between border-b px-4 py-3' style={{ borderColor: colors.border }}>
                 <TouchableOpacity onPress={() => setShowToPicker(false)}>
                   <Text style={{ color: colors.textSecondary }}>Hủy</Text>
                 </TouchableOpacity>

@@ -2,7 +2,7 @@ import withFloatingButton from '@/components/hoc/withFloatingButton'
 import { Header } from '@/components/layouts/Header'
 import { DateFilterPicker } from '@/components/organisms/DateFilterPicker'
 import { OrderCard } from '@/components/organisms/OrderCard'
-import { FilterChip } from '@/components/organisms/OrderFilterChips'
+import { FilterChip } from '@/components/molecules/FilterChip'
 import type { OrderFilter } from '@/features/order/api/order.api'
 import { PaymentMethodModal } from '@/features/order/components/organisms/PaymentMethodModal'
 import { TransferTableModal } from '@/features/order/components/organisms/TransferTableModal'
@@ -38,7 +38,7 @@ export default function HomeScreen() {
   const { data: meData, isPending: isLoadingUser } = useMe()
   const { orders, isLoading: isLoadingOrders, isRefetching, refetch } = useOrders(orderFilter)
 
-  const changeTableMutation = useChangeTable(selectedOrder?.orderID!, {
+  const changeTableMutation = useChangeTable(selectedOrder?.orderId!, {
     onSuccess: () => {
       setShowTransferModal(false)
       setSelectedOrder(null)
@@ -49,7 +49,7 @@ export default function HomeScreen() {
       setSelectedOrder(null)
     }
   })
-  const paymentMutation = usePayment(selectedOrder?.orderID!, {
+  const paymentMutation = usePayment(selectedOrder?.orderId!, {
     onSuccess: () => {
       setShowPaymentModal(false)
       setSelectedOrder(null)
@@ -65,7 +65,7 @@ export default function HomeScreen() {
 
     const filterValue = params.filter
 
-    if ([STATUS.ORDER.NO_COLLECTED, STATUS.ORDER.CANCELED, STATUS.ORDER.PAID].includes(filterValue as any)) {
+    if ([STATUS.ORDER.NOTCOLLECTED, STATUS.ORDER.CANCELLED, STATUS.ORDER.PAID].includes(filterValue as any)) {
       const { fromDate, toDate } = getTodayDateRange()
 
       setOrderFilter({
@@ -88,16 +88,6 @@ export default function HomeScreen() {
   }, [refetch])
 
   const handleChangeStatus = (status: OrderStatus) => {
-    // if ([STATUS.ORDER.NO_COLLECTED, STATUS.ORDER.CANCELED, STATUS.ORDER.PAID].includes(status as any)) {
-    //   const { fromDate, toDate } = getTodayDateRange()
-    //   setOrderFilter({
-    //     fromDate,
-    //     toDate,
-    //     statusId: status
-    //   })
-    // } else {
-    //   setOrderFilter({ fromDate: null, toDate: null, statusId: status })
-    // }
     router.replace({
       pathname: '/(protected)/(tabs)',
       params: {
@@ -155,13 +145,13 @@ export default function HomeScreen() {
     if (showLoading) {
       return (
         <View className='items-center justify-center py-20'>
-          <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
+          <View className='mb-4 rounded-full p-6' style={{ backgroundColor: `${colors.primary}10` }}>
             <Ionicons name='time-outline' size={48} color={colors.primary} />
           </View>
-          <Text className='text-lg font-semibold mt-2' style={{ color: colors.text }}>
+          <Text className='mt-2 text-lg font-semibold' style={{ color: colors.text }}>
             Đang tải đơn hàng...
           </Text>
-          <Text className='text-sm mt-2 text-center' style={{ color: colors.textSecondary }}>
+          <Text className='mt-2 text-center text-sm' style={{ color: colors.textSecondary }}>
             Vui lòng đợi trong giây lát
           </Text>
         </View>
@@ -170,13 +160,13 @@ export default function HomeScreen() {
 
     return (
       <View className='items-center justify-center py-32'>
-        <View className='rounded-full p-6 mb-4' style={{ backgroundColor: `${colors.primary}10` }}>
+        <View className='mb-4 rounded-full p-6' style={{ backgroundColor: `${colors.primary}10` }}>
           <Ionicons name='restaurant-outline' size={48} color={colors.primary} />
         </View>
-        <Text className='text-xl font-bold mt-2' style={{ color: colors.text }}>
+        <Text className='mt-2 text-xl font-bold' style={{ color: colors.text }}>
           Chưa có đơn hàng
         </Text>
-        <Text className='text-sm mt-2 text-center px-8' style={{ color: colors.textSecondary }}>
+        <Text className='mt-2 px-8 text-center text-sm' style={{ color: colors.textSecondary }}>
           Không có đơn hàng {ORDER_STATUS_LABEL[orderFilter.statusId].toLowerCase()} nào
         </Text>
       </View>
@@ -192,7 +182,7 @@ export default function HomeScreen() {
         rightContent={
           <TouchableOpacity
             onPress={() => router.push('/(protected)/(tabs)/profile')}
-            className='bg-white/20 rounded-full p-2'
+            className='rounded-full bg-white/20 p-2'
             style={{
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 2 },
@@ -202,7 +192,7 @@ export default function HomeScreen() {
             activeOpacity={0.7}
           >
             {meData?.data.avatar ? (
-              <Image source={{ uri: meData?.data.avatar }} className='w-8 h-8 rounded-full' resizeMode='contain' />
+              <Image source={{ uri: meData?.data.avatar }} className='h-8 w-8 rounded-full' resizeMode='contain' />
             ) : (
               <Ionicons name='person-circle-outline' size={32} color='white' />
             )}
@@ -304,7 +294,7 @@ function ContentComponent(props: {
 
   return (
     <>
-      <View className='flex m-3 mb-0 gap-2'>
+      <View className='m-3 mb-0 flex gap-2'>
         <Text className='text-lg font-bold' style={{ color: colors.text }}>
           Tổng cộng: {orders?.length ?? 0} bàn
         </Text>
@@ -327,7 +317,7 @@ function ContentComponent(props: {
 
       <FlatList
         data={orders}
-        keyExtractor={(item) => item.orderID.toString()}
+        keyExtractor={(item) => item.orderId.toString()}
         numColumns={3}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         columnWrapperStyle={{ gap: 12, marginBottom: 8 }}
@@ -341,7 +331,7 @@ function ContentComponent(props: {
               colors={colors}
               statusColors={status}
               effectiveTheme={effectiveTheme}
-              onPressDetail={() => router.push(`/(protected)/order/detail?orderId=${item.orderID}` as any)}
+              onPressDetail={() => router.push(`/(protected)/order/detail?orderId=${item.orderId}` as any)}
               onPressPayment={() => handlePayment(item)}
               onPressTransferTable={() => handleTransferTable(item)}
             />

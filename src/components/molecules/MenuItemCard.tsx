@@ -30,7 +30,7 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
 
   return (
     <View
-      className='rounded-2xl p-5 mb-3 border'
+      className='mb-3 rounded-2xl border p-5'
       style={{
         backgroundColor: colors.card,
         borderColor: colors.border,
@@ -44,16 +44,16 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
       <TouchableOpacity
         onPress={() => setExpanded((v) => !v)}
         activeOpacity={0.85}
-        className='flex-row items-start justify-between mb-3'
+        className='mb-3 flex-row items-start justify-between'
       >
-        <View className='flex-1 mr-3'>
-          <Text className='text-lg font-bold mb-1' style={{ color: colors.text }}>
+        <View className='mr-3 flex-1'>
+          <Text className='mb-1 text-lg font-bold' style={{ color: colors.text }}>
             {menu.name}
           </Text>
           <Text className='text-sm' style={{ color: colors.textSecondary }}>
             {menu.code}
           </Text>
-          <Text className='text-xs mt-1' style={{ color: colors.textSecondary }}>
+          <Text className='mt-1 text-xs' style={{ color: colors.textSecondary }}>
             {expanded ? 'Ẩn size' : 'Chạm để chọn size'}
           </Text>
         </View>
@@ -92,7 +92,7 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
                   borderColor: quantity > 0 ? colors.primary : 'transparent'
                 }}
               >
-                <View className='flex-1 mr-3'>
+                <View className='mr-3 flex-1'>
                   <Text className='text-base font-semibold' style={{ color: colors.text }}>
                     {size.name}
                   </Text>
@@ -110,7 +110,7 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
                     >
                       <Ionicons name='remove' size={18} color='white' />
                     </TouchableOpacity>
-                    <Text className='text-lg font-bold mx-3 min-w-[28px] text-center' style={{ color: colors.primary }}>
+                    <Text className='mx-3 min-w-[28px] text-center text-lg font-bold' style={{ color: colors.primary }}>
                       {quantity}
                     </Text>
                     <TouchableOpacity
@@ -151,7 +151,7 @@ export const MenuItemCard: React.FC<Props> = ({ menu, colors, getQuantity, onAdd
                     style={{ backgroundColor: colors.primary }}
                     activeOpacity={0.8}
                   >
-                    <Text className='text-white font-semibold'>Chọn</Text>
+                    <Text className='font-semibold text-white'>Chọn</Text>
                   </TouchableOpacity>
                 )}
               </View>

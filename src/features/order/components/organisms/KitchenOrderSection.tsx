@@ -34,10 +34,10 @@ export function KitchenOrderSection({
     <CollapsibleSection
       defaultExpanded={true}
       headerContent={
-        <View className='flex-row items-center flex-1'>
+        <View className='items flex-1 flex-row'>
           <View className='flex-1'>
             <View className='flex-row items-center'>
-              <View className='rounded-xl p-2 mr-3' style={{ backgroundColor: `${colors.primary}20` }}>
+              <View className='mm-3 rr-3 rounded-x' style={{ backgroundColor: `${colors.primary}20` }}>
                 <Ionicons name='restaurant' size={18} color={colors.primary} />
               </View>
               <View>
@@ -51,7 +51,7 @@ export function KitchenOrderSection({
             </View>
           </View>
           {canCheck && (
-            <View className='px-3 py-1.5 rounded-full' style={{ backgroundColor: `${colors.primary}15` }}>
+            <View className=' px-3 py-1.5' style={{ backgroundColor: `${colors.primary}15` }}>
               <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
                 {checkedItems.size}/{itemCount} đã chọn
               </Text>
@@ -60,7 +60,7 @@ export function KitchenOrderSection({
         </View>
       }
     >
-      <View className='px-2 pb-3 mt-1'>
+      <View className='mt-1 px-2'>
         {order.items.map((item) => (
           <KitchenItemRow
             key={item.id}
@@ -68,6 +68,7 @@ export function KitchenOrderSection({
             isChecked={checkedItems.has(item.id)}
             onToggleCheck={onToggleCheck}
             canCheck={canCheck}
+            showCheckbox={canCheck}
             colors={colors}
           />
         ))}

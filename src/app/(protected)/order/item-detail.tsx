@@ -48,8 +48,6 @@ export default function OrderItemDetailScreen() {
   // ===== LOCAL STATE =====
   const [noteDraft, setNoteDraft] = useState('')
   const [quantityDraft, setQuantityDraft] = useState<number | null>(null)
-
-  console.log('item-detail')
   useFocusEffect(
     useCallback(() => {
       if (!menuItem) {
@@ -195,13 +193,10 @@ export default function OrderItemDetailScreen() {
 
       <ScrollView className='flex-1' contentContainerStyle={{ padding: 16, paddingBottom: 28 }}>
         {/* ITEM */}
-        <View
-          className='rounded-2xl p-4 border mb-4'
-          style={{ backgroundColor: colors.card, borderColor: colors.border }}
-        >
+        <View className='borderp-4 mb-4 rounded' style={{ backgroundColor: colors.card, borderColor: colors.border }}>
           <View className='flex-row items-center'>
             <View
-              className='rounded-2xl items-center justify-center mr-12'
+              className='mmt1e-center rounde-ounded2lxl justify-center'
               style={{
                 width: 72,
                 height: 72,
@@ -220,19 +215,19 @@ export default function OrderItemDetailScreen() {
             </View>
 
             <View className='flex-1'>
-              <View className='flex-row items-center mt-2'>
-                <Text className='text-lg font-bold mr-3' style={{ color: colors.text }} numberOfLines={2}>
+              <View className='items-c mt-2 flex-row'>
+                <Text className='font mr-3 text-lg' style={{ color: colors.text }} numberOfLines={2}>
                   {menuItem.menuName}
                 </Text>
 
-                <View className='px-2 py-1 rounded' style={{ backgroundColor: `${colors.primary}15` }}>
+                <View className='p rounded' style={{ backgroundColor: `${colors.primary}15` }}>
                   <Text className='text-xs font-semibold' style={{ color: colors.primary }}>
                     {menuItem.sizeName}
                   </Text>
                 </View>
               </View>
 
-              <Text className='text-sm font-semibold mt-2' style={{ color: colors.textSecondary }}>
+              <Text className='mm-2 tt-2 font-sem text-sm' style={{ color: colors.textSecondary }}>
                 {formatCurrencyVND(menuItem.price)} / món
               </Text>
             </View>
@@ -240,11 +235,8 @@ export default function OrderItemDetailScreen() {
         </View>
 
         {/* QUANTITY */}
-        <View
-          className='rounded-2xl p-4 border mb-4'
-          style={{ backgroundColor: colors.card, borderColor: colors.border }}
-        >
-          <Text className='text-base font-bold mb-3' style={{ color: colors.text }}>
+        <View className='borderp-4 mb-4 rounded' style={{ backgroundColor: colors.card, borderColor: colors.border }}>
+          <Text className='font mb-3 text-base' style={{ color: colors.text }}>
             Số lượng
           </Text>
 
@@ -273,7 +265,7 @@ export default function OrderItemDetailScreen() {
                 <Ionicons name='remove' size={18} color={colors.primary} />
               </TouchableOpacity>
 
-              <Text className='text-base font-bold min-w-[36px] text-center' style={{ color: colors.text }}>
+              <Text className='nter text-base font-bold' style={{ color: colors.text }}>
                 {displayQuantity}
               </Text>
 
@@ -306,8 +298,8 @@ export default function OrderItemDetailScreen() {
         </View>
 
         {/* NOTE */}
-        <View className='rounded-2xl p-4 border' style={{ backgroundColor: colors.card, borderColor: colors.border }}>
-          <Text className='text-base font-bold mb-3' style={{ color: colors.text }}>
+        <View className='rounded-2xlder p-4' style={{ backgroundColor: colors.card, borderColor: colors.border }}>
+          <Text className='font mb-3 text-base' style={{ color: colors.text }}>
             Ghi chú
           </Text>
 
@@ -331,7 +323,7 @@ export default function OrderItemDetailScreen() {
           />
 
           <TouchableOpacity
-            className='rounded-2xl py-4 mt-4 flex-row items-center justify-center'
+            className='ms-center py-r 4ounded-2xl justify-center rounded-2xl py-4'
             style={{
               backgroundColor: colors.primary,
               opacity: disableSubmit ? 0.5 : 1
@@ -343,7 +335,7 @@ export default function OrderItemDetailScreen() {
             {isSaving ? (
               <ActivityIndicator />
             ) : (
-              <Text className='text-white text-base font-bold'>{isUpdateMode ? 'Cập nhật' : 'Lưu'}</Text>
+              <Text className='ont-bold text-white'>{isUpdateMode ? 'Cập nhật' : 'Lưu'}</Text>
             )}
           </TouchableOpacity>
         </View>

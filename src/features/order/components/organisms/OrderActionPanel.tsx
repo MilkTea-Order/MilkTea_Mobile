@@ -13,7 +13,7 @@ interface OrderActionPanelProps {
 export function OrderActionPanel({ filterMode, onFilterToggle, onAddItems, colors }: OrderActionPanelProps) {
   return (
     <View
-      className='rounded-3xl p-3 mb-4 border'
+      className='mb-4 rounded-3xl border p-3'
       style={{
         backgroundColor: colors.card,
         borderColor: colors.border
@@ -40,7 +40,7 @@ export function OrderActionPanel({ filterMode, onFilterToggle, onAddItems, color
         />
       </View>
 
-      <View className='flex-row mt-2 gap-2'>
+      <View className='mt-2 flex-row gap-2'>
         <ActionButton
           label='Chuyển bàn'
           icon='swap-horizontal-outline'
@@ -60,7 +60,7 @@ export function OrderActionPanel({ filterMode, onFilterToggle, onAddItems, color
         />
       </View>
 
-      <View className='flex-row mt-2 gap-2'>
+      <View className='mt-2 flex-row gap-2'>
         <ActionButton label='Thêm món' icon='add-circle-outline' onPress={onAddItems} colors={colors as any} />
 
         <ActionButton

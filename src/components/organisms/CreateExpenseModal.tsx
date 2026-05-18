@@ -132,7 +132,7 @@ export function CreateExpenseModal({ visible, onClose, groups, users }: Props) {
             }}
           >
             {/* HEADER */}
-            <View className='flex-row justify-between items-center px-5 py-4'>
+            <View className='flex-row items-center justify-between px-5 py-4'>
               <TouchableOpacity onPress={onClose}>
                 <Ionicons name='close' size={24} color={colors.textSecondary} />
               </TouchableOpacity>

@@ -1,8 +1,13 @@
 export interface Permission {
+  Id: number
   Name: string
-  ID: number
   Code: string
-  PermissionID: number
-  Note: string | null
-  Permission: null
+  PermissionDetails: PermissionDetail[]
+}
+
+export interface PermissionDetail {
+  id: number
+  name: string
+  code: string
+  note: string
 }

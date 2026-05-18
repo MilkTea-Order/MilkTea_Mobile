@@ -1,8 +1,9 @@
 import { PaymentMethod } from '@/shared/constants/payment'
-import { ORDER_ITEM_STATUS, OrderStatus } from '@/shared/constants/status'
+import { ORDER_ITEM_STATUS, OrderItemStatus, OrderStatus, STATUS } from '@/shared/constants/status'
 import { URL } from '@/shared/constants/urls'
 import { ApiResponse } from '@/shared/types/api.type'
 import http from '@/shared/utils/http'
+import { getKeyByValue } from '@/shared/utils/utils'
 import { AxiosResponse } from 'axios'
 import { CreateOrderItemPayload, CreateOrderPayload, Order } from '../types/order.type'
 
@@ -13,19 +14,28 @@ export type OrderFilter = {
 }
 
 export type KitchenOrderFilter = {
-  orderItemStatus?: keyof typeof ORDER_ITEM_STATUS
+  orderItemStatusId: OrderItemStatus
 }
 
 export type OrderDetailApiResponse = ApiResponse<Order>
 
 export const orderApi = {
   getOrders(filter: OrderFilter): Promise<AxiosResponse<ApiResponse<Order[]>>> {
-    return http.get<ApiResponse<Order[]>>(URL.ORDERS, { params: filter })
+    return http.get<ApiResponse<Order[]>>(URL.ORDERS, {
+      params: {
+        status: getKeyByValue(STATUS.ORDER, filter.statusId),
+        fromDate: filter.fromDate ?? undefined,
+        toDate: filter.toDate ?? undefined
+      }
+    })
+  },
+  createOrder(payload: CreateOrderPayload): Promise<AxiosResponse<ApiResponse<Order>>> {
+    return http.post<ApiResponse<Order>>(URL.ORDERS, payload)
   },
 
   getKitchenOrders(filter: KitchenOrderFilter): Promise<AxiosResponse<ApiResponse<{ orders: Order[] }>>> {
     return http.get<ApiResponse<{ orders: Order[] }>>(URL.ORDERS_KITCHEN, {
-      params: { orderItemStatus: filter.orderItemStatus }
+      params: { orderItemStatus: getKeyByValue(STATUS.ORDER_ITEM, filter.orderItemStatusId) }
     })
   },
 
@@ -44,10 +54,6 @@ export const orderApi = {
     return http.get<OrderDetailApiResponse>(`${URL.ORDERS}/${orderId}`, {
       params: { isCancelled }
     })
-  },
-
-  createOrder(payload: CreateOrderPayload): Promise<AxiosResponse<ApiResponse<Order>>> {
-    return http.post<ApiResponse<Order>>(URL.ORDERS, payload)
   },
 
   cancelOrderItems(orderId: number, orderDetailId: number): Promise<AxiosResponse<ApiResponse<object>>> {

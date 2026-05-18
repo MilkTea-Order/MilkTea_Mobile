@@ -16,7 +16,7 @@ export function TableCard({ table, onPress, selected = false }: TableCardProps) 
   return (
     <TouchableOpacity
       onPress={() => onPress?.(table)}
-      className='rounded-2xl border overflow-hidden'
+      className='overflow-hidden rounded-2xl border'
       style={{
         width: '31%',
         backgroundColor: selected ? `${colors.primary}20` : colors.card,
@@ -49,7 +49,7 @@ export function TableCard({ table, onPress, selected = false }: TableCardProps) 
       <View className='p-3'>
         <View className='flex-row items-center'>
           <Ionicons name='people-outline' size={14} color={colors.textSecondary} />
-          <Text className='text-xs ml-1' style={{ color: colors.textSecondary }}>
+          <Text className='ml-1 text-xs' style={{ color: colors.textSecondary }}>
             {table.numberOfSeats} ghế
           </Text>
         </View>

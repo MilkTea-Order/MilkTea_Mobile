@@ -372,7 +372,7 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
                 }}
               >
                 <View
-                  className='rounded-2xl overflow-hidden'
+                  className='overflow-hidden rounded-2xl'
                   style={{
                     shadowColor: colors.primary,
                     shadowOffset: { width: 0, height: 6 },
@@ -393,8 +393,8 @@ export function EditProfileForm({ userProfile, onSuccess }: EditProfileFormProps
                       <ActivityIndicator color='white' size='small' />
                     ) : (
                       <View className='flex-row items-center justify-center'>
-                        <Text className='text-white text-lg font-bold mr-2'>Lưu thay đổi</Text>
-                        <View className='rounded-full bg-white/20 p-1 ml-1'>
+                        <Text className='mr-2 text-lg font-bold text-white'>Lưu thay đổi</Text>
+                        <View className='ml-1 rounded-full bg-white/20 p-1'>
                           <Ionicons name='checkmark' size={18} color='white' />
                         </View>
                       </View>
